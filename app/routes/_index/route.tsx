@@ -23,7 +23,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function App() {
-
   return (
     <div className={styles.index}>
       <div className={styles.content}>

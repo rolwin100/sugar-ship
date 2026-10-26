@@ -1,4 +1,5 @@
 import type { AdminApiContext } from "@shopify/shopify-app-react-router/server";
+import type { CarrierServiceNode } from "./types";
 
 export const CARRIER_SERVICE_NAME = "Sugar Ship";
 
@@ -6,13 +7,6 @@ export function getRatesCallbackUrl(): string {
   const appUrl = (process.env.SHOPIFY_APP_URL ?? "").replace(/\/$/, "");
   return `${appUrl}/api/rates`;
 }
-
-type CarrierServiceNode = {
-  id: string;
-  name: string | null;
-  callbackUrl: string | null;
-  active: boolean;
-};
 
 /**
  * Makes sure this shop has exactly one active "Sugar Ship" carrier service

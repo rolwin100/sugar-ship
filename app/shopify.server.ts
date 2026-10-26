@@ -22,7 +22,10 @@ const shopify = shopifyApp({
       try {
         await ensureCarrierService(admin);
       } catch (error) {
-        console.error("[sugar-ship] afterAuth ensureCarrierService failed", error);
+        console.error(
+          "[sugar-ship] afterAuth ensureCarrierService failed",
+          error,
+        );
       }
     },
   },

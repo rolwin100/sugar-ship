@@ -9,11 +9,14 @@ import { ensureCarrierService } from "../lib/carrier-service.server";
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
 
-  // Keep the carrier service pointed at the current app URL (dev tunnels change on every run).
-  try {
-    await ensureCarrierService(admin);
-  } catch (error) {
-    console.error("[sugar-ship] ensureCarrierService failed", error);
+  // Dev only: the tunnel URL changes on every `shopify app dev` run, so re-point the
+  // carrier service on each admin load. In production afterAuth handles it.
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      await ensureCarrierService(admin);
+    } catch (error) {
+      console.error("[sugar-ship] ensureCarrierService failed", error);
+    }
   }
 
   // eslint-disable-next-line no-undef
