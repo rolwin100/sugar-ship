@@ -1,5 +1,6 @@
 {
   "name": "sugar-ship",
+  "packageManager": "pnpm@10.33.0",
   "private": true,
   "scripts": {
     "build": "react-router build",
@@ -54,9 +55,6 @@
     "typescript": "^5.9.3",
     "vite": "^6.3.6"
   },
-  "workspaces": [
-    "extensions/*"
-  ],
   "trustedDependencies": [
     "@shopify/plugin-cloudflare"
   ],

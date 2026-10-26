@@ -24,8 +24,11 @@ export function isTestCheckout(destination: RateAddress | undefined): boolean {
     destination?.address1,
     destination?.address2,
   ];
-  return fields.some((value) =>
-    value?.toLowerCase().includes(TEST_MODE_KEYWORD),
+  console.log("[sugar-ship] rates: destination", JSON.stringify(destination));
+  return fields.some(
+    (value) =>
+      typeof value === "string" &&
+      value?.toLowerCase().includes(TEST_MODE_KEYWORD),
   );
 }
 

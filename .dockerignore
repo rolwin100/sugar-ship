@@ -1,3 +1,10 @@
+.git
+.env
+.env.*
 .cache
+.shopify
+.react-router
 build
 node_modules
+docs
+notes.md

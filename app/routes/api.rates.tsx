@@ -11,14 +11,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
   const shop = request.headers.get("x-shopify-shop-domain");
 
-  if (hmacHeader && !isValidHmac(rawBody, hmacHeader)) {
-    console.warn(`[sugar-ship] rates: bad HMAC from ${shop ?? "unknown shop"}`);
-    return Response.json({ rates: [] }, { status: 401 });
-  }
-  if (!hmacHeader) {
+  if (!hmacHeader || !isValidHmac(rawBody, hmacHeader)) {
     console.warn(
-      `[sugar-ship] rates: request without HMAC header from ${shop ?? "unknown shop"}`,
+      `[sugar-ship] rates: missing or bad HMAC from ${shop ?? "unknown shop"}`,
     );
+    return Response.json({ rates: [] }, { status: 401 });
   }
 
   let payload: RateRequest;
