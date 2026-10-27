@@ -26,3 +26,15 @@ export type ShippingRate = {
   total_price: string;
   currency: string;
 };
+
+export type InstallDetails = {
+  carrierServiceId?: string;
+  currency?: string;
+};
+
+export type FallbackSettings = {
+  fallbackEnabled: boolean;
+  fallbackPrice: number;
+  fallbackName: unknown; // { en, fr, de }
+  fallbackDescription: unknown; // { en, fr, de } | null
+};

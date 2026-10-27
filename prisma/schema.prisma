@@ -32,3 +32,26 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+model Shop {
+  id               String    @id @default(cuid())
+  domain           String    @unique // e.g. mega-bundle.myshopify.com
+  carrierServiceId String? // gid://shopify/DeliveryCarrierService/...
+  currency         String? // shop's base currency, e.g. INR
+  installedAt      DateTime  @default(now())
+  uninstalledAt    DateTime? // null = currently installed
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  settings         ShopSettings?
+}
+
+model ShopSettings {
+  id                  String   @id @default(cuid())
+  shopId              String   @unique
+  shop                Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  fallbackEnabled     Boolean  @default(false)
+  fallbackPrice       Int      @default(0) // subunits, e.g. 9900 = 99.00
+  fallbackName        Json     @default("{\"en\":\"Standard Shipping\",\"fr\":\"Livraison standard\",\"de\":\"Standardversand\"}") // { en, fr, de }
+  fallbackDescription Json? // { en, fr, de }
+  updatedAt           DateTime @updatedAt
+}

@@ -67,12 +67,14 @@ export async function ensureCarrierService(admin: AdminApiContext) {
       console.error("[sugar-ship] carrierServiceCreate failed", errors);
       return { status: "error" as const, errors };
     }
+    const createdId: string | undefined =
+      createJson.data?.carrierServiceCreate?.carrierService?.id;
     console.log(`[sugar-ship] carrier service created -> ${callbackUrl}`);
-    return { status: "created" as const };
+    return { status: "created" as const, id: createdId };
   }
 
   if (existing.callbackUrl === callbackUrl && existing.active) {
-    return { status: "ok" as const };
+    return { status: "ok" as const, id: existing.id };
   }
 
   const updateResponse = await admin.graphql(
@@ -103,5 +105,5 @@ export async function ensureCarrierService(admin: AdminApiContext) {
     return { status: "error" as const, errors };
   }
   console.log(`[sugar-ship] carrier service updated -> ${callbackUrl}`);
-  return { status: "updated" as const };
+  return { status: "updated" as const, id: existing.id };
 }

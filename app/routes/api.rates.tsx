@@ -1,6 +1,12 @@
 import type { ActionFunctionArgs } from "react-router";
-import type { RateRequest } from "../lib/types";
-import { isValidHmac, quoteRates } from "../lib/rates/rates.server";
+import type { RateRequest, ShippingRate } from "../lib/types";
+import {
+  fallbackRates,
+  isTestCheckout,
+  isValidHmac,
+  quoteRates,
+} from "../lib/rates/rates.server";
+import { getShopForRates } from "../lib/shop.server";
 
 /**
  * Carrier Service callback. Shopify POSTs { rate: { origin, destination, items, currency, locale } }
@@ -32,5 +38,30 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     `[sugar-ship] rates: shop=${shop} name=${destination?.name ?? "null"} currency=${currency}`,
   );
 
-  return Response.json({ rates: quoteRates(payload) });
+  let rates: ShippingRate[] = [];
+  try {
+    rates = quoteRates(payload);
+  } catch (error) {
+    console.error(`[sugar-ship] rates: quoting failed for ${shop}`, error);
+  }
+
+  // Fallback when quoting failed or returned nothing. Test mode still applies.
+  if (rates.length === 0 && shop && isTestCheckout(destination)) {
+    try {
+      const shopRecord = await getShopForRates(shop);
+      rates = fallbackRates(
+        shopRecord?.settings,
+        shopRecord?.currency,
+        currency,
+        payload.rate?.locale,
+      );
+      if (rates.length > 0) {
+        console.log(`[sugar-ship] rates: returned fallback for ${shop}`);
+      }
+    } catch (error) {
+      console.error(`[sugar-ship] rates: fallback lookup failed for ${shop}`, error);
+    }
+  }
+
+  return Response.json({ rates });
 };

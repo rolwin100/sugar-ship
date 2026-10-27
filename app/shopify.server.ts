@@ -7,6 +7,7 @@ import {
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
 import { ensureCarrierService } from "./lib/carrier-service.server";
+import { fetchShopCurrency, upsertShopOnInstall } from "./lib/shop.server";
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -18,9 +19,14 @@ const shopify = shopifyApp({
   sessionStorage: new PrismaSessionStorage(prisma),
   distribution: AppDistribution.AppStore,
   hooks: {
-    afterAuth: async ({ admin }) => {
+    afterAuth: async ({ admin, session }) => {
       try {
-        await ensureCarrierService(admin);
+        const carrier = await ensureCarrierService(admin);
+        const currency = await fetchShopCurrency(admin);
+        await upsertShopOnInstall(session.shop, {
+          carrierServiceId: carrier.status === "error" ? undefined : carrier.id,
+          currency,
+        });
       } catch (error) {
         console.error(
           "[sugar-ship] afterAuth ensureCarrierService failed",
