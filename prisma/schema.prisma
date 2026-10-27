@@ -44,6 +44,8 @@ model Shop {
   updatedAt        DateTime  @updatedAt
   settings         ShopSettings?
   rateLogs         RateLog[]
+  rules            Rule[]
+  postcodeLists    PostcodeList[]
 }
 
 model ShopSettings {
@@ -54,6 +56,7 @@ model ShopSettings {
   fallbackPrice       Int      @default(0) // subunits, e.g. 9900 = 99.00
   fallbackName        Json     @default("{\"en\":\"Standard Shipping\",\"fr\":\"Livraison standard\",\"de\":\"Standardversand\"}") // { en, fr, de }
   fallbackDescription Json? // { en, fr, de }
+  combineStrategy     CombineStrategy @default(SUM) // when several rates share a name
   updatedAt           DateTime @updatedAt
 }
 
@@ -73,4 +76,183 @@ model RateLog {
   error       String?
 
   @@index([shopId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Rules engine (phase 2). All money is in subunits (paise/cents), weight in
+// grams, quantities as whole units, percentages in basis points (500 = 5%).
+// ---------------------------------------------------------------------------
+
+enum RuleStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum RuleMatch {
+  ALL // every condition must match
+  ANY // at least one condition matches
+  NONE // no condition matches
+}
+
+enum ConditionSubject {
+  CART
+  PRODUCT
+  ADDRESS
+}
+
+enum ConditionOperator {
+  EQUALS
+  NOT_EQUALS
+  GREATER_THAN
+  GREATER_OR_EQUAL
+  LESS_THAN
+  LESS_OR_EQUAL
+  CONTAINS
+  NOT_CONTAINS
+  IN // value is a list
+  NOT_IN
+  IN_POSTCODE_LIST
+  NOT_IN_POSTCODE_LIST
+}
+
+enum ProductQuantifier {
+  ANY // at least one product in the cart matches
+  ALL // every product matches
+  NONE // no product matches
+}
+
+enum RateMode {
+  FLAT // one fixed price
+  BANDS // price table by basis (from / to / price)
+  INCREMENTAL // base price + price per step of basis
+  PERCENT // percentage of cart subtotal
+}
+
+enum RateBasis {
+  WEIGHT // grams
+  QUANTITY // items
+  SUBTOTAL // subunits
+}
+
+enum AdjustmentKind {
+  HANDLING_FEE // added on top (fixed or percent)
+  MIN_PRICE // never charge less than value
+  MAX_PRICE // never charge more than value
+  ROUND_TO // round up to the nearest value (e.g. 100 = nearest 1.00)
+  FREE_OVER // free when cart subtotal >= value
+}
+
+enum AdjustmentType {
+  FIXED // value in subunits
+  PERCENT // value in basis points
+}
+
+enum CombineStrategy {
+  SUM
+  HIGHEST
+  LOWEST
+}
+
+/// The "when": a set of conditions; its rates apply when they match.
+model Rule {
+  id          String      @id @default(cuid())
+  shopId      String
+  shop        Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name        String
+  status      RuleStatus  @default(ACTIVE)
+  priority    Int         @default(0) // lower runs first
+  match       RuleMatch   @default(ALL)
+  exclusive   Boolean     @default(false) // when it matches, skip lower-priority rules
+  startsAt    DateTime? // optional schedule
+  endsAt      DateTime?
+  templateKey String? // which template created it, if any
+  conditions  Condition[]
+  rates       Rate[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([shopId, status, priority])
+}
+
+/// One line of a rule, e.g. CART weight LESS_THAN 2000.
+model Condition {
+  id             String             @id @default(cuid())
+  ruleId         String
+  rule           Rule               @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  subject        ConditionSubject
+  field          String // cart: subtotal | quantity | weight; product: tag | type | vendor | sku | collection; address: country | province | postcode
+  operator       ConditionOperator
+  value          Json? // number, string or list of strings
+  quantifier     ProductQuantifier? // product conditions only
+  postcodeListId String?
+  postcodeList   PostcodeList?      @relation(fields: [postcodeListId], references: [id], onDelete: SetNull)
+  sortOrder      Int                @default(0)
+
+  @@index([ruleId])
+}
+
+/// The "what to charge" for one Shopify zone.
+model Rate {
+  id              String           @id @default(cuid())
+  ruleId          String
+  rule            Rule             @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  zoneId          String // Shopify delivery zone gid
+  zoneName        String
+  preset          String? // standard | express | free | economy | next_day (translated in code)
+  name            String? // custom name, shown as typed when there is no preset
+  description     String?
+  minDeliveryDays Int?
+  maxDeliveryDays Int?
+  mode            RateMode         @default(FLAT)
+  basis           RateBasis? // required for BANDS and INCREMENTAL
+  price           Int? // FLAT price, or INCREMENTAL base price
+  stepSize        Int? // INCREMENTAL: per this many basis units
+  stepPrice       Int? // INCREMENTAL: price per step
+  percentBps      Int? // PERCENT: basis points of subtotal
+  combineTag      String? // for tag-based combining (v2)
+  sortOrder       Int              @default(0)
+  bands           RateBand[]
+  adjustments     RateAdjustment[]
+
+  @@index([ruleId])
+}
+
+/// One row of a rate's price table: from <= basis < to (to = null means no limit).
+model RateBand {
+  id        String @id @default(cuid())
+  rateId    String
+  rate      Rate   @relation(fields: [rateId], references: [id], onDelete: Cascade)
+  from      Int
+  to        Int?
+  price     Int
+  sortOrder Int    @default(0)
+
+  @@index([rateId])
+}
+
+/// Extras applied after the base price, in sortOrder.
+model RateAdjustment {
+  id        String         @id @default(cuid())
+  rateId    String
+  rate      Rate           @relation(fields: [rateId], references: [id], onDelete: Cascade)
+  kind      AdjustmentKind
+  type      AdjustmentType @default(FIXED)
+  value     Int
+  sortOrder Int            @default(0)
+
+  @@index([rateId])
+}
+
+/// Reusable postcodes: "560078" (exact), "5600*" (prefix), "560001-560099" (range).
+model PostcodeList {
+  id         String      @id @default(cuid())
+  shopId     String
+  shop       Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name       String
+  entries    String[]
+  conditions Condition[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([shopId])
 }
