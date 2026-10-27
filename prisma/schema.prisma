@@ -43,6 +43,7 @@ model Shop {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   settings         ShopSettings?
+  rateLogs         RateLog[]
 }
 
 model ShopSettings {
@@ -54,4 +55,22 @@ model ShopSettings {
   fallbackName        Json     @default("{\"en\":\"Standard Shipping\",\"fr\":\"Livraison standard\",\"de\":\"Standardversand\"}") // { en, fr, de }
   fallbackDescription Json? // { en, fr, de }
   updatedAt           DateTime @updatedAt
+}
+
+model RateLog {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  currency    String
+  locale      String?
+  destination Json // country, province, city, postal_code (no name or street)
+  items       Json // [{ name, sku, quantity, grams, price, product_id, variant_id }]
+  rates       Json // what we returned
+  outcome     String // "rates" | "fallback" | "none" | "error"
+  testMode    Boolean
+  durationMs  Int
+  error       String?
+
+  @@index([shopId, createdAt])
 }

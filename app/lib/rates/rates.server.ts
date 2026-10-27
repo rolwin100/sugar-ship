@@ -39,7 +39,6 @@ export function isTestCheckout(destination: RateAddress | undefined): boolean {
     destination?.address1,
     destination?.address2,
   ];
-  console.log("[sugar-ship] rates: destination", JSON.stringify(destination));
   return fields.some(
     (value) =>
       typeof value === "string" &&
