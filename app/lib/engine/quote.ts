@@ -1,6 +1,6 @@
 import { matchesConditions } from "./conditions";
 import { priceRate } from "./pricing";
-import { matchZone } from "./zones";
+import { matchZone } from "./match-zone";
 import type {
   EngineCart,
   EngineResult,

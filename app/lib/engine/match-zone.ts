@@ -1,7 +1,11 @@
-import type { EngineAddress, EngineZone } from "./types";
+import type { Zone, ZoneAddress } from "../zones/types";
 
 const norm = (value: string | null | undefined) =>
   (value ?? "").trim().toUpperCase();
+
+/** State codes: drops a country prefix so "JP-13", "jp-13" and "13" all become "13". */
+const normState = (value: string | null | undefined) =>
+  norm(value).replace(/^[A-Z]{2}-/, "");
 
 /**
  * Finds the one zone an address belongs to, most specific first:
@@ -11,11 +15,11 @@ const norm = (value: string | null | undefined) =>
  * Ties go to the lower sortOrder, then the earlier zone. Returns null if none match.
  */
 export function matchZone(
-  destination: EngineAddress,
-  zones: EngineZone[],
-): EngineZone | null {
+  destination: ZoneAddress,
+  zones: Zone[],
+): Zone | null {
   const country = norm(destination.country);
-  const province = norm(destination.province);
+  const province = normState(destination.province);
   if (!country) return null;
 
   const ordered = zones
@@ -32,7 +36,7 @@ export function matchZone(
         norm(region.country) === country &&
         region.provinces !== null &&
         province !== "" &&
-        region.provinces.some((p) => norm(p) === province),
+        region.provinces.some((p) => normState(p) === province),
     ),
   );
   if (stateZone) return stateZone;
