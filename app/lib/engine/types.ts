@@ -80,10 +80,22 @@ export type EngineAdjustment = {
   value: number;
 };
 
+export type EngineRegion = {
+  country: string; // ISO code, e.g. "IN"
+  provinces: string[] | null; // null = whole country
+};
+
+export type EngineZone = {
+  id: string;
+  name: string;
+  restOfWorld: boolean;
+  regions: EngineRegion[];
+  sortOrder?: number;
+};
+
 export type EngineRate = {
   id: string;
   zoneId: string;
-  zoneName: string;
   preset?: string | null;
   name?: string | null;
   description?: string | null;

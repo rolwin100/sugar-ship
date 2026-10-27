@@ -46,6 +46,7 @@ model Shop {
   rateLogs         RateLog[]
   rules            Rule[]
   postcodeLists    PostcodeList[]
+  zones            Zone[]
 }
 
 model ShopSettings {
@@ -191,13 +192,13 @@ model Condition {
   @@index([ruleId])
 }
 
-/// The "what to charge" for one Shopify zone.
+/// The "what to charge" for one of our zones.
 model Rate {
   id              String           @id @default(cuid())
   ruleId          String
   rule            Rule             @relation(fields: [ruleId], references: [id], onDelete: Cascade)
-  zoneId          String // Shopify delivery zone gid
-  zoneName        String
+  zoneId          String
+  zone            Zone             @relation(fields: [zoneId], references: [id], onDelete: Cascade)
   preset          String? // standard | express | free | economy | next_day (translated in code)
   name            String? // custom name, shown as typed when there is no preset
   description     String?
@@ -215,6 +216,7 @@ model Rate {
   adjustments     RateAdjustment[]
 
   @@index([ruleId])
+  @@index([zoneId])
 }
 
 /// One row of a rate's price table: from <= basis < to (to = null means no limit).
@@ -253,6 +255,25 @@ model PostcodeList {
   conditions Condition[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+
+  @@index([shopId])
+}
+
+/// Our own shipping zones (merchant-only names; customers never see them).
+/// regions: [{ "country": "IN", "provinces": null }, { "country": "US", "provinces": ["CA", "NY"] }]
+/// provinces null = whole country. Pre-filled from Shopify's General profile on install.
+model Zone {
+  id            String   @id @default(cuid())
+  shopId        String
+  shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name          String
+  restOfWorld   Boolean  @default(false)
+  regions       Json     @default("[]")
+  shopifyZoneId String? // set when imported from Shopify
+  sortOrder     Int      @default(0)
+  rates         Rate[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([shopId])
 }

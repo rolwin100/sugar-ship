@@ -1,10 +1,12 @@
 import { matchesConditions } from "./conditions";
 import { priceRate } from "./pricing";
+import { matchZone } from "./zones";
 import type {
   EngineCart,
   EngineResult,
   EngineRule,
   EngineSettings,
+  EngineZone,
   QuotedRate,
   TraceEntry,
 } from "./types";
@@ -21,17 +23,22 @@ function inSchedule(rule: EngineRule, now: Date): boolean {
  * Rules run in priority order (lowest first). Inactive and out-of-schedule rules
  * are skipped. A matching exclusive rule stops all later rules.
  *
- * Still to come: zone matching (2.3), real conditions (2.4–2.7), all pricing modes
+ * The address is matched to one zone up front; a matching rule only returns rates
+ * for that zone.
+ *
+ * Still to come: real conditions (2.4–2.7), all pricing modes
  * and adjustments (2.9–2.10), combining same-name rates (2.11).
  */
 export function quote(
   cart: EngineCart,
   rules: EngineRule[],
+  zones: EngineZone[],
   _settings: EngineSettings,
   now: Date = new Date(),
 ): EngineResult {
   const rates: QuotedRate[] = [];
   const trace: TraceEntry[] = [];
+  const zone = matchZone(cart.destination, zones);
 
   // Stable: equal priorities keep their original order.
   const ordered = rules
@@ -66,7 +73,13 @@ export function quote(
     }
 
     const notes: string[] = [];
+    if (!zone) notes.push("address is not in any zone");
     for (const rate of rule.rates) {
+      if (!zone) continue;
+      if (rate.zoneId !== zone.id) {
+        notes.push(`rate ${rate.id}: for another zone (address is in "${zone.name}")`);
+        continue;
+      }
       const priced = priceRate(rate, cart);
       if (!priced.ok) {
         notes.push(`rate ${rate.id}: ${priced.reason}`);

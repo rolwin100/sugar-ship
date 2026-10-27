@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { quote } from "./quote";
-import type { EngineCart, EngineRate, EngineRule, EngineSettings } from "./types";
+import type {
+  EngineCart,
+  EngineRate,
+  EngineRule,
+  EngineSettings,
+  EngineZone,
+} from "./types";
 
 const cart: EngineCart = {
   items: [{ quantity: 1, grams: 500, price: 50000 }],
@@ -9,13 +15,15 @@ const cart: EngineCart = {
 };
 
 const settings: EngineSettings = { combineStrategy: "SUM" };
+const zones: EngineZone[] = [
+  { id: "zone-in", name: "Domestic", restOfWorld: false, regions: [{ country: "IN", provinces: null }] },
+];
 const NOW = new Date("2026-10-27T12:00:00Z");
 
 function flatRate(id: string, price: number): EngineRate {
   return {
     id,
     zoneId: "zone-in",
-    zoneName: "India",
     preset: "standard",
     mode: "FLAT",
     price,
@@ -39,7 +47,7 @@ function rule(overrides: Partial<EngineRule> & { id: string }): EngineRule {
 
 describe("quote", () => {
   it("returns a flat rate for a matching rule", () => {
-    const result = quote(cart, [rule({ id: "r1" })], settings, NOW);
+    const result = quote(cart, [rule({ id: "r1" })], zones, settings, NOW);
     expect(result.rates).toHaveLength(1);
     expect(result.rates[0]).toMatchObject({ ruleId: "r1", price: 5000, preset: "standard" });
     expect(result.trace).toEqual([{ ruleId: "r1", ruleName: "r1", outcome: "matched" }]);
@@ -52,12 +60,12 @@ describe("quote", () => {
       rule({ id: "tie-a", priority: 3 }),
       rule({ id: "tie-b", priority: 3 }),
     ];
-    const result = quote(cart, rules, settings, NOW);
+    const result = quote(cart, rules, zones, settings, NOW);
     expect(result.trace.map((t) => t.ruleId)).toEqual(["early", "tie-a", "tie-b", "late"]);
   });
 
   it("skips inactive rules", () => {
-    const result = quote(cart, [rule({ id: "off", status: "INACTIVE" })], settings, NOW);
+    const result = quote(cart, [rule({ id: "off", status: "INACTIVE" })], zones, settings, NOW);
     expect(result.rates).toHaveLength(0);
     expect(result.trace[0].outcome).toBe("skipped_inactive");
   });
@@ -72,7 +80,7 @@ describe("quote", () => {
         endsAt: new Date("2026-11-01T00:00:00Z"),
       }),
     ];
-    const result = quote(cart, rules, settings, NOW);
+    const result = quote(cart, rules, zones, settings, NOW);
     const outcomes = Object.fromEntries(result.trace.map((t) => [t.ruleId, t.outcome]));
     expect(outcomes).toEqual({
       future: "skipped_schedule",
@@ -87,7 +95,7 @@ describe("quote", () => {
       rule({ id: "vip", priority: 1, exclusive: true }),
       rule({ id: "standard", priority: 2 }),
     ];
-    const result = quote(cart, rules, settings, NOW);
+    const result = quote(cart, rules, zones, settings, NOW);
     expect(result.rates.map((r) => r.ruleId)).toEqual(["vip"]);
     expect(result.trace[1]).toMatchObject({
       ruleId: "standard",
@@ -100,15 +108,33 @@ describe("quote", () => {
       rule({ id: "vip", priority: 1, exclusive: true, status: "INACTIVE" }),
       rule({ id: "standard", priority: 2 }),
     ];
-    const result = quote(cart, rules, settings, NOW);
+    const result = quote(cart, rules, zones, settings, NOW);
     expect(result.rates.map((r) => r.ruleId)).toEqual(["standard"]);
   });
 
   it("notes rates whose pricing mode is not supported yet", () => {
     const bands: EngineRate = { ...flatRate("bands", 0), mode: "BANDS", basis: "WEIGHT", price: null };
-    const result = quote(cart, [rule({ id: "r1", rates: [bands] })], settings, NOW);
+    const result = quote(cart, [rule({ id: "r1", rates: [bands] })], zones, settings, NOW);
     expect(result.rates).toHaveLength(0);
     expect(result.trace[0]).toMatchObject({ outcome: "matched" });
     expect(result.trace[0].detail).toContain("BANDS pricing not supported yet");
+  });
+
+  it("only returns rates for the address's zone", () => {
+    const multiZone = [
+      ...zones,
+      { id: "zone-eu", name: "Europe", restOfWorld: false, regions: [{ country: "FR", provinces: null }] },
+    ];
+    const rates = [flatRate("in-rate", 5000), { ...flatRate("eu-rate", 900), zoneId: "zone-eu" }];
+    const result = quote(cart, [rule({ id: "r1", rates })], multiZone, settings, NOW);
+    expect(result.rates.map((r) => r.rateId)).toEqual(["in-rate"]);
+    expect(result.trace[0].detail).toContain('for another zone (address is in "Domestic")');
+  });
+
+  it("returns no rates when the address is in no zone", () => {
+    const usCart = { ...cart, destination: { country: "US", province: "CA" } };
+    const result = quote(usCart, [rule({ id: "r1" })], zones, settings, NOW);
+    expect(result.rates).toHaveLength(0);
+    expect(result.trace[0].detail).toContain("address is not in any zone");
   });
 });
