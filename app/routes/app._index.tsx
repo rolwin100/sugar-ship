@@ -1,6 +1,7 @@
 import type { HeadersFunction, LoaderFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
 import { boundary } from "@shopify/shopify-app-react-router/server";
+import { Trans, useTranslation } from "react-i18next";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
@@ -9,18 +10,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Index() {
+  const { t } = useTranslation();
+
   return (
     <s-page heading="Sugar Ship">
-      <s-section heading="Shipping rules">
-        <s-paragraph>
-          Custom shipping rates are on the way. Rules, rate tables and the cart
-          simulator will appear here.
-        </s-paragraph>
+      <s-section heading={t("home.rulesHeading")}>
+        <s-paragraph>{t("home.rulesBody")}</s-paragraph>
       </s-section>
-      <s-section slot="aside" heading="Test mode">
+      <s-section slot="aside" heading={t("home.testModeHeading")}>
         <s-paragraph>
-          Add <s-text type="strong">sugarship</s-text> to the checkout address
-          to see Sugar Ship test rates. Real customers won&apos;t see them.
+          <Trans
+            i18nKey="home.testModeBody"
+            components={{ strong: <s-text type="strong" /> }}
+          />
         </s-paragraph>
       </s-section>
     </s-page>

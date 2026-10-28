@@ -67,3 +67,12 @@ export async function getShopForRates(domain: string) {
     include: { settings: true },
   });
 }
+
+/**
+ * The Shop row for an admin page. afterAuth normally creates it; if that failed,
+ * create it here so the admin still works (currency is filled in on the next auth).
+ */
+export async function requireShop(domain: string) {
+  const shop = await db.shop.findUnique({ where: { domain } });
+  return shop ?? upsertShopOnInstall(domain);
+}

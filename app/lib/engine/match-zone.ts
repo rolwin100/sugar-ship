@@ -1,11 +1,5 @@
+import { normCountry as norm, normState } from "../zones/codes";
 import type { Zone, ZoneAddress } from "../zones/types";
-
-const norm = (value: string | null | undefined) =>
-  (value ?? "").trim().toUpperCase();
-
-/** State codes: drops a country prefix so "JP-13", "jp-13" and "13" all become "13". */
-const normState = (value: string | null | undefined) =>
-  norm(value).replace(/^[A-Z]{2}-/, "");
 
 /**
  * Finds the one zone an address belongs to, most specific first:
