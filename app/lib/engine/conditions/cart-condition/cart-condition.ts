@@ -1,20 +1,29 @@
-import type { CartTotals, ConditionResult, EngineCondition } from "../../types";
+import type {
+  CartConditionField,
+  CartTotals,
+  ConditionResult,
+  EngineCondition,
+} from "../../types";
 import { compareNumbers, operatorSymbol } from "../operators";
 
-// Cart fields a condition can test, and the total each one reads.
-const CART_FIELDS = {
-  subtotal: "subtotal",
-  weight: "weight",
-  quantity: "quantity",
-} as const satisfies Record<string, keyof CartTotals>;
+/** Cart fields a condition can test (units: subtotal subunits, weight grams, quantity items). */
+export const CART_CONDITION_FIELDS: readonly CartConditionField[] = [
+  "subtotal",
+  "weight",
+  "quantity",
+];
+
+function isCartConditionField(field: string): field is CartConditionField {
+  return (CART_CONDITION_FIELDS as readonly string[]).includes(field);
+}
 
 /** A CART condition: compares subtotal, weight or quantity with a number. */
 export function checkCartCondition(
   condition: EngineCondition,
   totals: CartTotals,
 ): ConditionResult {
-  const field = CART_FIELDS[condition.field as keyof typeof CART_FIELDS];
-  if (!field) {
+  const field = condition.field;
+  if (!isCartConditionField(field)) {
     return { unsupported: `cart field "${condition.field}" isn't supported` };
   }
 

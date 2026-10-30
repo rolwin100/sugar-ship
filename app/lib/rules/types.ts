@@ -1,3 +1,4 @@
+import type { CartConditionField, NumberOperator } from "../engine";
 import type { RuleError } from "./validate-rule";
 
 /** Built-in checkout names; translated into the checkout's language (keys rates.preset*). */
@@ -14,6 +15,28 @@ export type RuleStatus = "ACTIVE" | "INACTIVE";
 
 /** One zone's price, in subunits of the shop's currency. */
 export type ZonePrice = { zoneId: string; price: number };
+
+/**
+ * One cart condition on a rate, in stored units:
+ * subtotal in subunits, weight in grams, quantity in items.
+ * Saved as a Condition row with subject CART.
+ */
+export type RuleCondition = {
+  field: CartConditionField;
+  operator: NumberOperator;
+  value: number;
+};
+
+/**
+ * A condition as the edit form holds it. `value` is the typed text, in the units the
+ * merchant sees: subtotal in the shop's currency ("1000"), weight in kg ("1.5"),
+ * quantity in items ("10").
+ */
+export type RuleConditionDraft = {
+  field: CartConditionField;
+  operator: NumberOperator;
+  value: string;
+};
 
 /**
  * A shipping rate as the merchant sees it ("Rates" in the admin; a Rule in the database).

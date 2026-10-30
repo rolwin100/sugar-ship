@@ -1,9 +1,10 @@
-import type { ConditionOperator } from "../../types";
+import type { ConditionOperator, NumberOperator } from "../../types";
 
 // Number comparisons, shared by every checker that compares numbers (cart totals now).
 
-const COMPARE: Partial<
-  Record<ConditionOperator, (actual: number, value: number) => boolean>
+const COMPARE: Record<
+  NumberOperator,
+  (actual: number, value: number) => boolean
 > = {
   EQUALS: (a, v) => a === v,
   NOT_EQUALS: (a, v) => a !== v,
@@ -13,8 +14,13 @@ const COMPARE: Partial<
   LESS_OR_EQUAL: (a, v) => a <= v,
 };
 
+/** Every number operator, for validating saved conditions. */
+export const NUMBER_OPERATORS = Object.keys(COMPARE) as NumberOperator[];
+
 /** Is this an operator that compares two numbers? */
-export function isNumberOperator(operator: ConditionOperator): boolean {
+export function isNumberOperator(
+  operator: ConditionOperator,
+): operator is NumberOperator {
   return operator in COMPARE;
 }
 
@@ -24,6 +30,5 @@ export function compareNumbers(
   actual: number,
   value: number,
 ): boolean | null {
-  const compare = COMPARE[operator];
-  return compare ? compare(actual, value) : null;
+  return isNumberOperator(operator) ? COMPARE[operator](actual, value) : null;
 }

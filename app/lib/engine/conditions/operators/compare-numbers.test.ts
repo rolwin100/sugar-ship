@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { compareNumbers, isNumberOperator } from "./compare-numbers";
+import {
+  compareNumbers,
+  isNumberOperator,
+  NUMBER_OPERATORS,
+} from "./compare-numbers";
 
 describe("number operators", () => {
   it("compares each operator, including the edges", () => {
@@ -18,5 +22,16 @@ describe("number operators", () => {
     expect(compareNumbers("CONTAINS", 1, 1)).toBeNull();
     expect(isNumberOperator("IN")).toBe(false);
     expect(isNumberOperator("LESS_THAN")).toBe(true);
+  });
+
+  it("lists every number operator", () => {
+    expect([...NUMBER_OPERATORS].sort()).toEqual([
+      "EQUALS",
+      "GREATER_OR_EQUAL",
+      "GREATER_THAN",
+      "LESS_OR_EQUAL",
+      "LESS_THAN",
+      "NOT_EQUALS",
+    ]);
   });
 });

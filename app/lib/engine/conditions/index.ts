@@ -1,3 +1,8 @@
-export { checkCartCondition } from "./cart-condition";
+export { CART_CONDITION_FIELDS, checkCartCondition } from "./cart-condition";
 export { checkConditions } from "./conditions";
-export { compareNumbers, isNumberOperator, operatorSymbol } from "./operators";
+export {
+  compareNumbers,
+  isNumberOperator,
+  NUMBER_OPERATORS,
+  operatorSymbol,
+} from "./operators";

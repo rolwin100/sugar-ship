@@ -23,6 +23,17 @@ export type ConditionOperator =
 export type Quantifier = "ANY" | "ALL" | "NONE";
 export type RuleStatus = "ACTIVE" | "INACTIVE";
 export type RuleMatch = "ALL" | "ANY" | "NONE";
+
+/** Operators that compare two numbers (cart totals now). */
+export type NumberOperator = Extract<
+  ConditionOperator,
+  | "EQUALS"
+  | "NOT_EQUALS"
+  | "GREATER_THAN"
+  | "GREATER_OR_EQUAL"
+  | "LESS_THAN"
+  | "LESS_OR_EQUAL"
+>;
 export type RateMode = "FLAT" | "BANDS" | "INCREMENTAL" | "PERCENT";
 export type RateBasis = "WEIGHT" | "QUANTITY" | "SUBTOTAL";
 export type AdjustmentKind =
@@ -66,6 +77,9 @@ export type CartTotals = {
   weight: number; // grams: grams × quantity over all items
   quantity: number; // number of items (units, not lines)
 };
+
+/** Cart fields a condition can test; each reads the CartTotals value of the same name. */
+export type CartConditionField = keyof CartTotals;
 
 // ---- Input: the shop's rules ----------------------------------------------
 
