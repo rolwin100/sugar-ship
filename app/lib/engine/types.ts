@@ -60,6 +60,13 @@ export type EngineCart = {
   destination: EngineAddress;
 };
 
+/** The cart added up once, for conditions and pricing. */
+export type CartTotals = {
+  subtotal: number; // subunits: price × quantity over all items
+  weight: number; // grams: grams × quantity over all items
+  quantity: number; // number of items (units, not lines)
+};
+
 // ---- Input: the shop's rules ----------------------------------------------
 
 export type EngineCondition = {
