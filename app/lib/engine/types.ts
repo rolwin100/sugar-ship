@@ -79,6 +79,17 @@ export type EngineCondition = {
   postcodeEntries?: string[] | null; // resolved from the linked PostcodeList
 };
 
+/**
+ * One condition checked against the cart: true/false with a short description
+ * (e.g. "subtotal 80000 ≥ 100000"), or why the engine can't check it yet.
+ */
+export type ConditionResult =
+  | { result: boolean; text: string }
+  | { unsupported: string };
+
+/** Whether a rule's conditions match a cart, and if not, why (for the trace). */
+export type ConditionCheck = { matched: boolean; reason?: string };
+
 export type EngineBand = { from: number; to: number | null; price: number };
 
 export type EngineAdjustment = {
