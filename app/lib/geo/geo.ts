@@ -63,7 +63,9 @@ export function stateName(countryCode: string, stateCode: string): string {
   const byCode = states[normCountry(countryCode)] ?? {};
   const code = normCountry(stateCode);
   if (byCode[code]) return byCode[code];
-  const match = Object.keys(byCode).find((key) => normState(key) === normState(code));
+  const match = Object.keys(byCode).find(
+    (key) => normState(key) === normState(code),
+  );
   return match ? byCode[match] : code;
 }
 

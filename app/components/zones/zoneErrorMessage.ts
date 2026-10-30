@@ -13,10 +13,17 @@ const ERROR_TEXT = {
 } as const satisfies Record<ZoneErrorKey, string>;
 
 /** Turns a validation error from the server into a translated sentence. */
-export function zoneErrorMessage(error: ZoneError, t: TFunction, locale: string) {
+export function zoneErrorMessage(
+  error: ZoneError,
+  t: TFunction,
+  locale: string,
+) {
   return t(ERROR_TEXT[error.key], {
     country: error.country ? countryName(error.country, locale) : "",
-    state: error.country && error.state ? stateName(error.country, error.state) : (error.state ?? ""),
+    state:
+      error.country && error.state
+        ? stateName(error.country, error.state)
+        : (error.state ?? ""),
     zone: error.zone ?? "",
   });
 }

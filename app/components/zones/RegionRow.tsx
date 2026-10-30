@@ -14,13 +14,23 @@ type Props = {
 };
 
 /** One country in the zone: whole country or selected states. */
-export function RegionRow({ region, wholeTaken, onRemove, onWholeChange, onChooseStates }: Props) {
+export function RegionRow({
+  region,
+  wholeTaken,
+  onRemove,
+  onWholeChange,
+  onChooseStates,
+}: Props) {
   const { t, i18n } = useTranslation();
   const name = countryName(region.country, i18n.language);
 
   return (
     <s-stack gap="small-200">
-      <s-stack direction="inline" justifyContent="space-between" alignItems="center">
+      <s-stack
+        direction="inline"
+        justifyContent="space-between"
+        alignItems="center"
+      >
         <s-text type="strong">{name}</s-text>
         <s-button variant="tertiary" onClick={onRemove}>
           {t("zones.remove")}
@@ -49,7 +59,11 @@ export function RegionRow({ region, wholeTaken, onRemove, onWholeChange, onChoos
                   total: listStates(region.country).length,
                 })}
               </s-text>
-              <s-button commandFor={STATES_MODAL_ID} command="--show" onClick={onChooseStates}>
+              <s-button
+                commandFor={STATES_MODAL_ID}
+                command="--show"
+                onClick={onChooseStates}
+              >
                 {t("zones.chooseStates")}
               </s-button>
             </s-stack>

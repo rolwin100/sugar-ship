@@ -23,12 +23,18 @@ export function CountriesModal({ selected, taken, onToggle }: Props) {
   const query = search.trim().toLocaleLowerCase(locale);
   const shown = query
     ? countries.filter(
-        (c) => c.name.toLocaleLowerCase(locale).includes(query) || c.code.toLowerCase() === query,
+        (c) =>
+          c.name.toLocaleLowerCase(locale).includes(query) ||
+          c.code.toLowerCase() === query,
       )
     : countries;
 
   return (
-    <s-modal id={COUNTRIES_MODAL_ID} heading={t("zones.addCountries")} onHide={() => setSearch("")}>
+    <s-modal
+      id={COUNTRIES_MODAL_ID}
+      heading={t("zones.addCountries")}
+      onHide={() => setSearch("")}
+    >
       <s-stack gap="base">
         <s-search-field
           label={t("zones.searchCountries")}
@@ -42,12 +48,15 @@ export function CountriesModal({ selected, taken, onToggle }: Props) {
             const usedBy = takenBy(taken, country.code);
             const isSelected = selected.has(country.code);
             // A whole country used elsewhere can still be added for some states, unless it has none.
-            const blocked = taken.whole.has(country.code) && !hasStates(country.code);
+            const blocked =
+              taken.whole.has(country.code) && !hasStates(country.code);
             return (
               <s-checkbox
                 key={country.code}
                 label={country.name}
-                details={usedBy ? t("zones.inZone", { zone: usedBy }) : undefined}
+                details={
+                  usedBy ? t("zones.inZone", { zone: usedBy }) : undefined
+                }
                 checked={isSelected}
                 disabled={blocked && !isSelected}
                 onChange={(e) => onToggle(country.code, fieldChecked(e))}
@@ -56,7 +65,12 @@ export function CountriesModal({ selected, taken, onToggle }: Props) {
           })}
         </s-stack>
       </s-stack>
-      <s-button slot="primary-action" variant="primary" commandFor={COUNTRIES_MODAL_ID} command="--hide">
+      <s-button
+        slot="primary-action"
+        variant="primary"
+        commandFor={COUNTRIES_MODAL_ID}
+        command="--hide"
+      >
         {t("common.done")}
       </s-button>
     </s-modal>

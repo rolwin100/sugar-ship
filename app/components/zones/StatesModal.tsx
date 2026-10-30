@@ -18,21 +18,36 @@ type Props = {
 };
 
 /** Pick states for one country. States used by another zone are disabled. */
-export function StatesModal({ country, selected, taken, onToggle, onSetAll }: Props) {
+export function StatesModal({
+  country,
+  selected,
+  taken,
+  onToggle,
+  onSetAll,
+}: Props) {
   const { t, i18n } = useTranslation();
   const [search, setSearch] = useState("");
 
   const states = country ? listStates(country) : [];
   const selectedSet = new Set(selected.map(normState));
-  const usedElsewhere = (country && taken.states.get(country)) || new Map<string, string>();
+  const usedElsewhere =
+    (country && taken.states.get(country)) || new Map<string, string>();
 
   const query = search.trim().toLocaleLowerCase();
-  const shown = query ? states.filter((s) => s.name.toLocaleLowerCase().includes(query)) : states;
+  const shown = query
+    ? states.filter((s) => s.name.toLocaleLowerCase().includes(query))
+    : states;
 
   return (
     <s-modal
       id={STATES_MODAL_ID}
-      heading={country ? t("zones.statesTitle", { country: countryName(country, i18n.language) }) : ""}
+      heading={
+        country
+          ? t("zones.statesTitle", {
+              country: countryName(country, i18n.language),
+            })
+          : ""
+      }
       onHide={() => setSearch("")}
     >
       {country && (
@@ -48,7 +63,11 @@ export function StatesModal({ country, selected, taken, onToggle, onSetAll }: Pr
             <s-button
               variant="tertiary"
               onClick={() =>
-                onSetAll(states.filter((s) => !usedElsewhere.has(normState(s.code))).map((s) => s.code))
+                onSetAll(
+                  states
+                    .filter((s) => !usedElsewhere.has(normState(s.code)))
+                    .map((s) => s.code),
+                )
               }
             >
               {t("zones.selectAll")}
@@ -65,7 +84,9 @@ export function StatesModal({ country, selected, taken, onToggle, onSetAll }: Pr
                 <s-checkbox
                   key={state.code}
                   label={state.name}
-                  details={usedBy ? t("zones.inZone", { zone: usedBy }) : undefined}
+                  details={
+                    usedBy ? t("zones.inZone", { zone: usedBy }) : undefined
+                  }
                   checked={checked}
                   disabled={Boolean(usedBy) && !checked}
                   onChange={(e) => onToggle(state.code, fieldChecked(e))}
@@ -75,7 +96,12 @@ export function StatesModal({ country, selected, taken, onToggle, onSetAll }: Pr
           </s-stack>
         </s-stack>
       )}
-      <s-button slot="primary-action" variant="primary" commandFor={STATES_MODAL_ID} command="--hide">
+      <s-button
+        slot="primary-action"
+        variant="primary"
+        commandFor={STATES_MODAL_ID}
+        command="--hide"
+      >
         {t("common.done")}
       </s-button>
     </s-modal>

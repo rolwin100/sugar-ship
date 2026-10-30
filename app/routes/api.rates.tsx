@@ -4,8 +4,8 @@ import {
   fallbackRates,
   isTestCheckout,
   isValidHmac,
-  quoteRates,
 } from "../lib/rates/rates.server";
+import { quoteCheckout } from "../lib/rates/quote-checkout.server";
 import { getShopForRates } from "../lib/shop.server";
 import { logRateRequest } from "../lib/rate-log.server";
 
@@ -55,7 +55,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   let errorMessage: string | undefined;
 
   try {
-    rates = quoteRates(payload);
+    // Test mode only for now (see isTestCheckout).
+    if (testMode && shopRecord)
+      rates = await quoteCheckout(shopRecord, payload);
     if (rates.length > 0) outcome = "rates";
   } catch (error) {
     outcome = "error";

@@ -11,4 +11,9 @@ export type {
 } from "./types";
 export { normCountry, normState } from "./codes";
 export { parseZoneInput, validateZone, ZONE_NAME_MAX } from "./validate-zone";
-export type { ZoneError, ZoneErrorKey, ZoneInput, ZoneValidation } from "./validate-zone";
+export type {
+  ZoneError,
+  ZoneErrorKey,
+  ZoneInput,
+  ZoneValidation,
+} from "./validate-zone";

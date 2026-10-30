@@ -28,11 +28,14 @@ export type SaveZoneResult =
   | { ok: false; notFound: true };
 
 /** The zone as the edit page holds it while the merchant is changing it. */
-export type ZoneDraft = { name: string; restOfWorld: boolean; regions: Region[] };
+export type ZoneDraft = {
+  name: string;
+  restOfWorld: boolean;
+  regions: Region[];
+};
 
 /** What the zone edit action returns to the page. */
 export type ZoneActionResult =
   | { ok: true; intent: "save" | "delete" }
   | { ok: false; errors: ZoneError[] }
   | { ok: false; invalid: true };
-

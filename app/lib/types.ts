@@ -43,6 +43,9 @@ export type ShippingRate = {
   description: string;
   total_price: string;
   currency: string;
+  // Delivery estimate, "YYYY-MM-DD HH:MM:SS +0000". Shopify shows it under the rate.
+  min_delivery_date?: string;
+  max_delivery_date?: string;
 };
 
 export type InstallDetails = {

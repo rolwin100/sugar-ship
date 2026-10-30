@@ -1,11 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import db from "../db.server";
-import type {
-  RateAddress,
-  RateItem,
-  RateOutcome,
-  ShippingRate,
-} from "./types";
+import type { RateAddress, RateItem, RateOutcome, ShippingRate } from "./types";
 
 type RateLogInput = {
   shopId: string;

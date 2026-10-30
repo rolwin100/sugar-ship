@@ -13,12 +13,22 @@ type Props = {
   onChooseStates: (country: string) => void;
 };
 
-export function ZoneRegionsSection({ regions, taken, onRemove, onWholeChange, onChooseStates }: Props) {
+export function ZoneRegionsSection({
+  regions,
+  taken,
+  onRemove,
+  onWholeChange,
+  onChooseStates,
+}: Props) {
   const { t } = useTranslation();
 
   return (
     <s-section heading={t("zones.countriesHeading")}>
-      <s-button slot="secondary-actions" commandFor={COUNTRIES_MODAL_ID} command="--show">
+      <s-button
+        slot="secondary-actions"
+        commandFor={COUNTRIES_MODAL_ID}
+        command="--show"
+      >
         {t("zones.addCountries")}
       </s-button>
 

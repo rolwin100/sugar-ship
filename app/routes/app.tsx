@@ -23,7 +23,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 
   // eslint-disable-next-line no-undef
-  return { apiKey: process.env.SHOPIFY_API_KEY || "", locale: getLocale(request) };
+  return {
+    apiKey: process.env.SHOPIFY_API_KEY || "",
+    locale: getLocale(request),
+  };
 };
 
 // Shopify only sends ?locale= on the first load. In-app links and form saves drop it,
@@ -51,6 +54,7 @@ function AppNav() {
     <s-app-nav>
       <s-link href="/app">{t("nav.home")}</s-link>
       <s-link href="/app/zones">{t("nav.zones")}</s-link>
+      <s-link href="/app/rates">{t("nav.rates")}</s-link>
     </s-app-nav>
   );
 }

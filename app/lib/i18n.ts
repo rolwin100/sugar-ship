@@ -17,8 +17,12 @@ export const resources = {
  * We keep the language part and fall back to English for anything we don't support.
  */
 export function getLocale(request: Request): Locale {
-  const raw = new URL(request.url).searchParams.get("locale") ?? "";
-  const language = raw.toLowerCase().split(/[-_]/)[0];
+  return toLocale(new URL(request.url).searchParams.get("locale"));
+}
+
+/** "fr-CA" → "fr"; anything we don't support → "en". */
+export function toLocale(raw: string | null | undefined): Locale {
+  const language = (raw ?? "").toLowerCase().split(/[-_]/)[0];
   return (SUPPORTED_LOCALES as readonly string[]).includes(language)
     ? (language as Locale)
     : "en";
@@ -35,4 +39,19 @@ export function createI18n(locale: Locale): i18n {
     interpolation: { escapeValue: false }, // React already escapes
   });
   return instance;
+}
+
+/**
+ * A shared, read-only translator for server code outside React (e.g. rate names at
+ * checkout). One instance per language, created on first use.
+ */
+const translators = new Map<Locale, i18n>();
+export function translatorFor(raw: string | null | undefined): i18n["t"] {
+  const locale = toLocale(raw);
+  let instance = translators.get(locale);
+  if (!instance) {
+    instance = createI18n(locale);
+    translators.set(locale, instance);
+  }
+  return instance.t;
 }

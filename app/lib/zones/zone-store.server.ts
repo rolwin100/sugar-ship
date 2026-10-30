@@ -14,7 +14,10 @@ export async function listZones(shopId: string): Promise<ZoneListItem[]> {
   return rows.map((row) => ({ ...toZone(row), rateCount: row._count.rates }));
 }
 
-export async function getZone(shopId: string, id: string): Promise<Zone | null> {
+export async function getZone(
+  shopId: string,
+  id: string,
+): Promise<Zone | null> {
   const row = await db.zone.findFirst({ where: { id, shopId } });
   return row ? toZone(row) : null;
 }
@@ -37,7 +40,8 @@ export async function saveZone(
 
   if (id === null) {
     // New zones go to the end of the list.
-    const sortOrder = others.reduce((max, zone) => Math.max(max, zone.sortOrder ?? 0), -1) + 1;
+    const sortOrder =
+      others.reduce((max, zone) => Math.max(max, zone.sortOrder ?? 0), -1) + 1;
     const row = await db.zone.create({ data: { ...data, shopId, sortOrder } });
     return { ok: true, zone: toZone(row) };
   }

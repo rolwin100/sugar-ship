@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { countryName, hasStates, listCountries, listStates, stateName } from "./geo";
+import {
+  countryName,
+  hasStates,
+  listCountries,
+  listStates,
+  stateName,
+} from "./geo";
 
 describe("geo", () => {
   it("lists the countries Shopify supports", () => {
@@ -21,8 +27,12 @@ describe("geo", () => {
 
   it("has Shopify's state codes", () => {
     expect(listStates("IN")).toHaveLength(37);
-    expect(listStates("in").find((s) => s.code === "MH")?.name).toBe("Maharashtra");
-    expect(listStates("JP").find((s) => s.code === "JP-13")?.name).toBe("Tokyo");
+    expect(listStates("in").find((s) => s.code === "MH")?.name).toBe(
+      "Maharashtra",
+    );
+    expect(listStates("JP").find((s) => s.code === "JP-13")?.name).toBe(
+      "Tokyo",
+    );
     expect(listStates("US")).toHaveLength(62);
   });
 
@@ -34,7 +44,8 @@ describe("geo", () => {
 
   it("only has states for known countries", () => {
     const codes = new Set(listCountries().map((c) => c.code));
-    for (const code of ["IN", "US", "JP", "KR", "PT", "GB", "AE"]) expect(codes.has(code)).toBe(true);
+    for (const code of ["IN", "US", "JP", "KR", "PT", "GB", "AE"])
+      expect(codes.has(code)).toBe(true);
   });
 
   it("looks up a state's name by code", () => {

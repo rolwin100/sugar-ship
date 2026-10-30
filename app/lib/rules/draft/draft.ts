@@ -1,0 +1,92 @@
+import { fromSubunits, toSubunits } from "../../money";
+import {
+  RATE_PRESETS,
+  type Rule,
+  type RuleDraft,
+  type RuleInput,
+  type RatePreset,
+} from "../types";
+
+export const emptyRuleDraft = (): RuleDraft => ({
+  name: "",
+  status: "ACTIVE",
+  preset: "standard",
+  customName: "",
+  minDeliveryDays: "",
+  maxDeliveryDays: "",
+  prices: {},
+});
+
+/** A saved rule → the editable text the form shows. */
+export function ruleToDraft(rule: Rule, currency: string): RuleDraft {
+  return {
+    name: rule.name,
+    status: rule.status,
+    preset: rule.preset ?? "custom",
+    customName: rule.customName,
+    minDeliveryDays: rule.minDeliveryDays?.toString() ?? "",
+    maxDeliveryDays: rule.maxDeliveryDays?.toString() ?? "",
+    prices: Object.fromEntries(
+      rule.prices.map((p) => [p.zoneId, fromSubunits(p.price, currency)]),
+    ),
+  };
+}
+
+/**
+ * The form's text → a rule to validate and save. Empty prices are left out (that zone
+ * doesn't get the rate); text that isn't a number becomes NaN so validation can flag it.
+ */
+export function draftToInput(draft: RuleDraft, currency: string): RuleInput {
+  const prices = Object.entries(draft.prices).flatMap(([zoneId, text]) => {
+    const price = toSubunits(text, currency);
+    return price === null ? [] : [{ zoneId, price }];
+  });
+
+  return {
+    name: draft.name,
+    status: draft.status,
+    preset: draft.preset === "custom" ? null : draft.preset,
+    customName: draft.preset === "custom" ? draft.customName : "",
+    minDeliveryDays: toDays(draft.minDeliveryDays),
+    maxDeliveryDays: toDays(draft.maxDeliveryDays),
+    prices,
+  };
+}
+
+/** "" → null, "3" → 3, anything else → NaN. */
+function toDays(text: string): number | null {
+  const trimmed = text.trim();
+  if (trimmed === "") return null;
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : Number.NaN;
+}
+
+/** Reads the draft the edit page posts (as JSON); null if the shape is wrong. */
+export function parseRuleDraft(raw: unknown): RuleDraft | null {
+  if (typeof raw !== "string") return null;
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const d = value as Record<string, unknown>;
+
+  const strings = [
+    "name",
+    "customName",
+    "minDeliveryDays",
+    "maxDeliveryDays",
+  ] as const;
+  if (strings.some((key) => typeof d[key] !== "string")) return null;
+  if (d.status !== "ACTIVE" && d.status !== "INACTIVE") return null;
+  if (d.preset !== "custom" && !RATE_PRESETS.includes(d.preset as RatePreset))
+    return null;
+
+  const prices = d.prices;
+  if (!prices || typeof prices !== "object" || Array.isArray(prices))
+    return null;
+  if (Object.values(prices).some((p) => typeof p !== "string")) return null;
+
+  return value as RuleDraft;
+}

@@ -30,7 +30,11 @@ export function ZoneDetailsSection({
         <s-text-field
           label={t("zones.nameLabel")}
           value={name}
-          error={nameError ? zoneErrorMessage(nameError, t, i18n.language) : undefined}
+          error={
+            nameError
+              ? zoneErrorMessage(nameError, t, i18n.language)
+              : undefined
+          }
           onInput={(e) => onNameChange(fieldValue(e))}
         />
         <s-checkbox
