@@ -1,4 +1,5 @@
-import { matchesConditions } from "../conditions";
+import { cartTotals } from "../cart-totals";
+import { checkConditions } from "../conditions";
 import { priceRate } from "../pricing";
 import { matchZone } from "../match-zone";
 import type {
@@ -26,7 +27,10 @@ function inSchedule(rule: EngineRule, now: Date): boolean {
  * The address is matched to one zone up front; a matching rule only returns rates
  * for that zone.
  *
- * Still to come: real conditions (2.4–2.7), all pricing modes
+ * Conditions are checked against the cart totals; when a rule doesn't match, its
+ * trace entry says why.
+ *
+ * Still to come: product and postcode conditions (2.6–2.7), all pricing modes
  * and adjustments (2.9–2.10), combining same-name rates (2.11).
  */
 export function quote(
@@ -39,6 +43,7 @@ export function quote(
   const rates: QuotedRate[] = [];
   const trace: TraceEntry[] = [];
   const zone = matchZone(cart.destination, zones);
+  const totals = cartTotals(cart);
 
   // Stable: equal priorities keep their original order.
   const ordered = rules
@@ -67,8 +72,13 @@ export function quote(
       trace.push({ ...base, outcome: "skipped_schedule" });
       continue;
     }
-    if (!matchesConditions(rule, cart)) {
-      trace.push({ ...base, outcome: "not_matched" });
+    const conditions = checkConditions(rule, totals);
+    if (!conditions.matched) {
+      trace.push({
+        ...base,
+        outcome: "not_matched",
+        ...(conditions.reason ? { detail: conditions.reason } : {}),
+      });
       continue;
     }
 

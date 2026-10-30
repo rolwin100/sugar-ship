@@ -1,9 +1,7 @@
-import { cartTotals } from "../cart-totals";
 import type {
   CartTotals,
   ConditionCheck,
   ConditionResult,
-  EngineCart,
   EngineCondition,
   EngineRule,
 } from "../types";
@@ -79,9 +77,4 @@ export function checkConditions(
         : { matched: true };
     }
   }
-}
-
-/** Shortcut for quote(): does this cart satisfy the rule? */
-export function matchesConditions(rule: EngineRule, cart: EngineCart): boolean {
-  return checkConditions(rule, cartTotals(cart)).matched;
 }

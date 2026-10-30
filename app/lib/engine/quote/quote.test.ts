@@ -188,4 +188,38 @@ describe("quote", () => {
     expect(result.rates).toHaveLength(0);
     expect(result.trace[0].detail).toContain("address is not in any zone");
   });
+
+  it("applies cart conditions and explains rules that don't match", () => {
+    const freeOver1000 = rule({
+      id: "free",
+      conditions: [
+        {
+          id: "c1",
+          subject: "CART",
+          field: "subtotal",
+          operator: "GREATER_OR_EQUAL",
+          value: 100000,
+        },
+      ],
+      rates: [flatRate("free-rate", 0)],
+    });
+    const cartOf = (price: number): EngineCart => ({
+      ...cart,
+      items: [{ quantity: 1, grams: 500, price }],
+    });
+
+    const big = quote(cartOf(120000), [freeOver1000], zones, settings, NOW);
+    expect(big.rates.map((r) => r.rateId)).toEqual(["free-rate"]);
+
+    const small = quote(cartOf(80000), [freeOver1000], zones, settings, NOW);
+    expect(small.rates).toEqual([]);
+    expect(small.trace).toEqual([
+      {
+        ruleId: "free",
+        ruleName: "free",
+        outcome: "not_matched",
+        detail: "needs all conditions; subtotal 80000 ≥ 100000 is false",
+      },
+    ]);
+  });
 });

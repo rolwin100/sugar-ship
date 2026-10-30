@@ -6,7 +6,7 @@ import type {
   EngineRule,
   RuleMatch,
 } from "../types";
-import { checkConditions, matchesConditions } from "./conditions";
+import { checkConditions } from "./conditions";
 
 const totals: CartTotals = { subtotal: 100000, weight: 2000, quantity: 3 };
 
@@ -91,18 +91,5 @@ describe("checkConditions", () => {
     }
     // Even under NONE, which would otherwise pass when nothing is true.
     expect(matched(rule([product], "NONE"))).toBe(false);
-  });
-});
-
-describe("matchesConditions", () => {
-  it("adds up the cart and checks it", () => {
-    const r = rule([condition("subtotal", "GREATER_OR_EQUAL", 100000)]);
-    const cart = (price: number) => ({
-      items: [{ quantity: 2, grams: 500, price }],
-      currency: "INR",
-      destination: { country: "IN" },
-    });
-    expect(matchesConditions(r, cart(60000))).toBe(true); // ₹1,200
-    expect(matchesConditions(r, cart(40000))).toBe(false); // ₹800
   });
 });
