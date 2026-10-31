@@ -30,8 +30,8 @@ function inSchedule(rule: EngineRule, now: Date): boolean {
  * Conditions are checked against the cart totals; when a rule doesn't match, its
  * trace entry says why.
  *
- * Still to come: product and postcode conditions (2.6–2.7), all pricing modes
- * and adjustments (2.9–2.10), combining same-name rates (2.11).
+ * Still to come: product and postcode conditions (2.6–2.7), adjustments (2.10),
+ * combining same-name rates (2.11).
  */
 export function quote(
   cart: EngineCart,
@@ -92,7 +92,7 @@ export function quote(
         );
         continue;
       }
-      const priced = priceRate(rate, cart);
+      const priced = priceRate(rate, totals);
       if (!priced.ok) {
         notes.push(`rate ${rate.id}: ${priced.reason}`);
         continue;

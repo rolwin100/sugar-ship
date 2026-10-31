@@ -2,6 +2,7 @@ export { AddRateButton } from "./AddRateButton";
 export { CheckoutDisplaySection } from "./CheckoutDisplaySection";
 export { CheckoutName } from "./CheckoutName";
 export { ConditionRow } from "./ConditionRow";
+export { ConditionsSection } from "./ConditionsSection";
 export { DeleteRuleModal, DELETE_RULE_MODAL_ID } from "./DeleteRuleModal";
 export { RatePrices } from "./RatePrices";
 export { RateRow } from "./RateRow";

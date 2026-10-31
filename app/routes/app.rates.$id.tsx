@@ -24,6 +24,7 @@ import { listZones } from "../lib/zones/zone-store.server";
 import { FormSaveBar } from "../components/FormSaveBar";
 import {
   CheckoutDisplaySection,
+  ConditionsSection,
   DELETE_RULE_MODAL_ID,
   DeleteRuleModal,
   RuleDetailsSection,
@@ -179,6 +180,17 @@ export default function RateEditPage() {
         onNameChange={(name) => change({ name })}
         onActiveChange={(active) =>
           change({ status: active ? "ACTIVE" : "INACTIVE" })
+        }
+      />
+
+      <ConditionsSection
+        match={draft.match}
+        conditions={draft.conditions}
+        currency={currency}
+        errors={errors.filter((e) => e.field === "conditions")}
+        onMatchChange={(match) => change({ match })}
+        onConditionsChange={(update) =>
+          setDraft((d) => ({ ...d, conditions: update(d.conditions) }))
         }
       />
 

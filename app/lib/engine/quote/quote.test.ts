@@ -136,7 +136,7 @@ describe("quote", () => {
     expect(result.rates.map((r) => r.ruleId)).toEqual(["standard"]);
   });
 
-  it("notes rates whose pricing mode is not supported yet", () => {
+  it("notes rates that can't be priced", () => {
     const bands: EngineRate = {
       ...flatRate("bands", 0),
       mode: "BANDS",
@@ -152,7 +152,7 @@ describe("quote", () => {
     );
     expect(result.rates).toHaveLength(0);
     expect(result.trace[0]).toMatchObject({ outcome: "matched" });
-    expect(result.trace[0].detail).toContain("BANDS pricing not supported yet");
+    expect(result.trace[0].detail).toContain("BANDS rate has no bands");
   });
 
   it("only returns rates for the address's zone", () => {

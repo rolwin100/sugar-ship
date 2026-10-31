@@ -145,6 +145,14 @@
     "conditionFieldLabel": "Condition {{number}}: what to check",
     "conditionOperatorLabel": "Condition {{number}}: comparison",
     "conditionValueLabel": "Condition {{number}}: value",
-    "removeCondition": "Remove condition {{number}}"
+    "removeCondition": "Remove condition {{number}}",
+    "whenHeading": "When",
+    "whenAlways": "This rate always applies. Add a condition to limit it, for example free shipping when the cart subtotal is at least a set amount.",
+    "matchLabel": "Apply this rate when",
+    "matchAll": "all of these are true",
+    "matchAny": "any of these is true",
+    "matchNone": "none of these is true",
+    "addCondition": "Add condition",
+    "conditionsAtLimit": "You can add up to 10 conditions."
   }
 }

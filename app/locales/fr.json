@@ -145,6 +145,14 @@
     "conditionFieldLabel": "Condition {{number}} : élément vérifié",
     "conditionOperatorLabel": "Condition {{number}} : comparaison",
     "conditionValueLabel": "Condition {{number}} : valeur",
-    "removeCondition": "Supprimer la condition {{number}}"
+    "removeCondition": "Supprimer la condition {{number}}",
+    "whenHeading": "Quand",
+    "whenAlways": "Ce tarif s'applique toujours. Ajoutez une condition pour le limiter, par exemple la livraison gratuite lorsque le sous-total du panier atteint un certain montant.",
+    "matchLabel": "Appliquer ce tarif quand",
+    "matchAll": "toutes ces conditions sont remplies",
+    "matchAny": "au moins une de ces conditions est remplie",
+    "matchNone": "aucune de ces conditions n'est remplie",
+    "addCondition": "Ajouter une condition",
+    "conditionsAtLimit": "Vous pouvez ajouter jusqu'à 10 conditions."
   }
 }

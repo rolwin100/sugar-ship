@@ -1,4 +1,8 @@
-import type { CartConditionField, NumberOperator } from "../../../lib/engine";
+import type {
+  CartConditionField,
+  NumberOperator,
+  RuleMatch,
+} from "../../../lib/engine";
 
 /** Translation key for each condition field. */
 export const CONDITION_FIELD_KEYS = {
@@ -31,3 +35,10 @@ export const CONDITION_OPERATORS_IN_ORDER: NumberOperator[] = [
   "EQUALS",
   "NOT_EQUALS",
 ];
+
+/** Translation key for each way of combining conditions ("Apply this rate when …"). */
+export const CONDITION_MATCH_KEYS = {
+  ALL: "rates.matchAll",
+  ANY: "rates.matchAny",
+  NONE: "rates.matchNone",
+} as const satisfies Record<RuleMatch, string>;

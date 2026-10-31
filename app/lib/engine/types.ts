@@ -104,6 +104,11 @@ export type ConditionResult =
 /** Whether a rule's conditions match a cart, and if not, why (for the trace). */
 export type ConditionCheck = { matched: boolean; reason?: string };
 
+/** One zone's price for a cart (subunits), or why it can't be priced. */
+export type PriceResult =
+  | { ok: true; price: number }
+  | { ok: false; reason: string };
+
 export type EngineBand = { from: number; to: number | null; price: number };
 
 export type EngineAdjustment = {

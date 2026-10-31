@@ -1,4 +1,8 @@
-import type { CartConditionField, NumberOperator } from "../../lib/engine";
+import type {
+  CartConditionField,
+  NumberOperator,
+  RuleMatch,
+} from "../../lib/engine";
 import type { RuleConditionDraft } from "../../lib/rules/types";
 import type { RuleError } from "../../lib/rules/validate-rule";
 
@@ -14,4 +18,17 @@ export type ConditionRowProps = {
   onOperatorChange: (operator: NumberOperator) => void;
   onValueChange: (value: string) => void;
   onRemove: () => void;
+};
+
+export type ConditionsSectionProps = {
+  match: RuleMatch;
+  conditions: RuleConditionDraft[];
+  currency: string;
+  /** Condition errors from the last save; each points at a condition by index. */
+  errors: RuleError[];
+  onMatchChange: (match: RuleMatch) => void;
+  /** Gets a function that turns the current list into the new one (see edit-conditions). */
+  onConditionsChange: (
+    update: (conditions: RuleConditionDraft[]) => RuleConditionDraft[],
+  ) => void;
 };

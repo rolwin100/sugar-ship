@@ -145,6 +145,14 @@
     "conditionFieldLabel": "Bedingung {{number}}: was geprüft wird",
     "conditionOperatorLabel": "Bedingung {{number}}: Vergleich",
     "conditionValueLabel": "Bedingung {{number}}: Wert",
-    "removeCondition": "Bedingung {{number}} entfernen"
+    "removeCondition": "Bedingung {{number}} entfernen",
+    "whenHeading": "Wann",
+    "whenAlways": "Dieser Tarif gilt immer. Fügen Sie eine Bedingung hinzu, um ihn einzuschränken, zum Beispiel kostenloser Versand ab einer bestimmten Warenkorb-Zwischensumme.",
+    "matchLabel": "Diesen Tarif anwenden, wenn",
+    "matchAll": "alle diese Bedingungen erfüllt sind",
+    "matchAny": "mindestens eine dieser Bedingungen erfüllt ist",
+    "matchNone": "keine dieser Bedingungen erfüllt ist",
+    "addCondition": "Bedingung hinzufügen",
+    "conditionsAtLimit": "Sie können bis zu 10 Bedingungen hinzufügen."
   }
 }
