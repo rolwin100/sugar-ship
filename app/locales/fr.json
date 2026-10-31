@@ -153,6 +153,18 @@
     "matchAny": "au moins une de ces conditions est remplie",
     "matchNone": "aucune de ces conditions n'est remplie",
     "addCondition": "Ajouter une condition",
-    "conditionsAtLimit": "Vous pouvez ajouter jusqu'à 10 conditions."
+    "conditionsAtLimit": "Vous pouvez ajouter jusqu'à 10 conditions.",
+    "errorPricingBasisInvalid": "{{zone}} : choisissez sur quoi le prix est basé.",
+    "errorBandsRequired": "{{zone}} : ajoutez au moins une tranche de prix.",
+    "errorTooManyBands": "{{zone}} : utilisez 20 tranches de prix maximum.",
+    "errorBandsStartAtZero": "{{zone}} : la première tranche doit commencer à 0.",
+    "errorBandNotContinuous": "{{zone}}, tranche {{band}} : doit commencer là où la tranche {{previous}} se termine.",
+    "errorBandOpenNotLast": "{{zone}}, tranche {{band}} : seule la dernière tranche peut rester ouverte (« et plus »).",
+    "errorBandRangeInvalid": "{{zone}}, tranche {{band}} : saisissez une plage valide, avec « à » supérieur à « de ».",
+    "errorBandPriceInvalid": "{{zone}}, tranche {{band}} : saisissez un prix valide.",
+    "errorBasePriceInvalid": "{{zone}} : saisissez un prix de base valide.",
+    "errorStepSizeInvalid": "{{zone}} : le palier doit être supérieur à 0.",
+    "errorStepPriceInvalid": "{{zone}} : saisissez un prix par palier valide.",
+    "errorPercentInvalid": "{{zone}} : saisissez un pourcentage supérieur à 0 et jusqu'à 100, avec 2 décimales maximum."
   }
 }

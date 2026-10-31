@@ -222,4 +222,33 @@ describe("validateRule", () => {
       keys(validateRule(input({ match: "SOME" as never }), zones)),
     ).toEqual(["matchInvalid"]);
   });
+
+  it("checks each zone's pricing in any mode", () => {
+    const tableAndPercent = input({
+      prices: [
+        {
+          zoneId: "domestic",
+          mode: "BANDS",
+          basis: "WEIGHT",
+          bands: [{ from: 0, to: null, price: 8000 }],
+        },
+        { zoneId: "intl", mode: "PERCENT", percentBps: 500 },
+      ],
+    });
+    expect(validateRule(tableAndPercent, zones).ok).toBe(true);
+
+    const badStep = input({
+      prices: [
+        {
+          zoneId: "domestic",
+          mode: "INCREMENTAL",
+          basis: "WEIGHT",
+          basePrice: 5000,
+          stepSize: 0,
+          stepPrice: 2000,
+        },
+      ],
+    });
+    expect(keys(validateRule(badStep, zones))).toEqual(["stepSizeInvalid"]);
+  });
 });

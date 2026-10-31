@@ -17,6 +17,18 @@ const ERROR_TEXT = {
   tooManyConditions: "rates.errorTooManyConditions",
   conditionUnsupported: "rates.errorConditionUnsupported",
   conditionValueInvalid: "rates.errorConditionSubtotalInvalid", // see VALUE_TEXT
+  pricingBasisInvalid: "rates.errorPricingBasisInvalid",
+  bandsRequired: "rates.errorBandsRequired",
+  tooManyBands: "rates.errorTooManyBands",
+  bandsStartAtZero: "rates.errorBandsStartAtZero",
+  bandNotContinuous: "rates.errorBandNotContinuous",
+  bandOpenNotLast: "rates.errorBandOpenNotLast",
+  bandRangeInvalid: "rates.errorBandRangeInvalid",
+  bandPriceInvalid: "rates.errorBandPriceInvalid",
+  basePriceInvalid: "rates.errorBasePriceInvalid",
+  stepSizeInvalid: "rates.errorStepSizeInvalid",
+  stepPriceInvalid: "rates.errorStepPriceInvalid",
+  percentInvalid: "rates.errorPercentInvalid",
 } as const satisfies Record<RuleErrorKey, string>;
 
 // A bad condition value asks for the right unit: an amount, a weight in kg, or items.
@@ -39,5 +51,7 @@ export function ruleErrorMessage(
   return t(key, {
     zone: error.zoneId ? (zoneNames[error.zoneId] ?? "") : "",
     number: (error.index ?? 0) + 1, // "Condition 2"
+    band: (error.bandIndex ?? 0) + 1, // "band 2"
+    previous: error.bandIndex ?? 0, // "where band 1 ends"
   });
 }

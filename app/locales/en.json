@@ -153,6 +153,18 @@
     "matchAny": "any of these is true",
     "matchNone": "none of these is true",
     "addCondition": "Add condition",
-    "conditionsAtLimit": "You can add up to 10 conditions."
+    "conditionsAtLimit": "You can add up to 10 conditions.",
+    "errorPricingBasisInvalid": "{{zone}}: choose what the price is based on.",
+    "errorBandsRequired": "{{zone}}: add at least one price band.",
+    "errorTooManyBands": "{{zone}}: use 20 price bands or fewer.",
+    "errorBandsStartAtZero": "{{zone}}: the first band must start at 0.",
+    "errorBandNotContinuous": "{{zone}}, band {{band}}: must start where band {{previous}} ends.",
+    "errorBandOpenNotLast": "{{zone}}, band {{band}}: only the last band can be left open (“and above”).",
+    "errorBandRangeInvalid": "{{zone}}, band {{band}}: enter a valid range, with “to” above “from”.",
+    "errorBandPriceInvalid": "{{zone}}, band {{band}}: enter a valid price.",
+    "errorBasePriceInvalid": "{{zone}}: enter a valid base price.",
+    "errorStepSizeInvalid": "{{zone}}: the step size must be more than 0.",
+    "errorStepPriceInvalid": "{{zone}}: enter a valid price per step.",
+    "errorPercentInvalid": "{{zone}}: enter a percentage above 0 and up to 100, with at most 2 decimals."
   }
 }

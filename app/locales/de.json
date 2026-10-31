@@ -153,6 +153,18 @@
     "matchAny": "mindestens eine dieser Bedingungen erfüllt ist",
     "matchNone": "keine dieser Bedingungen erfüllt ist",
     "addCondition": "Bedingung hinzufügen",
-    "conditionsAtLimit": "Sie können bis zu 10 Bedingungen hinzufügen."
+    "conditionsAtLimit": "Sie können bis zu 10 Bedingungen hinzufügen.",
+    "errorPricingBasisInvalid": "{{zone}}: Wählen Sie, worauf der Preis basiert.",
+    "errorBandsRequired": "{{zone}}: Fügen Sie mindestens eine Preisstufe hinzu.",
+    "errorTooManyBands": "{{zone}}: Verwenden Sie höchstens 20 Preisstufen.",
+    "errorBandsStartAtZero": "{{zone}}: Die erste Stufe muss bei 0 beginnen.",
+    "errorBandNotContinuous": "{{zone}}, Stufe {{band}}: Muss dort beginnen, wo Stufe {{previous}} endet.",
+    "errorBandOpenNotLast": "{{zone}}, Stufe {{band}}: Nur die letzte Stufe darf offen bleiben („und mehr“).",
+    "errorBandRangeInvalid": "{{zone}}, Stufe {{band}}: Geben Sie einen gültigen Bereich ein, bei dem „bis“ größer als „von“ ist.",
+    "errorBandPriceInvalid": "{{zone}}, Stufe {{band}}: Geben Sie einen gültigen Preis ein.",
+    "errorBasePriceInvalid": "{{zone}}: Geben Sie einen gültigen Grundpreis ein.",
+    "errorStepSizeInvalid": "{{zone}}: Die Schrittgröße muss größer als 0 sein.",
+    "errorStepPriceInvalid": "{{zone}}: Geben Sie einen gültigen Preis pro Schritt ein.",
+    "errorPercentInvalid": "{{zone}}: Geben Sie einen Prozentsatz über 0 und bis 100 mit höchstens 2 Nachkommastellen ein."
   }
 }

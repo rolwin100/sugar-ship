@@ -55,9 +55,22 @@ export async function saveRule(
   if (!result.ok) return result;
   const rule = result.rule;
 
+  // Until D2.3 saves the other modes, refuse them rather than store them as flat ₹0.
+  const notFlat = rule.prices.filter((p) => p.mode !== "FLAT");
+  if (notFlat.length > 0) {
+    return {
+      ok: false,
+      errors: notFlat.map((p) => ({
+        field: "prices" as const,
+        key: "priceInvalid" as const,
+        zoneId: p.zoneId,
+      })),
+    };
+  }
+
   const ruleData = { name: rule.name, status: rule.status, match: rule.match };
   // One Rate row per priced zone; the checkout name and delivery estimate are shared.
-  // Validation only lets flat prices through until D2.3 stores the other modes.
+  // Only flat prices reach here until D2.3 (see the check above).
   const rates = rule.prices.map((pricing, sortOrder) => ({
     zoneId: pricing.zoneId,
     price: pricing.mode === "FLAT" ? pricing.price : 0,

@@ -4,6 +4,14 @@ import {
   type CartConditionField,
 } from "../../engine";
 import { RULE_MATCHES, type RuleInput } from "../types";
+import {
+  CHECKOUT_NAME_MAX,
+  CONDITION_VALUE_MAX,
+  CONDITIONS_MAX,
+  DELIVERY_DAYS_MAX,
+  RULE_NAME_MAX,
+} from "./limits";
+import { validatePricing } from "./validate-pricing";
 
 /** Each key maps to a `rates.error<Key>` translation. */
 export type RuleErrorKey =
@@ -20,12 +28,25 @@ export type RuleErrorKey =
   | "matchInvalid"
   | "tooManyConditions"
   | "conditionUnsupported"
-  | "conditionValueInvalid";
+  | "conditionValueInvalid"
+  | "pricingBasisInvalid"
+  | "bandsRequired"
+  | "tooManyBands"
+  | "bandsStartAtZero"
+  | "bandNotContinuous"
+  | "bandOpenNotLast"
+  | "bandRangeInvalid"
+  | "bandPriceInvalid"
+  | "basePriceInvalid"
+  | "stepSizeInvalid"
+  | "stepPriceInvalid"
+  | "percentInvalid";
 
 export type RuleError = {
   field: "name" | "customName" | "days" | "prices" | "conditions";
   key: RuleErrorKey;
   zoneId?: string; // for price errors
+  bandIndex?: number; // for band errors: row in the zone's price table, from 0
   index?: number; // for condition errors: position in the list, from 0
   conditionField?: CartConditionField; // for conditionValueInvalid: which unit to ask for
 };
@@ -34,13 +55,16 @@ export type RuleValidation =
   | { ok: true; rule: RuleInput }
   | { ok: false; errors: RuleError[] };
 
-export const RULE_NAME_MAX = 100;
-export const CHECKOUT_NAME_MAX = 60;
-export const DELIVERY_DAYS_MAX = 365;
-export const PRICE_MAX = 1_000_000_000; // subunits; well above any real shipping price
-export const CONDITIONS_MAX = 10;
-// Subunits, grams or items; well above any real cart.
-export const CONDITION_VALUE_MAX = 1_000_000_000;
+export {
+  BANDS_MAX,
+  CHECKOUT_NAME_MAX,
+  CONDITION_VALUE_MAX,
+  CONDITIONS_MAX,
+  DELIVERY_DAYS_MAX,
+  PERCENT_BPS_MAX,
+  PRICE_MAX,
+  RULE_NAME_MAX,
+} from "./limits";
 
 /**
  * Checks a rule before saving and returns a cleaned copy (trimmed names).
@@ -84,14 +108,8 @@ export function validateRule(
       errors.push({ field: "prices", key: "zoneUnknown", zoneId });
     } else if (seen.has(zoneId)) {
       errors.push({ field: "prices", key: "zoneDuplicate", zoneId });
-    } else if (
-      // Until D2.2 checks the other modes, only flat prices can be saved.
-      pricing.mode !== "FLAT" ||
-      !Number.isInteger(pricing.price) ||
-      pricing.price < 0 ||
-      pricing.price > PRICE_MAX
-    ) {
-      errors.push({ field: "prices", key: "priceInvalid", zoneId });
+    } else {
+      errors.push(...validatePricing(pricing));
     }
     seen.add(zoneId);
   }
