@@ -1,11 +1,14 @@
+import { CART_CONDITION_FIELDS, NUMBER_OPERATORS } from "../../engine";
 import { fromSubunits, toSubunits } from "../../money";
 import {
   RATE_PRESETS,
+  RULE_MATCHES,
   type Rule,
   type RuleDraft,
   type RuleInput,
   type RatePreset,
 } from "../types";
+import { conditionToDraft, draftToCondition } from "./condition-draft";
 
 export const emptyRuleDraft = (): RuleDraft => ({
   name: "",
@@ -15,6 +18,8 @@ export const emptyRuleDraft = (): RuleDraft => ({
   minDeliveryDays: "",
   maxDeliveryDays: "",
   prices: {},
+  match: "ALL",
+  conditions: [],
 });
 
 /** A saved rule → the editable text the form shows. */
@@ -29,6 +34,8 @@ export function ruleToDraft(rule: Rule, currency: string): RuleDraft {
     prices: Object.fromEntries(
       rule.prices.map((p) => [p.zoneId, fromSubunits(p.price, currency)]),
     ),
+    match: rule.match,
+    conditions: rule.conditions.map((c) => conditionToDraft(c, currency)),
   };
 }
 
@@ -50,6 +57,8 @@ export function draftToInput(draft: RuleDraft, currency: string): RuleInput {
     minDeliveryDays: toDays(draft.minDeliveryDays),
     maxDeliveryDays: toDays(draft.maxDeliveryDays),
     prices,
+    match: draft.match,
+    conditions: draft.conditions.map((c) => draftToCondition(c, currency)),
   };
 }
 
@@ -88,5 +97,20 @@ export function parseRuleDraft(raw: unknown): RuleDraft | null {
     return null;
   if (Object.values(prices).some((p) => typeof p !== "string")) return null;
 
+  if (!RULE_MATCHES.includes(d.match as RuleDraft["match"])) return null;
+  if (!Array.isArray(d.conditions)) return null;
+  if (!d.conditions.every(isConditionDraft)) return null;
+
   return value as RuleDraft;
+}
+
+/** One posted condition: a known field and number operator, and the value as text. */
+function isConditionDraft(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const c = value as Record<string, unknown>;
+  return (
+    (CART_CONDITION_FIELDS as readonly unknown[]).includes(c.field) &&
+    (NUMBER_OPERATORS as readonly unknown[]).includes(c.operator) &&
+    typeof c.value === "string"
+  );
 }

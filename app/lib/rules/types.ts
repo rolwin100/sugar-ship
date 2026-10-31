@@ -1,4 +1,4 @@
-import type { CartConditionField, NumberOperator } from "../engine";
+import type { CartConditionField, NumberOperator, RuleMatch } from "../engine";
 import type { RuleError } from "./validate-rule";
 
 /** Built-in checkout names; translated into the checkout's language (keys rates.preset*). */
@@ -12,6 +12,13 @@ export const RATE_PRESETS = [
 export type RatePreset = (typeof RATE_PRESETS)[number];
 
 export type RuleStatus = "ACTIVE" | "INACTIVE";
+
+/** How a rate's conditions combine: all, any, or none of them true. */
+export const RULE_MATCHES = [
+  "ALL",
+  "ANY",
+  "NONE",
+] as const satisfies readonly RuleMatch[];
 
 /** One zone's price, in subunits of the shop's currency. */
 export type ZonePrice = { zoneId: string; price: number };
@@ -51,6 +58,8 @@ export type RuleInput = {
   minDeliveryDays: number | null;
   maxDeliveryDays: number | null;
   prices: ZonePrice[]; // zones without a price don't get this rate
+  match: RuleMatch;
+  conditions: RuleCondition[]; // none = the rate always applies
 };
 
 export type Rule = RuleInput & { id: string };
@@ -69,6 +78,8 @@ export type RuleDraft = {
   minDeliveryDays: string;
   maxDeliveryDays: string;
   prices: Record<string, string>; // zoneId → typed price ("" = not offered)
+  match: RuleMatch;
+  conditions: RuleConditionDraft[];
 };
 
 /** What the rule edit action returns to the page. */

@@ -12,6 +12,8 @@ const input = (overrides: Partial<RuleInput> = {}): RuleInput => ({
   minDeliveryDays: 3,
   maxDeliveryDays: 5,
   prices: [{ zoneId: "domestic", price: 8000 }],
+  match: "ALL",
+  conditions: [],
   ...overrides,
 });
 

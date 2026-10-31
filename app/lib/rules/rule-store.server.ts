@@ -184,5 +184,7 @@ function toRule(row: RuleRow): Rule {
     minDeliveryDays: first?.minDeliveryDays ?? null,
     maxDeliveryDays: first?.maxDeliveryDays ?? null,
     prices: row.rates.map((r) => ({ zoneId: r.zoneId, price: r.price ?? 0 })),
+    match: row.match,
+    conditions: [], // loaded from the Condition table in C2 step 4
   };
 }

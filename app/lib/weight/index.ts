@@ -1,1 +1,1 @@
-export { gramsToKg, kgToGrams } from "./weight";
+export * from "./weight";

@@ -19,6 +19,11 @@ const rule: Rule = {
     { zoneId: "domestic", price: 8000 },
     { zoneId: "intl", price: 150000 },
   ],
+  match: "ANY",
+  conditions: [
+    { field: "subtotal", operator: "GREATER_OR_EQUAL", value: 100000 },
+    { field: "weight", operator: "LESS_THAN", value: 1500 },
+  ],
 };
 
 describe("rule drafts", () => {
@@ -26,6 +31,10 @@ describe("rule drafts", () => {
     const draft = ruleToDraft(rule, "INR");
     expect(draft.prices).toEqual({ domestic: "80.00", intl: "1500.00" });
     expect(draft.minDeliveryDays).toBe("3");
+    expect(draft.conditions).toEqual([
+      { field: "subtotal", operator: "GREATER_OR_EQUAL", value: "1000.00" },
+      { field: "weight", operator: "LESS_THAN", value: "1.5" },
+    ]);
     expect(draftToInput(draft, "INR")).toEqual({
       name: rule.name,
       status: rule.status,
@@ -34,7 +43,13 @@ describe("rule drafts", () => {
       minDeliveryDays: 3,
       maxDeliveryDays: 5,
       prices: rule.prices,
+      match: "ANY",
+      conditions: rule.conditions,
     });
+  });
+
+  it("starts new rates with no conditions, matching all", () => {
+    expect(emptyRuleDraft()).toMatchObject({ match: "ALL", conditions: [] });
   });
 
   it("uses 'custom' for rules without a preset", () => {
@@ -78,5 +93,20 @@ describe("rule drafts", () => {
       parseRuleDraft(JSON.stringify({ ...draft, prices: { a: 5 } })),
     ).toBeNull();
     expect(parseRuleDraft(JSON.stringify({ ...draft, name: 1 }))).toBeNull();
+  });
+
+  it("rejects posted conditions with the wrong shape", () => {
+    const draft = ruleToDraft(rule, "INR");
+    const withConditions = (conditions: unknown, match: unknown = "ALL") =>
+      parseRuleDraft(JSON.stringify({ ...draft, match, conditions }));
+    const ok = { field: "weight", operator: "LESS_THAN", value: "1.5" };
+
+    expect(withConditions([ok])).not.toBeNull();
+    expect(withConditions([ok], "SOME")).toBeNull();
+    expect(withConditions("nope")).toBeNull();
+    expect(withConditions([{ ...ok, field: "colour" }])).toBeNull();
+    expect(withConditions([{ ...ok, operator: "CONTAINS" }])).toBeNull();
+    expect(withConditions([{ ...ok, value: 1.5 }])).toBeNull();
+    expect(withConditions([null])).toBeNull();
   });
 });
