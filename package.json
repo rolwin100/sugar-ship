@@ -21,7 +21,8 @@
     "typecheck": "react-router typegen && tsc --noEmit",
     "test": "vitest run",
     "format": "oxfmt --write",
-    "format:check": "oxfmt --check"
+    "format:check": "oxfmt --check",
+    "prepare": "husky || true"
   },
   "type": "module",
   "engines": {
@@ -53,6 +54,8 @@
     "@types/react": "^18.3.25",
     "@types/react-dom": "^18.3.7",
     "graphql-config": "^5.1.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "oxfmt": "0.74.0",
     "oxlint": "1.89.0",
     "typescript": "^5.9.3",
@@ -74,5 +77,11 @@
       "qs": "^6.16.0"
     }
   },
-  "author": "rolwinmonteiro"
+  "author": "rolwinmonteiro",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "oxlint",
+      "oxfmt --write --no-error-on-unmatched-pattern"
+    ]
+  }
 }

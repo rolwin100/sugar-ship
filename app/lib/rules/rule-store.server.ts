@@ -8,20 +8,24 @@ import {
   type Rule,
   type SaveRuleResult,
 } from "./types";
+import { toRuleCondition } from "./stored-condition";
 import { validateRule } from "./validate-rule";
 
 // Every query filters by shopId, so one shop can never read or change another shop's rules.
 
-const withRates = {
+const withRatesAndConditions = {
   rates: { orderBy: { sortOrder: "asc" } },
+  conditions: { orderBy: { sortOrder: "asc" } },
 } satisfies Prisma.RuleInclude;
-type RuleRow = Prisma.RuleGetPayload<{ include: typeof withRates }>;
+type RuleRow = Prisma.RuleGetPayload<{
+  include: typeof withRatesAndConditions;
+}>;
 
 export async function listRules(shopId: string): Promise<Rule[]> {
   const rows = await db.rule.findMany({
     where: { shopId },
     orderBy: [{ priority: "asc" }, { createdAt: "asc" }],
-    include: withRates,
+    include: withRatesAndConditions,
   });
   return rows.map(toRule);
 }
@@ -32,7 +36,7 @@ export async function getRule(
 ): Promise<Rule | null> {
   const row = await db.rule.findFirst({
     where: { id, shopId },
-    include: withRates,
+    include: withRatesAndConditions,
   });
   return row ? toRule(row) : null;
 }
@@ -51,7 +55,7 @@ export async function saveRule(
   if (!result.ok) return result;
   const rule = result.rule;
 
-  const ruleData = { name: rule.name, status: rule.status };
+  const ruleData = { name: rule.name, status: rule.status, match: rule.match };
   // One Rate row per priced zone; the checkout name and delivery estimate are shared.
   const rates = rule.prices.map(({ zoneId, price }, sortOrder) => ({
     zoneId,
@@ -63,6 +67,16 @@ export async function saveRule(
     minDeliveryDays: rule.minDeliveryDays,
     maxDeliveryDays: rule.maxDeliveryDays,
   }));
+  // One Condition row per condition, in the order the merchant listed them.
+  const conditions = rule.conditions.map(
+    ({ field, operator, value }, sortOrder) => ({
+      subject: "CART" as const,
+      field,
+      operator,
+      value,
+      sortOrder,
+    }),
+  );
 
   if (id === null) {
     // New rules run after existing ones.
@@ -77,8 +91,9 @@ export async function saveRule(
         shopId,
         priority: (last?.priority ?? -1) + 1,
         rates: { create: rates },
+        conditions: { create: conditions },
       },
-      include: withRates,
+      include: withRatesAndConditions,
     });
     return { ok: true, rule: toRule(row) };
   }
@@ -89,12 +104,17 @@ export async function saveRule(
   });
   if (!existing) return { ok: false, notFound: true };
 
-  // Replace the rates wholesale; simpler than diffing, and rate ids aren't referenced yet.
+  // Replace rates and conditions wholesale, in one transaction; simpler than diffing,
+  // and their ids aren't referenced anywhere yet.
   await db.$transaction([
     db.rule.update({ where: { id }, data: ruleData }),
     db.rate.deleteMany({ where: { ruleId: id } }),
     db.rate.createMany({
       data: rates.map((rate) => ({ ...rate, ruleId: id })),
+    }),
+    db.condition.deleteMany({ where: { ruleId: id } }),
+    db.condition.createMany({
+      data: conditions.map((condition) => ({ ...condition, ruleId: id })),
     }),
   ]);
   return { ok: true, rule: { id, ...rule } };
@@ -185,6 +205,10 @@ function toRule(row: RuleRow): Rule {
     maxDeliveryDays: first?.maxDeliveryDays ?? null,
     prices: row.rates.map((r) => ({ zoneId: r.zoneId, price: r.price ?? 0 })),
     match: row.match,
-    conditions: [], // loaded from the Condition table in C2 step 4
+    // Only cart conditions exist for now; rows that aren't valid ones are skipped.
+    conditions: row.conditions.flatMap((c) => {
+      const condition = toRuleCondition(c);
+      return condition ? [condition] : [];
+    }),
   };
 }

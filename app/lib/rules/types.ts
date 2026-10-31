@@ -34,6 +34,14 @@ export type RuleCondition = {
   value: number;
 };
 
+/** A Condition row as read from the database, before it's checked (see toRuleCondition). */
+export type StoredCondition = {
+  subject: string;
+  field: string;
+  operator: string;
+  value: unknown; // JSON column
+};
+
 /**
  * A condition as the edit form holds it. `value` is the typed text, in the units the
  * merchant sees: subtotal in the shop's currency ("1000"), weight in kg ("1.5"),

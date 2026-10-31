@@ -128,4 +128,96 @@ describe("validateRule", () => {
       ),
     ).toEqual(["zoneDuplicate"]);
   });
+
+  it("accepts valid conditions", () => {
+    const result = validateRule(
+      input({
+        match: "ANY",
+        conditions: [
+          { field: "subtotal", operator: "GREATER_OR_EQUAL", value: 100000 },
+          { field: "weight", operator: "LESS_THAN", value: 1500 },
+          { field: "quantity", operator: "EQUALS", value: 0 },
+        ],
+      }),
+      zones,
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("flags condition values that aren't whole numbers from 0, by position", () => {
+    const result = validateRule(
+      input({
+        conditions: [
+          { field: "subtotal", operator: "GREATER_THAN", value: 100 },
+          { field: "weight", operator: "LESS_THAN", value: Number.NaN },
+          { field: "quantity", operator: "EQUALS", value: -1 },
+          { field: "quantity", operator: "EQUALS", value: 2.5 },
+          { field: "subtotal", operator: "EQUALS", value: 2_000_000_000 },
+        ],
+      }),
+      zones,
+    );
+    expect(result.ok ? [] : result.errors).toEqual([
+      {
+        field: "conditions",
+        key: "conditionValueInvalid",
+        index: 1,
+        conditionField: "weight",
+      },
+      {
+        field: "conditions",
+        key: "conditionValueInvalid",
+        index: 2,
+        conditionField: "quantity",
+      },
+      {
+        field: "conditions",
+        key: "conditionValueInvalid",
+        index: 3,
+        conditionField: "quantity",
+      },
+      {
+        field: "conditions",
+        key: "conditionValueInvalid",
+        index: 4,
+        conditionField: "subtotal",
+      },
+    ]);
+  });
+
+  it("rejects fields and operators the engine can't check", () => {
+    const result = validateRule(
+      input({
+        conditions: [
+          // Wrong shapes can only arrive from outside the form, hence the casts.
+          { field: "colour" as never, operator: "EQUALS", value: 1 },
+          { field: "subtotal", operator: "CONTAINS" as never, value: 1 },
+        ],
+      }),
+      zones,
+    );
+    expect(result.ok ? [] : result.errors).toEqual([
+      { field: "conditions", key: "conditionUnsupported", index: 0 },
+      { field: "conditions", key: "conditionUnsupported", index: 1 },
+    ]);
+  });
+
+  it("allows at most 10 conditions and a known match mode", () => {
+    const condition = {
+      field: "quantity",
+      operator: "GREATER_THAN",
+      value: 1,
+    } as const;
+    expect(
+      keys(
+        validateRule(input({ conditions: Array(11).fill(condition) }), zones),
+      ),
+    ).toEqual(["tooManyConditions"]);
+    expect(
+      validateRule(input({ conditions: Array(10).fill(condition) }), zones).ok,
+    ).toBe(true);
+    expect(
+      keys(validateRule(input({ match: "SOME" as never }), zones)),
+    ).toEqual(["matchInvalid"]);
+  });
 });

@@ -123,6 +123,12 @@
     "errorZoneUnknown": "A zone in this rate no longer exists. Reload the page.",
     "errorZoneDuplicate": "A zone in this rate no longer exists. Reload the page.",
     "errorInvalid": "Something went wrong. Reload the page and try again.",
-    "viewZones": "View zones"
+    "viewZones": "View zones",
+    "errorMatchInvalid": "Choose how the conditions combine.",
+    "errorTooManyConditions": "Use 10 conditions or fewer.",
+    "errorConditionUnsupported": "Condition {{number}} can't be used here. Remove it and add it again.",
+    "errorConditionSubtotalInvalid": "Condition {{number}}: enter a valid amount.",
+    "errorConditionWeightInvalid": "Condition {{number}}: enter a weight in kg, with up to 3 decimals.",
+    "errorConditionQuantityInvalid": "Condition {{number}}: enter a whole number of items."
   }
 }

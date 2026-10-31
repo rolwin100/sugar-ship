@@ -123,6 +123,12 @@
     "errorZoneUnknown": "Une zone de ce tarif n'existe plus. Rechargez la page.",
     "errorZoneDuplicate": "Une zone de ce tarif n'existe plus. Rechargez la page.",
     "errorInvalid": "Une erreur s'est produite. Rechargez la page et réessayez.",
-    "viewZones": "Voir les zones"
+    "viewZones": "Voir les zones",
+    "errorMatchInvalid": "Choisissez comment les conditions se combinent.",
+    "errorTooManyConditions": "Utilisez 10 conditions maximum.",
+    "errorConditionUnsupported": "La condition {{number}} ne peut pas être utilisée ici. Supprimez-la et ajoutez-la à nouveau.",
+    "errorConditionSubtotalInvalid": "Condition {{number}} : saisissez un montant valide.",
+    "errorConditionWeightInvalid": "Condition {{number}} : saisissez un poids en kg, avec 3 décimales maximum.",
+    "errorConditionQuantityInvalid": "Condition {{number}} : saisissez un nombre entier d'articles."
   }
 }

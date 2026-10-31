@@ -1,4 +1,9 @@
-import type { RuleInput } from "../types";
+import {
+  CART_CONDITION_FIELDS,
+  NUMBER_OPERATORS,
+  type CartConditionField,
+} from "../../engine";
+import { RULE_MATCHES, type RuleInput } from "../types";
 
 /** Each key maps to a `rates.error<Key>` translation. */
 export type RuleErrorKey =
@@ -11,12 +16,18 @@ export type RuleErrorKey =
   | "pricesRequired"
   | "priceInvalid"
   | "zoneUnknown"
-  | "zoneDuplicate";
+  | "zoneDuplicate"
+  | "matchInvalid"
+  | "tooManyConditions"
+  | "conditionUnsupported"
+  | "conditionValueInvalid";
 
 export type RuleError = {
-  field: "name" | "customName" | "days" | "prices";
+  field: "name" | "customName" | "days" | "prices" | "conditions";
   key: RuleErrorKey;
   zoneId?: string; // for price errors
+  index?: number; // for condition errors: position in the list, from 0
+  conditionField?: CartConditionField; // for conditionValueInvalid: which unit to ask for
 };
 
 export type RuleValidation =
@@ -27,6 +38,9 @@ export const RULE_NAME_MAX = 100;
 export const CHECKOUT_NAME_MAX = 60;
 export const DELIVERY_DAYS_MAX = 365;
 export const PRICE_MAX = 1_000_000_000; // subunits; well above any real shipping price
+export const CONDITIONS_MAX = 10;
+// Subunits, grams or items; well above any real cart.
+export const CONDITION_VALUE_MAX = 1_000_000_000;
 
 /**
  * Checks a rule before saving and returns a cleaned copy (trimmed names).
@@ -74,6 +88,33 @@ export function validateRule(
     }
     seen.add(zoneId);
   }
+
+  if (!RULE_MATCHES.includes(input.match)) {
+    errors.push({ field: "conditions", key: "matchInvalid" });
+  }
+  if (input.conditions.length > CONDITIONS_MAX) {
+    errors.push({ field: "conditions", key: "tooManyConditions" });
+  }
+  input.conditions.forEach((condition, index) => {
+    const { field, operator, value } = condition;
+    if (
+      !CART_CONDITION_FIELDS.includes(field) ||
+      !NUMBER_OPERATORS.includes(operator)
+    ) {
+      errors.push({ field: "conditions", key: "conditionUnsupported", index });
+    } else if (
+      !Number.isInteger(value) ||
+      value < 0 ||
+      value > CONDITION_VALUE_MAX
+    ) {
+      errors.push({
+        field: "conditions",
+        key: "conditionValueInvalid",
+        index,
+        conditionField: field,
+      });
+    }
+  });
 
   return errors.length
     ? { ok: false, errors }
