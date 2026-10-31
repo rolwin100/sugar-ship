@@ -3,7 +3,7 @@ import type { RuleError } from "../../lib/rules/validate-rule";
 import type { Zone } from "../../lib/zones/types";
 import { fieldValue } from "../field-events";
 import { ZoneCoverage } from "../zones/ZoneCoverage";
-import { ruleErrorMessage } from "./ruleErrorMessage";
+import { ruleErrorMessage } from "./utils";
 
 type Props = {
   zones: Zone[];

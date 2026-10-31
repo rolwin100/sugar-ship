@@ -129,6 +129,22 @@
     "errorConditionUnsupported": "Bedingung {{number}} kann hier nicht verwendet werden. Entfernen Sie sie und fügen Sie sie erneut hinzu.",
     "errorConditionSubtotalInvalid": "Bedingung {{number}}: Geben Sie einen gültigen Betrag ein.",
     "errorConditionWeightInvalid": "Bedingung {{number}}: Geben Sie ein Gewicht in kg mit höchstens 3 Nachkommastellen ein.",
-    "errorConditionQuantityInvalid": "Bedingung {{number}}: Geben Sie eine ganze Anzahl an Artikeln ein."
+    "errorConditionQuantityInvalid": "Bedingung {{number}}: Geben Sie eine ganze Anzahl an Artikeln ein.",
+    "fieldSubtotal": "Warenkorb-Zwischensumme",
+    "fieldWeight": "Warenkorbgewicht",
+    "fieldQuantity": "Anzahl der Artikel",
+    "opAtLeast": "ist mindestens",
+    "opMoreThan": "ist größer als",
+    "opAtMost": "ist höchstens",
+    "opLessThan": "ist kleiner als",
+    "opEquals": "ist gleich",
+    "opNotEquals": "ist nicht gleich",
+    "unitKg": "kg",
+    "unitItems": "Artikel",
+    "quantityHelp": "Zählt jede Einheit, z. B. 2 T-Shirts + 1 Mütze = 3.",
+    "conditionFieldLabel": "Bedingung {{number}}: was geprüft wird",
+    "conditionOperatorLabel": "Bedingung {{number}}: Vergleich",
+    "conditionValueLabel": "Bedingung {{number}}: Wert",
+    "removeCondition": "Bedingung {{number}} entfernen"
   }
 }

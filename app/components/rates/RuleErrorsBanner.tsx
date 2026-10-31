@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { RuleError } from "../../lib/rules/validate-rule";
-import { ruleErrorMessage } from "./ruleErrorMessage";
+import { ruleErrorMessage } from "./utils";
 
 type Props = {
   errors: RuleError[];

@@ -3,7 +3,7 @@ import { PRESET_KEYS } from "../../lib/rules/presets";
 import { RATE_PRESETS, type RuleDraft } from "../../lib/rules/types";
 import type { RuleError } from "../../lib/rules/validate-rule";
 import { fieldValue } from "../field-events";
-import { ruleErrorMessage } from "./ruleErrorMessage";
+import { ruleErrorMessage } from "./utils";
 
 type Fields = Pick<
   RuleDraft,

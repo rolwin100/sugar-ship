@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
-import { countryName, stateName } from "../../lib/geo/geo";
-import type { ZoneError, ZoneErrorKey } from "../../lib/zones/validate-zone";
+import { countryName, stateName } from "../../../lib/geo/geo";
+import type { ZoneError, ZoneErrorKey } from "../../../lib/zones/validate-zone";
 
 const ERROR_TEXT = {
   nameRequired: "zones.errorNameRequired",

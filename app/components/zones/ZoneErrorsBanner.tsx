@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { ZoneError } from "../../lib/zones/validate-zone";
-import { zoneErrorMessage } from "./zoneErrorMessage";
+import { zoneErrorMessage } from "./utils";
 
 /** Errors about the zone's countries and states (name errors show on the name field). */
 export function ZoneErrorsBanner({

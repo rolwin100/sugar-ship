@@ -129,6 +129,22 @@
     "errorConditionUnsupported": "La condition {{number}} ne peut pas être utilisée ici. Supprimez-la et ajoutez-la à nouveau.",
     "errorConditionSubtotalInvalid": "Condition {{number}} : saisissez un montant valide.",
     "errorConditionWeightInvalid": "Condition {{number}} : saisissez un poids en kg, avec 3 décimales maximum.",
-    "errorConditionQuantityInvalid": "Condition {{number}} : saisissez un nombre entier d'articles."
+    "errorConditionQuantityInvalid": "Condition {{number}} : saisissez un nombre entier d'articles.",
+    "fieldSubtotal": "Sous-total du panier",
+    "fieldWeight": "Poids du panier",
+    "fieldQuantity": "Nombre d'articles",
+    "opAtLeast": "est au moins",
+    "opMoreThan": "est supérieur à",
+    "opAtMost": "est au plus",
+    "opLessThan": "est inférieur à",
+    "opEquals": "est égal à",
+    "opNotEquals": "n'est pas égal à",
+    "unitKg": "kg",
+    "unitItems": "articles",
+    "quantityHelp": "Compte chaque unité, par ex. 2 t-shirts + 1 casquette = 3.",
+    "conditionFieldLabel": "Condition {{number}} : élément vérifié",
+    "conditionOperatorLabel": "Condition {{number}} : comparaison",
+    "conditionValueLabel": "Condition {{number}} : valeur",
+    "removeCondition": "Supprimer la condition {{number}}"
   }
 }

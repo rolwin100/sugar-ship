@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
-import type { CartConditionField } from "../../lib/engine";
-import type { RuleError, RuleErrorKey } from "../../lib/rules/validate-rule";
+import type { CartConditionField } from "../../../lib/engine";
+import type { RuleError, RuleErrorKey } from "../../../lib/rules/validate-rule";
 
 const ERROR_TEXT = {
   nameRequired: "rates.errorNameRequired",

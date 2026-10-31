@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { ZoneError } from "../../lib/zones/validate-zone";
 import { fieldChecked, fieldValue } from "../field-events";
-import { zoneErrorMessage } from "./zoneErrorMessage";
+import { zoneErrorMessage } from "./utils";
 
 type Props = {
   name: string;

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { RuleError } from "../../lib/rules/validate-rule";
 import { fieldChecked, fieldValue } from "../field-events";
-import { ruleErrorMessage } from "./ruleErrorMessage";
+import { ruleErrorMessage } from "./utils";
 
 type Props = {
   name: string;

@@ -1,0 +1,106 @@
+import { useTranslation } from "react-i18next";
+import type { CartConditionField, NumberOperator } from "../../lib/engine";
+import { fieldValue } from "../field-events";
+import {
+  CONDITION_FIELD_KEYS,
+  CONDITION_FIELDS_IN_ORDER,
+  CONDITION_OPERATOR_KEYS,
+  CONDITION_OPERATORS_IN_ORDER,
+  ruleErrorMessage,
+} from "./utils";
+import type { ConditionRowProps } from "./types";
+
+/** One condition: [field] [comparison] [value in the right unit] [remove]. */
+export function ConditionRow({
+  index,
+  condition,
+  currency,
+  error,
+  onFieldChange,
+  onOperatorChange,
+  onValueChange,
+  onRemove,
+}: ConditionRowProps) {
+  const { t } = useTranslation();
+  const number = index + 1;
+  const errorText = error ? ruleErrorMessage(error, t, {}) : undefined;
+  const valueLabel = t("rates.conditionValueLabel", { number });
+
+  return (
+    <s-grid
+      gridTemplateColumns="1fr 1fr 1fr auto"
+      gap="small-200"
+      alignItems="start"
+    >
+      <s-select
+        label={t("rates.conditionFieldLabel", { number })}
+        labelAccessibilityVisibility="exclusive"
+        value={condition.field}
+        onChange={(e) => onFieldChange(fieldValue(e) as CartConditionField)}
+      >
+        {CONDITION_FIELDS_IN_ORDER.map((field) => (
+          <s-option key={field} value={field}>
+            {t(CONDITION_FIELD_KEYS[field])}
+          </s-option>
+        ))}
+      </s-select>
+
+      <s-select
+        label={t("rates.conditionOperatorLabel", { number })}
+        labelAccessibilityVisibility="exclusive"
+        value={condition.operator}
+        onChange={(e) => onOperatorChange(fieldValue(e) as NumberOperator)}
+      >
+        {CONDITION_OPERATORS_IN_ORDER.map((operator) => (
+          <s-option key={operator} value={operator}>
+            {t(CONDITION_OPERATOR_KEYS[operator])}
+          </s-option>
+        ))}
+      </s-select>
+
+      {condition.field === "subtotal" && (
+        <s-money-field
+          label={valueLabel}
+          labelAccessibilityVisibility="exclusive"
+          currencyCode={currency as never}
+          min={0}
+          value={condition.value}
+          error={errorText}
+          onInput={(e) => onValueChange(fieldValue(e))}
+        />
+      )}
+      {condition.field === "weight" && (
+        <s-number-field
+          label={valueLabel}
+          labelAccessibilityVisibility="exclusive"
+          suffix={t("rates.unitKg")}
+          min={0}
+          step={0.001}
+          value={condition.value}
+          error={errorText}
+          onInput={(e) => onValueChange(fieldValue(e))}
+        />
+      )}
+      {condition.field === "quantity" && (
+        <s-number-field
+          label={valueLabel}
+          labelAccessibilityVisibility="exclusive"
+          suffix={t("rates.unitItems")}
+          details={t("rates.quantityHelp")}
+          min={0}
+          step={1}
+          value={condition.value}
+          error={errorText}
+          onInput={(e) => onValueChange(fieldValue(e))}
+        />
+      )}
+
+      <s-button
+        variant="tertiary"
+        icon="delete"
+        accessibilityLabel={t("rates.removeCondition", { number })}
+        onClick={onRemove}
+      />
+    </s-grid>
+  );
+}

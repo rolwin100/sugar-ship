@@ -129,6 +129,22 @@
     "errorConditionUnsupported": "Condition {{number}} can't be used here. Remove it and add it again.",
     "errorConditionSubtotalInvalid": "Condition {{number}}: enter a valid amount.",
     "errorConditionWeightInvalid": "Condition {{number}}: enter a weight in kg, with up to 3 decimals.",
-    "errorConditionQuantityInvalid": "Condition {{number}}: enter a whole number of items."
+    "errorConditionQuantityInvalid": "Condition {{number}}: enter a whole number of items.",
+    "fieldSubtotal": "Cart subtotal",
+    "fieldWeight": "Cart weight",
+    "fieldQuantity": "Number of items",
+    "opAtLeast": "is at least",
+    "opMoreThan": "is more than",
+    "opAtMost": "is at most",
+    "opLessThan": "is less than",
+    "opEquals": "is equal to",
+    "opNotEquals": "is not equal to",
+    "unitKg": "kg",
+    "unitItems": "items",
+    "quantityHelp": "Counts each unit, e.g. 2 T-shirts + 1 cap = 3.",
+    "conditionFieldLabel": "Condition {{number}}: what to check",
+    "conditionOperatorLabel": "Condition {{number}}: comparison",
+    "conditionValueLabel": "Condition {{number}}: value",
+    "removeCondition": "Remove condition {{number}}"
   }
 }
