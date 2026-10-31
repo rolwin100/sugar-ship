@@ -1,5 +1,4 @@
 import { CART_CONDITION_FIELDS, NUMBER_OPERATORS } from "../../engine";
-import { fromSubunits, toSubunits } from "../../money";
 import {
   RATE_PRESETS,
   RULE_MATCHES,
@@ -9,6 +8,11 @@ import {
   type RatePreset,
 } from "../types";
 import { conditionToDraft, draftToCondition } from "./condition-draft";
+import {
+  draftToPricing,
+  isZonePricingDraft,
+  pricingToDraft,
+} from "./pricing-draft";
 
 export const emptyRuleDraft = (): RuleDraft => ({
   name: "",
@@ -32,7 +36,7 @@ export function ruleToDraft(rule: Rule, currency: string): RuleDraft {
     minDeliveryDays: rule.minDeliveryDays?.toString() ?? "",
     maxDeliveryDays: rule.maxDeliveryDays?.toString() ?? "",
     prices: Object.fromEntries(
-      rule.prices.map((p) => [p.zoneId, fromSubunits(p.price, currency)]),
+      rule.prices.map((p) => [p.zoneId, pricingToDraft(p, currency)]),
     ),
     match: rule.match,
     conditions: rule.conditions.map((c) => conditionToDraft(c, currency)),
@@ -40,13 +44,13 @@ export function ruleToDraft(rule: Rule, currency: string): RuleDraft {
 }
 
 /**
- * The form's text → a rule to validate and save. Empty prices are left out (that zone
- * doesn't get the rate); text that isn't a number becomes NaN so validation can flag it.
+ * The form's text → a rule to validate and save. Zones that aren't offered are left
+ * out; text that isn't a number becomes NaN so validation can flag it.
  */
 export function draftToInput(draft: RuleDraft, currency: string): RuleInput {
-  const prices = Object.entries(draft.prices).flatMap(([zoneId, text]) => {
-    const price = toSubunits(text, currency);
-    return price === null ? [] : [{ zoneId, price }];
+  const prices = Object.entries(draft.prices).flatMap(([zoneId, zone]) => {
+    const pricing = draftToPricing(zoneId, zone, currency);
+    return pricing ? [pricing] : [];
   });
 
   return {
@@ -95,7 +99,7 @@ export function parseRuleDraft(raw: unknown): RuleDraft | null {
   const prices = d.prices;
   if (!prices || typeof prices !== "object" || Array.isArray(prices))
     return null;
-  if (Object.values(prices).some((p) => typeof p !== "string")) return null;
+  if (!Object.values(prices).every(isZonePricingDraft)) return null;
 
   if (!RULE_MATCHES.includes(d.match as RuleDraft["match"])) return null;
   if (!Array.isArray(d.conditions)) return null;

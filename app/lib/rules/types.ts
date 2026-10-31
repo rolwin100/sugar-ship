@@ -1,4 +1,10 @@
-import type { CartConditionField, NumberOperator, RuleMatch } from "../engine";
+import type {
+  CartConditionField,
+  NumberOperator,
+  RateBasis,
+  RateMode,
+  RuleMatch,
+} from "../engine";
 import type { RuleError } from "./validate-rule";
 
 /** Built-in checkout names; translated into the checkout's language (keys rates.preset*). */
@@ -20,8 +26,63 @@ export const RULE_MATCHES = [
   "NONE",
 ] as const satisfies readonly RuleMatch[];
 
-/** One zone's price, in subunits of the shop's currency. */
-export type ZonePrice = { zoneId: string; price: number };
+/** The ways a zone can be priced (engine/pricing does the maths). */
+export const PRICING_MODES = [
+  "FLAT",
+  "BANDS",
+  "INCREMENTAL",
+  "PERCENT",
+] as const satisfies readonly RateMode[];
+
+/** What BANDS and INCREMENTAL pricing are based on. */
+export const PRICING_BASES = [
+  "WEIGHT",
+  "SUBTOTAL",
+  "QUANTITY",
+] as const satisfies readonly RateBasis[];
+
+/**
+ * One row of a price table, in stored units: `from`/`to` in grams, subunits or items
+ * (by the zone's basis), `price` in subunits. Covers from ≤ value < to; to null = and above.
+ */
+export type PriceBand = { from: number; to: number | null; price: number };
+
+/**
+ * How one zone is priced, in stored units (money in subunits, weight in grams,
+ * percentages in basis points). Zones without a pricing don't get this rate.
+ */
+export type ZonePricing =
+  | { zoneId: string; mode: "FLAT"; price: number }
+  | { zoneId: string; mode: "BANDS"; basis: RateBasis; bands: PriceBand[] }
+  | {
+      zoneId: string;
+      mode: "INCREMENTAL";
+      basis: RateBasis;
+      basePrice: number; // covers the first step
+      stepSize: number; // grams, subunits or items
+      stepPrice: number; // per further step
+    }
+  | { zoneId: string; mode: "PERCENT"; percentBps: number };
+
+/** A price-table row as typed in the form. */
+export type PriceBandDraft = { from: string; to: string; price: string };
+
+/**
+ * One zone's pricing as the form holds it: every mode's fields as typed text, so
+ * switching modes keeps what the merchant typed. Units follow the basis: weight in
+ * kg, subtotal in the shop's currency, quantity in items; percent as "5" or "2.5".
+ */
+export type ZonePricingDraft = {
+  offered: boolean; // false = this zone doesn't get the rate
+  mode: RateMode;
+  basis: RateBasis; // BANDS and INCREMENTAL
+  price: string; // FLAT
+  bands: PriceBandDraft[];
+  basePrice: string;
+  stepSize: string;
+  stepPrice: string;
+  percent: string;
+};
 
 /**
  * One cart condition on a rate, in stored units:
@@ -65,7 +126,7 @@ export type RuleInput = {
   customName: string;
   minDeliveryDays: number | null;
   maxDeliveryDays: number | null;
-  prices: ZonePrice[]; // zones without a price don't get this rate
+  prices: ZonePricing[]; // zones without a pricing don't get this rate
   match: RuleMatch;
   conditions: RuleCondition[]; // none = the rate always applies
 };
@@ -85,7 +146,7 @@ export type RuleDraft = {
   customName: string;
   minDeliveryDays: string;
   maxDeliveryDays: string;
-  prices: Record<string, string>; // zoneId → typed price ("" = not offered)
+  prices: Record<string, ZonePricingDraft>; // zoneId → that zone's pricing
   match: RuleMatch;
   conditions: RuleConditionDraft[];
 };

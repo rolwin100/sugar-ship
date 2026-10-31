@@ -57,9 +57,10 @@ export async function saveRule(
 
   const ruleData = { name: rule.name, status: rule.status, match: rule.match };
   // One Rate row per priced zone; the checkout name and delivery estimate are shared.
-  const rates = rule.prices.map(({ zoneId, price }, sortOrder) => ({
-    zoneId,
-    price,
+  // Validation only lets flat prices through until D2.3 stores the other modes.
+  const rates = rule.prices.map((pricing, sortOrder) => ({
+    zoneId: pricing.zoneId,
+    price: pricing.mode === "FLAT" ? pricing.price : 0,
     sortOrder,
     mode: "FLAT" as const,
     preset: rule.preset,
@@ -203,7 +204,12 @@ function toRule(row: RuleRow): Rule {
     customName: preset ? "" : (first?.name ?? ""),
     minDeliveryDays: first?.minDeliveryDays ?? null,
     maxDeliveryDays: first?.maxDeliveryDays ?? null,
-    prices: row.rates.map((r) => ({ zoneId: r.zoneId, price: r.price ?? 0 })),
+    // Read as flat for now; D2.3 reads each zone's mode and settings.
+    prices: row.rates.map((r) => ({
+      zoneId: r.zoneId,
+      mode: "FLAT" as const,
+      price: r.price ?? 0,
+    })),
     match: row.match,
     // Only cart conditions exist for now; rows that aren't valid ones are skipped.
     conditions: row.conditions.flatMap((c) => {

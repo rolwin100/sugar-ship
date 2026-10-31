@@ -19,6 +19,7 @@ import {
   parseRuleDraft,
   ruleToDraft,
 } from "../lib/rules/draft";
+import { replaceZoneFlatPrice } from "../lib/rules/edit-pricing";
 import type { RuleActionResult, RuleDraft } from "../lib/rules/types";
 import { listZones } from "../lib/zones/zone-store.server";
 import { FormSaveBar } from "../components/FormSaveBar";
@@ -210,7 +211,10 @@ export default function RateEditPage() {
         currency={currency}
         errors={errors.filter((e) => e.field === "prices" && e.zoneId)}
         onPriceChange={(zoneId, price) =>
-          setDraft((d) => ({ ...d, prices: { ...d.prices, [zoneId]: price } }))
+          setDraft((d) => ({
+            ...d,
+            prices: replaceZoneFlatPrice(d.prices, zoneId, price),
+          }))
         }
       />
 

@@ -78,12 +78,19 @@ export function validateRule(
   if (input.prices.length === 0)
     errors.push({ field: "prices", key: "pricesRequired" });
   const seen = new Set<string>();
-  for (const { zoneId, price } of input.prices) {
+  for (const pricing of input.prices) {
+    const { zoneId } = pricing;
     if (!zoneIds.has(zoneId)) {
       errors.push({ field: "prices", key: "zoneUnknown", zoneId });
     } else if (seen.has(zoneId)) {
       errors.push({ field: "prices", key: "zoneDuplicate", zoneId });
-    } else if (!Number.isInteger(price) || price < 0 || price > PRICE_MAX) {
+    } else if (
+      // Until D2.2 checks the other modes, only flat prices can be saved.
+      pricing.mode !== "FLAT" ||
+      !Number.isInteger(pricing.price) ||
+      pricing.price < 0 ||
+      pricing.price > PRICE_MAX
+    ) {
       errors.push({ field: "prices", key: "priceInvalid", zoneId });
     }
     seen.add(zoneId);

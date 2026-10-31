@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import type { ZonePricingDraft } from "../../lib/rules/types";
 import type { RuleError } from "../../lib/rules/validate-rule";
 import type { Zone } from "../../lib/zones/types";
 import { fieldValue } from "../field-events";
@@ -7,7 +8,7 @@ import { ruleErrorMessage } from "./utils";
 
 type Props = {
   zones: Zone[];
-  prices: Record<string, string>; // zoneId → typed price
+  prices: Record<string, ZonePricingDraft>; // zoneId → pricing (flat only until D3)
   currency: string;
   errors: RuleError[]; // price errors, each with a zoneId
   onPriceChange: (zoneId: string, price: string) => void;
@@ -44,7 +45,7 @@ export function ZonePricesSection({
                   currencyCode={currency as never}
                   placeholder={t("rates.notOffered")}
                   min={0}
-                  value={prices[zone.id] ?? ""}
+                  value={prices[zone.id]?.offered ? prices[zone.id].price : ""}
                   error={
                     error ? ruleErrorMessage(error, t, zoneNames) : undefined
                   }

@@ -5,6 +5,7 @@ import {
   parseRuleDraft,
   ruleToDraft,
 } from "./draft";
+import { emptyZonePricingDraft } from "./pricing-draft";
 import type { Rule } from "../types";
 
 const rule: Rule = {
@@ -16,8 +17,8 @@ const rule: Rule = {
   minDeliveryDays: 3,
   maxDeliveryDays: 5,
   prices: [
-    { zoneId: "domestic", price: 8000 },
-    { zoneId: "intl", price: 150000 },
+    { zoneId: "domestic", mode: "FLAT", price: 8000 },
+    { zoneId: "intl", mode: "FLAT", price: 150000 },
   ],
   match: "ANY",
   conditions: [
@@ -29,7 +30,12 @@ const rule: Rule = {
 describe("rule drafts", () => {
   it("round-trips a saved rule through the form", () => {
     const draft = ruleToDraft(rule, "INR");
-    expect(draft.prices).toEqual({ domestic: "80.00", intl: "1500.00" });
+    expect(draft.prices.domestic).toMatchObject({
+      offered: true,
+      mode: "FLAT",
+      price: "80.00",
+    });
+    expect(draft.prices.intl).toMatchObject({ price: "1500.00" });
     expect(draft.minDeliveryDays).toBe("3");
     expect(draft.conditions).toEqual([
       { field: "subtotal", operator: "GREATER_OR_EQUAL", value: "1000.00" },
@@ -64,16 +70,22 @@ describe("rule drafts", () => {
     });
   });
 
-  it("leaves out empty prices and marks bad text as NaN", () => {
+  it("leaves out zones that aren't offered and marks bad text as NaN", () => {
+    const zone = (offered: boolean, price: string) => ({
+      ...emptyZonePricingDraft(),
+      offered,
+      price,
+    });
     const draft = {
       ...emptyRuleDraft(),
-      prices: { a: "", b: "50", c: "abc" },
+      prices: { a: zone(false, ""), b: zone(true, "50"), c: zone(true, "abc") },
       minDeliveryDays: "2.5",
     };
     const input = draftToInput(draft, "INR");
-    expect(input.prices.map((p) => p.zoneId)).toEqual(["b", "c"]);
-    expect(input.prices[0].price).toBe(5000);
-    expect(input.prices[1].price).toBeNaN();
+    expect(input.prices).toEqual([
+      { zoneId: "b", mode: "FLAT", price: 5000 },
+      { zoneId: "c", mode: "FLAT", price: Number.NaN },
+    ]);
     expect(input.minDeliveryDays).toBeNaN();
     expect(input.maxDeliveryDays).toBeNull();
   });

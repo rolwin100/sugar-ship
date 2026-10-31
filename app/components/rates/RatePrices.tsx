@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { formatMoney } from "../../lib/money";
-import type { ZonePrice } from "../../lib/rules/types";
+import type { ZonePricing } from "../../lib/rules/types";
 
 /** Up to this many zones are listed by name; more are shown as a price range. */
 const NAMED_ZONES_MAX = 2;
 
 type Props = {
-  prices: ZonePrice[];
+  prices: ZonePricing[];
   zoneNames: Record<string, string>;
   currency: string;
 };
@@ -16,20 +16,22 @@ export function RatePrices({ prices, zoneNames, currency }: Props) {
   const { t, i18n } = useTranslation();
   const money = (subunits: number) =>
     formatMoney(subunits, currency, i18n.language);
+  // Only flat prices can be saved until D3; other modes are summarised there.
+  const flat = prices.flatMap((p) => (p.mode === "FLAT" ? [p] : []));
 
-  if (prices.length <= NAMED_ZONES_MAX) {
+  if (flat.length <= NAMED_ZONES_MAX) {
     return (
       <>
-        {prices
+        {flat
           .map((p) => `${zoneNames[p.zoneId] ?? "?"} ${money(p.price)}`)
           .join(" · ")}
       </>
     );
   }
 
-  const amounts = prices.map((p) => p.price);
+  const amounts = flat.map((p) => p.price);
   const min = Math.min(...amounts);
   const max = Math.max(...amounts);
   const range = min === max ? money(min) : `${money(min)}–${money(max)}`;
-  return <>{t("rates.pricesZones", { range, count: prices.length })}</>;
+  return <>{t("rates.pricesZones", { range, count: flat.length })}</>;
 }

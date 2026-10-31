@@ -11,7 +11,7 @@ const input = (overrides: Partial<RuleInput> = {}): RuleInput => ({
   customName: "",
   minDeliveryDays: 3,
   maxDeliveryDays: 5,
-  prices: [{ zoneId: "domestic", price: 8000 }],
+  prices: [{ zoneId: "domestic", mode: "FLAT", price: 8000 }],
   match: "ALL",
   conditions: [],
   ...overrides,
@@ -87,14 +87,16 @@ describe("validateRule", () => {
 
   it("allows free (0) and flags bad prices per zone", () => {
     expect(
-      validateRule(input({ prices: [{ zoneId: "domestic", price: 0 }] }), zones)
-        .ok,
+      validateRule(
+        input({ prices: [{ zoneId: "domestic", mode: "FLAT", price: 0 }] }),
+        zones,
+      ).ok,
     ).toBe(true);
     const result = validateRule(
       input({
         prices: [
-          { zoneId: "domestic", price: Number.NaN },
-          { zoneId: "intl", price: -1 },
+          { zoneId: "domestic", mode: "FLAT", price: Number.NaN },
+          { zoneId: "intl", mode: "FLAT", price: -1 },
         ],
       }),
       zones,
@@ -109,7 +111,7 @@ describe("validateRule", () => {
     expect(
       keys(
         validateRule(
-          input({ prices: [{ zoneId: "other-shop", price: 1 }] }),
+          input({ prices: [{ zoneId: "other-shop", mode: "FLAT", price: 1 }] }),
           zones,
         ),
       ),
@@ -119,8 +121,8 @@ describe("validateRule", () => {
         validateRule(
           input({
             prices: [
-              { zoneId: "domestic", price: 1 },
-              { zoneId: "domestic", price: 2 },
+              { zoneId: "domestic", mode: "FLAT", price: 1 },
+              { zoneId: "domestic", mode: "FLAT", price: 2 },
             ],
           }),
           zones,
