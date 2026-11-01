@@ -9,12 +9,16 @@ import {
   type SaveRuleResult,
 } from "./types";
 import { toRuleCondition } from "./stored-condition";
+import { toPricingColumns, toZonePricing } from "./stored-pricing";
 import { validateRule } from "./validate-rule";
 
 // Every query filters by shopId, so one shop can never read or change another shop's rules.
 
 const withRatesAndConditions = {
-  rates: { orderBy: { sortOrder: "asc" } },
+  rates: {
+    orderBy: { sortOrder: "asc" },
+    include: { bands: { orderBy: { sortOrder: "asc" } } },
+  },
   conditions: { orderBy: { sortOrder: "asc" } },
 } satisfies Prisma.RuleInclude;
 type RuleRow = Prisma.RuleGetPayload<{
@@ -55,32 +59,22 @@ export async function saveRule(
   if (!result.ok) return result;
   const rule = result.rule;
 
-  // Until D2.3 saves the other modes, refuse them rather than store them as flat ₹0.
-  const notFlat = rule.prices.filter((p) => p.mode !== "FLAT");
-  if (notFlat.length > 0) {
-    return {
-      ok: false,
-      errors: notFlat.map((p) => ({
-        field: "prices" as const,
-        key: "priceInvalid" as const,
-        zoneId: p.zoneId,
-      })),
-    };
-  }
-
   const ruleData = { name: rule.name, status: rule.status, match: rule.match };
-  // One Rate row per priced zone; the checkout name and delivery estimate are shared.
-  // Only flat prices reach here until D2.3 (see the check above).
-  const rates = rule.prices.map((pricing, sortOrder) => ({
-    zoneId: pricing.zoneId,
-    price: pricing.mode === "FLAT" ? pricing.price : 0,
-    sortOrder,
-    mode: "FLAT" as const,
-    preset: rule.preset,
-    name: rule.preset ? null : rule.customName,
-    minDeliveryDays: rule.minDeliveryDays,
-    maxDeliveryDays: rule.maxDeliveryDays,
-  }));
+  // One Rate row per priced zone (plus RateBand rows for a price table);
+  // the checkout name and delivery estimate are shared.
+  const rates = rule.prices.map((pricing, sortOrder) => {
+    const { bands, ...columns } = toPricingColumns(pricing);
+    return {
+      zoneId: pricing.zoneId,
+      sortOrder,
+      ...columns,
+      bands: { create: bands },
+      preset: rule.preset,
+      name: rule.preset ? null : rule.customName,
+      minDeliveryDays: rule.minDeliveryDays,
+      maxDeliveryDays: rule.maxDeliveryDays,
+    };
+  });
   // One Condition row per condition, in the order the merchant listed them.
   const conditions = rule.conditions.map(
     ({ field, operator, value }, sortOrder) => ({
@@ -118,19 +112,20 @@ export async function saveRule(
   });
   if (!existing) return { ok: false, notFound: true };
 
-  // Replace rates and conditions wholesale, in one transaction; simpler than diffing,
-  // and their ids aren't referenced anywhere yet.
-  await db.$transaction([
-    db.rule.update({ where: { id }, data: ruleData }),
-    db.rate.deleteMany({ where: { ruleId: id } }),
-    db.rate.createMany({
-      data: rates.map((rate) => ({ ...rate, ruleId: id })),
-    }),
-    db.condition.deleteMany({ where: { ruleId: id } }),
-    db.condition.createMany({
+  // Replace rates (their bands go by cascade) and conditions wholesale, in one
+  // transaction; simpler than diffing, and their ids aren't referenced anywhere yet.
+  // Rates are created one by one because createMany can't create their bands.
+  await db.$transaction(async (tx) => {
+    await tx.rule.update({ where: { id }, data: ruleData });
+    await tx.rate.deleteMany({ where: { ruleId: id } });
+    for (const rate of rates) {
+      await tx.rate.create({ data: { ...rate, ruleId: id } });
+    }
+    await tx.condition.deleteMany({ where: { ruleId: id } });
+    await tx.condition.createMany({
       data: conditions.map((condition) => ({ ...condition, ruleId: id })),
-    }),
-  ]);
+    });
+  });
   return { ok: true, rule: { id, ...rule } };
 }
 
@@ -217,12 +212,11 @@ function toRule(row: RuleRow): Rule {
     customName: preset ? "" : (first?.name ?? ""),
     minDeliveryDays: first?.minDeliveryDays ?? null,
     maxDeliveryDays: first?.maxDeliveryDays ?? null,
-    // Read as flat for now; D2.3 reads each zone's mode and settings.
-    prices: row.rates.map((r) => ({
-      zoneId: r.zoneId,
-      mode: "FLAT" as const,
-      price: r.price ?? 0,
-    })),
+    // Rows missing a column their mode needs are skipped (the zone shows as not priced).
+    prices: row.rates.flatMap((r) => {
+      const pricing = toZonePricing(r);
+      return pricing ? [pricing] : [];
+    }),
     match: row.match,
     // Only cart conditions exist for now; rows that aren't valid ones are skipped.
     conditions: row.conditions.flatMap((c) => {

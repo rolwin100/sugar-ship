@@ -95,6 +95,23 @@ export type RuleCondition = {
   value: number;
 };
 
+/** A Rate row's pricing columns as read from the database, before they're checked (see toZonePricing). */
+export type StoredPricing = {
+  zoneId: string;
+  mode: RateMode;
+  basis: RateBasis | null;
+  price: number | null; // FLAT price, or INCREMENTAL base price
+  stepSize: number | null;
+  stepPrice: number | null;
+  percentBps: number | null;
+  bands: PriceBand[];
+};
+
+/** A zone pricing as Rate columns plus RateBand rows, ready to save (see toPricingColumns). */
+export type PricingColumns = Omit<StoredPricing, "zoneId" | "bands"> & {
+  bands: (PriceBand & { sortOrder: number })[];
+};
+
 /** A Condition row as read from the database, before it's checked (see toRuleCondition). */
 export type StoredCondition = {
   subject: string;
