@@ -3,6 +3,7 @@ import { priceByBands } from "./bands";
 import { priceFlat } from "./flat";
 import { priceIncrementally } from "./incremental";
 import { priceByPercent } from "./percent";
+import { RATE_MODE } from "../constants";
 
 /**
  * Base price of one zone's rate for this cart, in subunits, using the rate's mode.
@@ -19,13 +20,13 @@ export function priceRate(rate: EngineRate, totals: CartTotals): PriceResult {
 
 function priceByMode(rate: EngineRate, totals: CartTotals): PriceResult {
   switch (rate.mode) {
-    case "FLAT":
+    case RATE_MODE.FLAT:
       return priceFlat(rate);
-    case "BANDS":
+    case RATE_MODE.BANDS:
       return priceByBands(rate, totals);
-    case "INCREMENTAL":
+    case RATE_MODE.INCREMENTAL:
       return priceIncrementally(rate, totals);
-    case "PERCENT":
+    case RATE_MODE.PERCENT:
       return priceByPercent(rate, totals);
   }
 }

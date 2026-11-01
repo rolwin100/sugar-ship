@@ -11,6 +11,7 @@ import type {
   QuotedRate,
   TraceEntry,
 } from "../types";
+import { RULE_STATUS, TRACE_OUTCOME } from "../constants";
 
 function inSchedule(rule: EngineRule, now: Date): boolean {
   if (rule.startsAt && now < rule.startsAt) return false;
@@ -59,24 +60,24 @@ export function quote(
     if (stoppedBy) {
       trace.push({
         ...base,
-        outcome: "skipped_after_exclusive",
+        outcome: TRACE_OUTCOME.SKIPPED_AFTER_EXCLUSIVE,
         detail: `exclusive rule "${stoppedBy.name}" matched first`,
       });
       continue;
     }
-    if (rule.status !== "ACTIVE") {
-      trace.push({ ...base, outcome: "skipped_inactive" });
+    if (rule.status !== RULE_STATUS.ACTIVE) {
+      trace.push({ ...base, outcome: TRACE_OUTCOME.SKIPPED_INACTIVE });
       continue;
     }
     if (!inSchedule(rule, now)) {
-      trace.push({ ...base, outcome: "skipped_schedule" });
+      trace.push({ ...base, outcome: TRACE_OUTCOME.SKIPPED_SCHEDULE });
       continue;
     }
     const conditions = checkConditions(rule, totals);
     if (!conditions.matched) {
       trace.push({
         ...base,
-        outcome: "not_matched",
+        outcome: TRACE_OUTCOME.NOT_MATCHED,
         ...(conditions.reason ? { detail: conditions.reason } : {}),
       });
       continue;
@@ -112,7 +113,7 @@ export function quote(
 
     trace.push({
       ...base,
-      outcome: "matched",
+      outcome: TRACE_OUTCOME.MATCHED,
       ...(notes.length > 0 ? { detail: notes.join("; ") } : {}),
     });
 

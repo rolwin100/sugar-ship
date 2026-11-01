@@ -3,6 +3,7 @@ import type {
   NumberOperator,
   RuleMatch,
 } from "../../../lib/engine";
+import { CART_CONDITION_FIELD, CONDITION_OPERATOR } from "../../../lib/engine";
 
 /** Translation key for each condition field. */
 export const CONDITION_FIELD_KEYS = {
@@ -23,17 +24,17 @@ export const CONDITION_OPERATOR_KEYS = {
 
 /** Dropdown order: the most common comparisons first. */
 export const CONDITION_FIELDS_IN_ORDER: CartConditionField[] = [
-  "subtotal",
-  "weight",
-  "quantity",
+  CART_CONDITION_FIELD.SUBTOTAL,
+  CART_CONDITION_FIELD.WEIGHT,
+  CART_CONDITION_FIELD.QUANTITY,
 ];
 export const CONDITION_OPERATORS_IN_ORDER: NumberOperator[] = [
-  "GREATER_OR_EQUAL",
-  "GREATER_THAN",
-  "LESS_OR_EQUAL",
-  "LESS_THAN",
-  "EQUALS",
-  "NOT_EQUALS",
+  CONDITION_OPERATOR.GREATER_OR_EQUAL,
+  CONDITION_OPERATOR.GREATER_THAN,
+  CONDITION_OPERATOR.LESS_OR_EQUAL,
+  CONDITION_OPERATOR.LESS_THAN,
+  CONDITION_OPERATOR.EQUALS,
+  CONDITION_OPERATOR.NOT_EQUALS,
 ];
 
 /** Translation key for each way of combining conditions ("Apply this rate when …"). */

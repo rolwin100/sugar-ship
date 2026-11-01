@@ -5,12 +5,13 @@ import type {
   EngineCondition,
 } from "../../types";
 import { compareNumbers, operatorSymbol } from "../operators";
+import { CART_CONDITION_FIELD } from "../../constants";
 
 /** Cart fields a condition can test (units: subtotal subunits, weight grams, quantity items). */
 export const CART_CONDITION_FIELDS: readonly CartConditionField[] = [
-  "subtotal",
-  "weight",
-  "quantity",
+  CART_CONDITION_FIELD.SUBTOTAL,
+  CART_CONDITION_FIELD.WEIGHT,
+  CART_CONDITION_FIELD.QUANTITY,
 ];
 
 function isCartConditionField(field: string): field is CartConditionField {

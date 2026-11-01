@@ -1,5 +1,5 @@
 import type { CombineStrategy } from "@prisma/client";
-import { quote } from "../engine";
+import { COMBINE_STRATEGY, quote } from "../engine";
 import { loadEngineRules } from "../rules/rule-store.server";
 import type { RateRequest, ShippingRate } from "../types";
 import { listZones } from "../zones/zone-store.server";
@@ -27,7 +27,7 @@ export async function quoteCheckout(
     loadEngineRules(shop.id),
   ]);
   const result = quote(cart, rules, zones, {
-    combineStrategy: shop.settings?.combineStrategy ?? "SUM",
+    combineStrategy: shop.settings?.combineStrategy ?? COMBINE_STRATEGY.SUM,
   });
   return toShippingRates(result.rates, cart.currency, cart.locale);
 }

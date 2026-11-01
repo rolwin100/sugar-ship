@@ -1,5 +1,6 @@
 import { emptyZonePricingDraft } from "../draft/pricing-draft";
 import type { ZonePricingDraft } from "../types";
+import { RATE_MODE } from "../../engine";
 
 // Pure helpers for editing zone pricings in the form. Each returns a new record.
 // D3 adds mode switching, bands and the other modes' fields.
@@ -19,7 +20,7 @@ export function replaceZoneFlatPrice(
     [zoneId]: {
       ...current,
       offered: text.trim() !== "",
-      mode: "FLAT",
+      mode: RATE_MODE.FLAT,
       price: text,
     },
   };

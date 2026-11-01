@@ -1,6 +1,7 @@
 import { fromSubunits, toSubunits } from "../../money";
 import { gramsToKg, kgToGrams } from "../../weight";
 import type { RuleCondition, RuleConditionDraft } from "../types";
+import { CART_CONDITION_FIELD } from "../../engine";
 
 /**
  * A saved condition → the text the form shows, in the merchant's units:
@@ -12,11 +13,11 @@ export function conditionToDraft(
 ): RuleConditionDraft {
   const { field, operator, value } = condition;
   switch (field) {
-    case "subtotal":
+    case CART_CONDITION_FIELD.SUBTOTAL:
       return { field, operator, value: fromSubunits(value, currency) };
-    case "weight":
+    case CART_CONDITION_FIELD.WEIGHT:
       return { field, operator, value: gramsToKg(value) };
-    case "quantity":
+    case CART_CONDITION_FIELD.QUANTITY:
       return { field, operator, value: String(value) };
   }
 }
@@ -31,15 +32,15 @@ export function draftToCondition(
 ): RuleCondition {
   const { field, operator, value: text } = draft;
   switch (field) {
-    case "subtotal":
+    case CART_CONDITION_FIELD.SUBTOTAL:
       return {
         field,
         operator,
         value: toSubunits(text, currency) ?? Number.NaN,
       };
-    case "weight":
+    case CART_CONDITION_FIELD.WEIGHT:
       return { field, operator, value: kgToGrams(text) ?? Number.NaN };
-    case "quantity":
+    case CART_CONDITION_FIELD.QUANTITY:
       return {
         field,
         operator,

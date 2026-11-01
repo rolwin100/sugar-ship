@@ -1,44 +1,46 @@
+import { RATE_BASIS, RATE_MODE, RULE_MATCH } from "../engine";
 import type {
   CartConditionField,
   NumberOperator,
   RateBasis,
   RateMode,
   RuleMatch,
+  RuleStatus,
 } from "../engine";
+import { RATE_PRESET } from "./constants";
 import type { RuleError } from "./validate-rule";
 
-/** Built-in checkout names; translated into the checkout's language (keys rates.preset*). */
-export const RATE_PRESETS = [
-  "standard",
-  "express",
-  "economy",
-  "free",
-  "next_day",
-] as const;
-export type RatePreset = (typeof RATE_PRESETS)[number];
+export type RatePreset = (typeof RATE_PRESET)[keyof typeof RATE_PRESET];
 
-export type RuleStatus = "ACTIVE" | "INACTIVE";
+/** Built-in presets in display order. */
+export const RATE_PRESETS = [
+  RATE_PRESET.STANDARD,
+  RATE_PRESET.EXPRESS,
+  RATE_PRESET.ECONOMY,
+  RATE_PRESET.FREE,
+  RATE_PRESET.NEXT_DAY,
+] as const satisfies readonly RatePreset[];
 
 /** How a rate's conditions combine: all, any, or none of them true. */
 export const RULE_MATCHES = [
-  "ALL",
-  "ANY",
-  "NONE",
+  RULE_MATCH.ALL,
+  RULE_MATCH.ANY,
+  RULE_MATCH.NONE,
 ] as const satisfies readonly RuleMatch[];
 
 /** The ways a zone can be priced (engine/pricing does the maths). */
 export const PRICING_MODES = [
-  "FLAT",
-  "BANDS",
-  "INCREMENTAL",
-  "PERCENT",
+  RATE_MODE.FLAT,
+  RATE_MODE.BANDS,
+  RATE_MODE.INCREMENTAL,
+  RATE_MODE.PERCENT,
 ] as const satisfies readonly RateMode[];
 
 /** What BANDS and INCREMENTAL pricing are based on. */
 export const PRICING_BASES = [
-  "WEIGHT",
-  "SUBTOTAL",
-  "QUANTITY",
+  RATE_BASIS.WEIGHT,
+  RATE_BASIS.SUBTOTAL,
+  RATE_BASIS.QUANTITY,
 ] as const satisfies readonly RateBasis[];
 
 /**
@@ -52,17 +54,22 @@ export type PriceBand = { from: number; to: number | null; price: number };
  * percentages in basis points). Zones without a pricing don't get this rate.
  */
 export type ZonePricing =
-  | { zoneId: string; mode: "FLAT"; price: number }
-  | { zoneId: string; mode: "BANDS"; basis: RateBasis; bands: PriceBand[] }
+  | { zoneId: string; mode: typeof RATE_MODE.FLAT; price: number }
   | {
       zoneId: string;
-      mode: "INCREMENTAL";
+      mode: typeof RATE_MODE.BANDS;
+      basis: RateBasis;
+      bands: PriceBand[];
+    }
+  | {
+      zoneId: string;
+      mode: typeof RATE_MODE.INCREMENTAL;
       basis: RateBasis;
       basePrice: number; // covers the first step
       stepSize: number; // grams, subunits or items
       stepPrice: number; // per further step
     }
-  | { zoneId: string; mode: "PERCENT"; percentBps: number };
+  | { zoneId: string; mode: typeof RATE_MODE.PERCENT; percentBps: number };
 
 /** A price-table row as typed in the form. */
 export type PriceBandDraft = { from: string; to: string; price: string };

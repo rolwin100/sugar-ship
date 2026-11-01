@@ -11,6 +11,8 @@ import {
 import { toRuleCondition } from "./stored-condition";
 import { toPricingColumns, toZonePricing } from "./stored-pricing";
 import { validateRule } from "./validate-rule";
+import { CONDITION_SUBJECT } from "../engine";
+import { RATE_PRESET } from "./constants";
 
 // Every query filters by shopId, so one shop can never read or change another shop's rules.
 
@@ -78,7 +80,7 @@ export async function saveRule(
   // One Condition row per condition, in the order the merchant listed them.
   const conditions = rule.conditions.map(
     ({ field, operator, value }, sortOrder) => ({
-      subject: "CART" as const,
+      subject: CONDITION_SUBJECT.CART,
       field,
       operator,
       value,
@@ -208,7 +210,7 @@ function toRule(row: RuleRow): Rule {
     id: row.id,
     name: row.name,
     status: row.status,
-    preset: first ? preset : "standard",
+    preset: first ? preset : RATE_PRESET.STANDARD,
     customName: preset ? "" : (first?.name ?? ""),
     minDeliveryDays: first?.minDeliveryDays ?? null,
     maxDeliveryDays: first?.maxDeliveryDays ?? null,

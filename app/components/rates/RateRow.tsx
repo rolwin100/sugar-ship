@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import type { Rule } from "../../lib/rules/types";
 import { CheckoutName } from "./CheckoutName";
 import { RatePrices } from "./RatePrices";
+import { RULE_STATUS } from "../../lib/engine";
 
 type Props = {
   rule: Rule;
@@ -11,7 +12,7 @@ type Props = {
 
 export function RateRow({ rule, zoneNames, currency }: Props) {
   const { t } = useTranslation();
-  const active = rule.status === "ACTIVE";
+  const active = rule.status === RULE_STATUS.ACTIVE;
 
   return (
     <s-table-row clickDelegate={`rate-link-${rule.id}`}>

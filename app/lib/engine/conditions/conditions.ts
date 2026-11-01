@@ -6,6 +6,7 @@ import type {
   EngineRule,
 } from "../types";
 import { checkCartCondition } from "./cart-condition";
+import { CONDITION_SUBJECT, RULE_MATCH } from "../constants";
 
 /** Hands each condition to the checker for its subject. */
 function checkCondition(
@@ -13,7 +14,7 @@ function checkCondition(
   totals: CartTotals,
 ): ConditionResult {
   switch (condition.subject) {
-    case "CART":
+    case CONDITION_SUBJECT.CART:
       return checkCartCondition(condition, totals);
     // PRODUCT (slice G) and ADDRESS postcode lists (slice H) come later.
     default:
@@ -51,7 +52,7 @@ export function checkConditions(
   }
 
   switch (rule.match) {
-    case "ALL": {
+    case RULE_MATCH.ALL: {
       const failed = results.find((r) => !r.result);
       return failed
         ? {
@@ -60,14 +61,14 @@ export function checkConditions(
           }
         : { matched: true };
     }
-    case "ANY":
+    case RULE_MATCH.ANY:
       return results.some((r) => r.result)
         ? { matched: true }
         : {
             matched: false,
             reason: `needs any condition; none is true (${results.map((r) => r.text).join(", ")})`,
           };
-    case "NONE": {
+    case RULE_MATCH.NONE: {
       const hit = results.find((r) => r.result);
       return hit
         ? {

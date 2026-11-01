@@ -1,6 +1,7 @@
 import type { CartConditionField, NumberOperator } from "../../engine";
 import type { RuleConditionDraft } from "../types";
 import { CONDITIONS_MAX } from "../validate-rule";
+import { CART_CONDITION_FIELD, CONDITION_OPERATOR } from "../../engine";
 
 // Pure helpers for editing a rate's conditions in the form. Each takes the current
 // list and returns a new one, never changing the original. `index` is the
@@ -8,8 +9,8 @@ import { CONDITIONS_MAX } from "../validate-rule";
 
 /** What "Add condition" starts with: cart subtotal, at least, no value yet. */
 export const NEW_CONDITION: RuleConditionDraft = {
-  field: "subtotal",
-  operator: "GREATER_OR_EQUAL",
+  field: CART_CONDITION_FIELD.SUBTOTAL,
+  operator: CONDITION_OPERATOR.GREATER_OR_EQUAL,
   value: "",
 };
 

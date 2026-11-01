@@ -32,6 +32,7 @@ import {
   RuleErrorsBanner,
   ZonePricesSection,
 } from "../components/rates";
+import { RULE_STATUS } from "../lib/engine";
 
 /** `/app/rates/new` creates a rate; `/app/rates/<id>` edits one. */
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
@@ -177,10 +178,10 @@ export default function RateEditPage() {
       <RuleDetailsSection
         name={draft.name}
         nameError={errors.find((e) => e.field === "name")}
-        active={draft.status === "ACTIVE"}
+        active={draft.status === RULE_STATUS.ACTIVE}
         onNameChange={(name) => change({ name })}
         onActiveChange={(active) =>
-          change({ status: active ? "ACTIVE" : "INACTIVE" })
+          change({ status: active ? RULE_STATUS.ACTIVE : RULE_STATUS.INACTIVE })
         }
       />
 

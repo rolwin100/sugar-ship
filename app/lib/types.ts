@@ -1,3 +1,5 @@
+import type { RATE_OUTCOME } from "./constants";
+
 export type CarrierServiceNode = {
   id: string;
   name: string | null;
@@ -35,7 +37,7 @@ export type RateRequest = {
   };
 };
 
-export type RateOutcome = "rates" | "fallback" | "none" | "error";
+export type RateOutcome = (typeof RATE_OUTCOME)[keyof typeof RATE_OUTCOME];
 
 export type ShippingRate = {
   service_name: string;

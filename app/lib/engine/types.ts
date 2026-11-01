@@ -1,49 +1,48 @@
 /**
  * Rule engine types. The engine is pure TypeScript: no Prisma, Shopify or I/O.
  * Units: money in subunits, weight in grams, percentages in basis points.
- * The string unions mirror the Prisma enums in prisma/schema.prisma.
+ * The string types derive from the constants in ./constants, which mirror the
+ * Prisma enums in prisma/schema.prisma.
  */
 
-export type ConditionSubject = "CART" | "PRODUCT" | "ADDRESS";
+import type {
+  ADJUSTMENT_KIND,
+  ADJUSTMENT_TYPE,
+  CART_CONDITION_FIELD,
+  COMBINE_STRATEGY,
+  CONDITION_OPERATOR,
+  CONDITION_SUBJECT,
+  QUANTIFIER,
+  RATE_BASIS,
+  RATE_MODE,
+  RULE_MATCH,
+  RULE_STATUS,
+  TRACE_OUTCOME,
+} from "./constants";
 
-export type ConditionOperator =
-  | "EQUALS"
-  | "NOT_EQUALS"
-  | "GREATER_THAN"
-  | "GREATER_OR_EQUAL"
-  | "LESS_THAN"
-  | "LESS_OR_EQUAL"
-  | "CONTAINS"
-  | "NOT_CONTAINS"
-  | "IN"
-  | "NOT_IN"
-  | "IN_POSTCODE_LIST"
-  | "NOT_IN_POSTCODE_LIST";
+type ValueOf<T> = T[keyof T];
 
-export type Quantifier = "ANY" | "ALL" | "NONE";
-export type RuleStatus = "ACTIVE" | "INACTIVE";
-export type RuleMatch = "ALL" | "ANY" | "NONE";
+export type ConditionSubject = ValueOf<typeof CONDITION_SUBJECT>;
+export type ConditionOperator = ValueOf<typeof CONDITION_OPERATOR>;
+export type Quantifier = ValueOf<typeof QUANTIFIER>;
+export type RuleStatus = ValueOf<typeof RULE_STATUS>;
+export type RuleMatch = ValueOf<typeof RULE_MATCH>;
 
 /** Operators that compare two numbers (cart totals now). */
 export type NumberOperator = Extract<
   ConditionOperator,
-  | "EQUALS"
-  | "NOT_EQUALS"
-  | "GREATER_THAN"
-  | "GREATER_OR_EQUAL"
-  | "LESS_THAN"
-  | "LESS_OR_EQUAL"
+  | typeof CONDITION_OPERATOR.EQUALS
+  | typeof CONDITION_OPERATOR.NOT_EQUALS
+  | typeof CONDITION_OPERATOR.GREATER_THAN
+  | typeof CONDITION_OPERATOR.GREATER_OR_EQUAL
+  | typeof CONDITION_OPERATOR.LESS_THAN
+  | typeof CONDITION_OPERATOR.LESS_OR_EQUAL
 >;
-export type RateMode = "FLAT" | "BANDS" | "INCREMENTAL" | "PERCENT";
-export type RateBasis = "WEIGHT" | "QUANTITY" | "SUBTOTAL";
-export type AdjustmentKind =
-  | "HANDLING_FEE"
-  | "MIN_PRICE"
-  | "MAX_PRICE"
-  | "ROUND_TO"
-  | "FREE_OVER";
-export type AdjustmentType = "FIXED" | "PERCENT";
-export type CombineStrategy = "SUM" | "HIGHEST" | "LOWEST";
+export type RateMode = ValueOf<typeof RATE_MODE>;
+export type RateBasis = ValueOf<typeof RATE_BASIS>;
+export type AdjustmentKind = ValueOf<typeof ADJUSTMENT_KIND>;
+export type AdjustmentType = ValueOf<typeof ADJUSTMENT_TYPE>;
+export type CombineStrategy = ValueOf<typeof COMBINE_STRATEGY>;
 
 // ---- Input: the cart ------------------------------------------------------
 
@@ -79,7 +78,7 @@ export type CartTotals = {
 };
 
 /** Cart fields a condition can test; each reads the CartTotals value of the same name. */
-export type CartConditionField = keyof CartTotals;
+export type CartConditionField = ValueOf<typeof CART_CONDITION_FIELD>;
 
 // ---- Input: the shop's rules ----------------------------------------------
 
@@ -171,12 +170,7 @@ export type QuotedRate = {
   price: number; // subunits
 };
 
-export type TraceOutcome =
-  | "matched"
-  | "not_matched"
-  | "skipped_inactive"
-  | "skipped_schedule"
-  | "skipped_after_exclusive";
+export type TraceOutcome = ValueOf<typeof TRACE_OUTCOME>;
 
 export type TraceEntry = {
   ruleId: string;

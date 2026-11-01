@@ -1,4 +1,8 @@
-import { CART_CONDITION_FIELDS, NUMBER_OPERATORS } from "../../engine";
+import {
+  CART_CONDITION_FIELDS,
+  CONDITION_SUBJECT,
+  NUMBER_OPERATORS,
+} from "../../engine";
 import type { RuleCondition, StoredCondition } from "../types";
 
 /**
@@ -7,7 +11,7 @@ import type { RuleCondition, StoredCondition } from "../types";
  * column is JSON, so it's checked here instead of trusted.
  */
 export function toRuleCondition(row: StoredCondition): RuleCondition | null {
-  if (row.subject !== "CART") return null;
+  if (row.subject !== CONDITION_SUBJECT.CART) return null;
 
   const field = CART_CONDITION_FIELDS.find((f) => f === row.field);
   const operator = NUMBER_OPERATORS.find((o) => o === row.operator);

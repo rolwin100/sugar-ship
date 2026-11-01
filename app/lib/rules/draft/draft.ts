@@ -1,4 +1,9 @@
-import { CART_CONDITION_FIELDS, NUMBER_OPERATORS } from "../../engine";
+import {
+  CART_CONDITION_FIELDS,
+  NUMBER_OPERATORS,
+  RULE_MATCH,
+  RULE_STATUS,
+} from "../../engine";
 import {
   RATE_PRESETS,
   RULE_MATCHES,
@@ -13,16 +18,17 @@ import {
   isZonePricingDraft,
   pricingToDraft,
 } from "./pricing-draft";
+import { RATE_PRESET } from "../constants";
 
 export const emptyRuleDraft = (): RuleDraft => ({
   name: "",
-  status: "ACTIVE",
-  preset: "standard",
+  status: RULE_STATUS.ACTIVE,
+  preset: RATE_PRESET.STANDARD,
   customName: "",
   minDeliveryDays: "",
   maxDeliveryDays: "",
   prices: {},
-  match: "ALL",
+  match: RULE_MATCH.ALL,
   conditions: [],
 });
 
@@ -92,7 +98,8 @@ export function parseRuleDraft(raw: unknown): RuleDraft | null {
     "maxDeliveryDays",
   ] as const;
   if (strings.some((key) => typeof d[key] !== "string")) return null;
-  if (d.status !== "ACTIVE" && d.status !== "INACTIVE") return null;
+  if (d.status !== RULE_STATUS.ACTIVE && d.status !== RULE_STATUS.INACTIVE)
+    return null;
   if (d.preset !== "custom" && !RATE_PRESETS.includes(d.preset as RatePreset))
     return null;
 

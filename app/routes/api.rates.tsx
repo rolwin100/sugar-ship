@@ -8,6 +8,7 @@ import {
 import { quoteCheckout } from "../lib/rates/quote-checkout.server";
 import { getShopForRates } from "../lib/shop.server";
 import { logRateRequest } from "../lib/rate-log.server";
+import { RATE_OUTCOME } from "../lib/constants";
 
 /**
  * Carrier Service callback. Shopify POSTs { rate: { origin, destination, items, currency, locale } }
@@ -51,16 +52,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   let rates: ShippingRate[] = [];
-  let outcome: RateOutcome = "none";
+  let outcome: RateOutcome = RATE_OUTCOME.NONE;
   let errorMessage: string | undefined;
 
   try {
     // Test mode only for now (see isTestCheckout).
     if (testMode && shopRecord)
       rates = await quoteCheckout(shopRecord, payload);
-    if (rates.length > 0) outcome = "rates";
+    if (rates.length > 0) outcome = RATE_OUTCOME.RATES;
   } catch (error) {
-    outcome = "error";
+    outcome = RATE_OUTCOME.ERROR;
     errorMessage = error instanceof Error ? error.message : String(error);
     console.error(`[sugar-ship] rates: quoting failed for ${shop}`, error);
   }
@@ -73,7 +74,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       currency,
       locale,
     );
-    if (rates.length > 0) outcome = "fallback";
+    if (rates.length > 0) outcome = RATE_OUTCOME.FALLBACK;
   }
 
   const durationMs = Date.now() - startedAt;

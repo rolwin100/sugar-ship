@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { formatMoney } from "../../lib/money";
 import type { ZonePricing } from "../../lib/rules/types";
+import { RATE_MODE } from "../../lib/engine";
 
 /** Up to this many zones are listed by name; more are shown as a price range. */
 const NAMED_ZONES_MAX = 2;
@@ -17,7 +18,7 @@ export function RatePrices({ prices, zoneNames, currency }: Props) {
   const money = (subunits: number) =>
     formatMoney(subunits, currency, i18n.language);
   // Only flat prices can be saved until D3; other modes are summarised there.
-  const flat = prices.flatMap((p) => (p.mode === "FLAT" ? [p] : []));
+  const flat = prices.flatMap((p) => (p.mode === RATE_MODE.FLAT ? [p] : []));
 
   if (flat.length <= NAMED_ZONES_MAX) {
     return (

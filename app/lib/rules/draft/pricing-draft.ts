@@ -9,6 +9,7 @@ import {
   type ZonePricing,
   type ZonePricingDraft,
 } from "../types";
+import { RATE_BASIS, RATE_MODE } from "../../engine";
 
 // Converts one zone's pricing between the form (typed text, merchant units) and
 // stored values (subunits, grams, items, basis points). Text that can't be read
@@ -19,8 +20,8 @@ const BPS_PER_PERCENT = 100; // 5% = 500 basis points
 /** A zone that isn't offered yet; flat is the default mode when it's switched on. */
 export const emptyZonePricingDraft = (): ZonePricingDraft => ({
   offered: false,
-  mode: "FLAT",
-  basis: "WEIGHT",
+  mode: RATE_MODE.FLAT,
+  basis: RATE_BASIS.WEIGHT,
   price: "",
   bands: [{ from: "0", to: "", price: "" }],
   basePrice: "",
@@ -40,9 +41,9 @@ export function pricingToDraft(
     mode: pricing.mode,
   };
   switch (pricing.mode) {
-    case "FLAT":
+    case RATE_MODE.FLAT:
       return { ...draft, price: fromSubunits(pricing.price, currency) };
-    case "BANDS":
+    case RATE_MODE.BANDS:
       return {
         ...draft,
         basis: pricing.basis,
@@ -50,7 +51,7 @@ export function pricingToDraft(
           bandToDraft(band, pricing.basis, currency),
         ),
       };
-    case "INCREMENTAL":
+    case RATE_MODE.INCREMENTAL:
       return {
         ...draft,
         basis: pricing.basis,
@@ -58,7 +59,7 @@ export function pricingToDraft(
         stepSize: basisToText(pricing.stepSize, pricing.basis, currency),
         stepPrice: fromSubunits(pricing.stepPrice, currency),
       };
-    case "PERCENT":
+    case RATE_MODE.PERCENT:
       return { ...draft, percent: bpsToPercent(pricing.percentBps) };
   }
 }
@@ -76,31 +77,31 @@ export function draftToPricing(
   const money = (text: string) => toSubunits(text, currency) ?? Number.NaN;
 
   switch (draft.mode) {
-    case "FLAT":
-      return { zoneId, mode: "FLAT", price: money(draft.price) };
-    case "BANDS":
+    case RATE_MODE.FLAT:
+      return { zoneId, mode: RATE_MODE.FLAT, price: money(draft.price) };
+    case RATE_MODE.BANDS:
       return {
         zoneId,
-        mode: "BANDS",
+        mode: RATE_MODE.BANDS,
         basis: draft.basis,
         bands: draft.bands.map((band) =>
           draftToBand(band, draft.basis, currency),
         ),
       };
-    case "INCREMENTAL":
+    case RATE_MODE.INCREMENTAL:
       return {
         zoneId,
-        mode: "INCREMENTAL",
+        mode: RATE_MODE.INCREMENTAL,
         basis: draft.basis,
         basePrice: money(draft.basePrice),
         stepSize:
           textToBasis(draft.stepSize, draft.basis, currency) ?? Number.NaN,
         stepPrice: money(draft.stepPrice),
       };
-    case "PERCENT":
+    case RATE_MODE.PERCENT:
       return {
         zoneId,
-        mode: "PERCENT",
+        mode: RATE_MODE.PERCENT,
         percentBps: percentToBps(draft.percent) ?? Number.NaN,
       };
   }
@@ -139,11 +140,11 @@ export function basisToText(
   currency: string,
 ): string {
   switch (basis) {
-    case "WEIGHT":
+    case RATE_BASIS.WEIGHT:
       return gramsToKg(value);
-    case "SUBTOTAL":
+    case RATE_BASIS.SUBTOTAL:
       return fromSubunits(value, currency);
-    case "QUANTITY":
+    case RATE_BASIS.QUANTITY:
       return String(value);
   }
 }
@@ -155,11 +156,11 @@ export function textToBasis(
   currency: string,
 ): number | null {
   switch (basis) {
-    case "WEIGHT":
+    case RATE_BASIS.WEIGHT:
       return kgToGrams(text);
-    case "SUBTOTAL":
+    case RATE_BASIS.SUBTOTAL:
       return toSubunits(text, currency);
-    case "QUANTITY": {
+    case RATE_BASIS.QUANTITY: {
       const trimmed = text.trim();
       if (trimmed === "") return null;
       return /^\d+$/.test(trimmed) ? Number(trimmed) : Number.NaN;

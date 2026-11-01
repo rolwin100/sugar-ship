@@ -7,6 +7,7 @@ import {
   PRICE_MAX,
 } from "./limits";
 import type { RuleError, RuleErrorKey } from "./validate-rule";
+import { RATE_MODE } from "../../engine";
 
 // Checks one zone's pricing, by mode. Values are in stored units (subunits, grams,
 // items, basis points); text the form couldn't read arrives as NaN and fails here.
@@ -25,10 +26,10 @@ export function validatePricing(pricing: ZonePricing): RuleError[] {
   });
 
   switch (pricing.mode) {
-    case "FLAT":
+    case RATE_MODE.FLAT:
       return isAmount(pricing.price, PRICE_MAX) ? [] : [error("priceInvalid")];
 
-    case "BANDS": {
+    case RATE_MODE.BANDS: {
       if (!PRICING_BASES.includes(pricing.basis)) {
         return [error("pricingBasisInvalid")];
       }
@@ -62,7 +63,7 @@ export function validatePricing(pricing: ZonePricing): RuleError[] {
       return errors;
     }
 
-    case "INCREMENTAL": {
+    case RATE_MODE.INCREMENTAL: {
       if (!PRICING_BASES.includes(pricing.basis)) {
         return [error("pricingBasisInvalid")];
       }
@@ -82,7 +83,7 @@ export function validatePricing(pricing: ZonePricing): RuleError[] {
       return errors;
     }
 
-    case "PERCENT":
+    case RATE_MODE.PERCENT:
       return isAmount(pricing.percentBps, PERCENT_BPS_MAX) &&
         pricing.percentBps > 0
         ? []

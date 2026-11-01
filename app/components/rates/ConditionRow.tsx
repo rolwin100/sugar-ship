@@ -9,6 +9,7 @@ import {
   ruleErrorMessage,
 } from "./utils";
 import type { ConditionRowProps } from "./types";
+import { CART_CONDITION_FIELD } from "../../lib/engine";
 
 /** One condition: [field] [comparison] [value in the right unit] [remove]. */
 export function ConditionRow({
@@ -58,7 +59,7 @@ export function ConditionRow({
         ))}
       </s-select>
 
-      {condition.field === "subtotal" && (
+      {condition.field === CART_CONDITION_FIELD.SUBTOTAL && (
         <s-money-field
           label={valueLabel}
           labelAccessibilityVisibility="exclusive"
@@ -69,7 +70,7 @@ export function ConditionRow({
           onInput={(e) => onValueChange(fieldValue(e))}
         />
       )}
-      {condition.field === "weight" && (
+      {condition.field === CART_CONDITION_FIELD.WEIGHT && (
         <s-number-field
           label={valueLabel}
           labelAccessibilityVisibility="exclusive"
@@ -81,7 +82,7 @@ export function ConditionRow({
           onInput={(e) => onValueChange(fieldValue(e))}
         />
       )}
-      {condition.field === "quantity" && (
+      {condition.field === CART_CONDITION_FIELD.QUANTITY && (
         <s-number-field
           label={valueLabel}
           labelAccessibilityVisibility="exclusive"
