@@ -102,6 +102,12 @@ export type RuleCondition = {
   value: number;
 };
 
+/** The single-value text fields of a zone pricing draft (bands are edited as rows). */
+export type ZonePricingTextField = keyof Pick<
+  ZonePricingDraft,
+  "price" | "basePrice" | "stepSize" | "stepPrice" | "percent"
+>;
+
 /** A Rate row's pricing columns as read from the database, before they're checked (see toZonePricing). */
 export type StoredPricing = {
   zoneId: string;

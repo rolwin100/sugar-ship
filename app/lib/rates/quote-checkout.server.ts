@@ -20,7 +20,12 @@ export async function quoteCheckout(
 
   // Prices are saved in the shop's currency and we don't convert yet,
   // so checkouts in another currency get no Sugar Ship rates.
-  if (!shop.currency || shop.currency !== cart.currency) return [];
+  if (!shop.currency || shop.currency !== cart.currency) {
+    console.log(
+      `[sugar-ship] quote: skipped, checkout currency ${cart.currency} isn't the shop's (${shop.currency ?? "unknown"})`,
+    );
+    return [];
+  }
 
   const [zones, rules] = await Promise.all([
     listZones(shop.id),
@@ -29,5 +34,17 @@ export async function quoteCheckout(
   const result = quote(cart, rules, zones, {
     combineStrategy: shop.settings?.combineStrategy ?? COMBINE_STRATEGY.SUM,
   });
+
+  // Why each rule did or didn't produce a rate, until the History page shows it.
+  const { country, province } = cart.destination;
+  console.log(
+    `[sugar-ship] quote: to ${country ?? "?"}-${province ?? "?"}, ${result.rates.length} rate(s)`,
+  );
+  for (const entry of result.trace) {
+    console.log(
+      `[sugar-ship]   "${entry.ruleName}": ${entry.outcome}${entry.detail ? ` — ${entry.detail}` : ""}`,
+    );
+  }
+
   return toShippingRates(result.rates, cart.currency, cart.locale);
 }

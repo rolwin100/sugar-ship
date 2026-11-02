@@ -1,26 +1,26 @@
 import { useTranslation } from "react-i18next";
+import { emptyZonePricingDraft } from "../../lib/rules/draft";
 import type { ZonePricingDraft } from "../../lib/rules/types";
 import type { RuleError } from "../../lib/rules/validate-rule";
 import type { Zone } from "../../lib/zones/types";
-import { fieldValue } from "../field-events";
-import { ZoneCoverage } from "../zones/ZoneCoverage";
-import { ruleErrorMessage } from "./utils";
+import type { ZonePricingCardProps } from "./types";
+import { ZonePricingCard } from "./ZonePricingCard";
 
 type Props = {
   zones: Zone[];
-  prices: Record<string, ZonePricingDraft>; // zoneId → pricing (flat only until D3)
+  prices: Record<string, ZonePricingDraft>; // zoneId → pricing
   currency: string;
   errors: RuleError[]; // price errors, each with a zoneId
-  onPriceChange: (zoneId: string, price: string) => void;
+  onPricesChange: ZonePricingCardProps["onPricesChange"];
 };
 
-/** One price field per zone; empty means the rate isn't offered there. */
+/** One card per zone: whether the rate is offered there and how it's priced. */
 export function ZonePricesSection({
   zones,
   prices,
   currency,
   errors,
-  onPriceChange,
+  onPricesChange,
 }: Props) {
   const { t } = useTranslation();
   const zoneNames = Object.fromEntries(zones.map((z) => [z.id, z.name]));
@@ -36,27 +36,17 @@ export function ZonePricesSection({
             <s-link href="/app/zones">{t("rates.goToZones")}</s-link>
           </s-paragraph>
         ) : (
-          zones.map((zone) => {
-            const error = errors.find((e) => e.zoneId === zone.id);
-            return (
-              <s-stack key={zone.id} gap="small-100">
-                <s-money-field
-                  label={zone.name}
-                  currencyCode={currency as never}
-                  placeholder={t("rates.notOffered")}
-                  min={0}
-                  value={prices[zone.id]?.offered ? prices[zone.id].price : ""}
-                  error={
-                    error ? ruleErrorMessage(error, t, zoneNames) : undefined
-                  }
-                  onInput={(e) => onPriceChange(zone.id, fieldValue(e))}
-                />
-                <s-text color="subdued">
-                  <ZoneCoverage zone={{ ...zone, rateCount: 0 }} />
-                </s-text>
-              </s-stack>
-            );
-          })
+          zones.map((zone) => (
+            <ZonePricingCard
+              key={zone.id}
+              zone={zone}
+              pricing={prices[zone.id] ?? emptyZonePricingDraft()}
+              currency={currency}
+              errors={errors.filter((e) => e.zoneId === zone.id)}
+              zoneNames={zoneNames}
+              onPricesChange={onPricesChange}
+            />
+          ))
         )}
       </s-stack>
     </s-section>
