@@ -9,6 +9,7 @@ const input = (overrides: Partial<RuleInput> = {}): RuleInput => ({
   status: "ACTIVE",
   preset: "standard",
   customName: "",
+  description: "",
   minDeliveryDays: 3,
   maxDeliveryDays: 5,
   prices: [{ zoneId: "domestic", mode: "FLAT", price: 8000 }],
@@ -57,6 +58,17 @@ describe("validateRule", () => {
   it("clears the custom name when a preset is used", () => {
     const result = validateRule(input({ customName: "leftover" }), zones);
     expect(result.ok && result.rule.customName).toBe("");
+  });
+
+  it("trims the description and limits its length", () => {
+    const ok = validateRule(input({ description: "  Tracked  " }), zones);
+    expect(ok.ok && ok.rule.description).toBe("Tracked");
+    expect(
+      validateRule(input({ description: "x".repeat(100) }), zones).ok,
+    ).toBe(true);
+    expect(
+      keys(validateRule(input({ description: "x".repeat(101) }), zones)),
+    ).toEqual(["descriptionTooLong"]);
   });
 
   it("checks delivery days", () => {

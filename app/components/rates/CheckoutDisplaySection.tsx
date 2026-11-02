@@ -7,22 +7,29 @@ import { ruleErrorMessage } from "./utils";
 
 type Fields = Pick<
   RuleDraft,
-  "preset" | "customName" | "minDeliveryDays" | "maxDeliveryDays"
+  | "preset"
+  | "customName"
+  | "description"
+  | "minDeliveryDays"
+  | "maxDeliveryDays"
 >;
 
 type Props = Fields & {
   customNameError?: RuleError;
+  descriptionError?: RuleError;
   daysError?: RuleError;
   onChange: (fields: Partial<Fields>) => void;
 };
 
-/** How the rate looks to customers: its name and delivery estimate. */
+/** How the rate looks to customers: its name, description and delivery estimate. */
 export function CheckoutDisplaySection({
   preset,
   customName,
+  description,
   minDeliveryDays,
   maxDeliveryDays,
   customNameError,
+  descriptionError,
   daysError,
   onChange,
 }: Props) {
@@ -59,6 +66,18 @@ export function CheckoutDisplaySection({
             onInput={(e) => onChange({ customName: fieldValue(e) })}
           />
         )}
+
+        <s-text-field
+          label={t("rates.descriptionLabel")}
+          details={t("rates.descriptionHelp")}
+          value={description}
+          error={
+            descriptionError
+              ? ruleErrorMessage(descriptionError, t, {})
+              : undefined
+          }
+          onInput={(e) => onChange({ description: fieldValue(e) })}
+        />
 
         <s-stack gap="small-200">
           <s-text type="strong">{t("rates.deliveryLabel")}</s-text>

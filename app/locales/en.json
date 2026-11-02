@@ -199,6 +199,9 @@
     "summaryStepSubtotal": "{{base}} + {{price}} per {{step}}",
     "summaryStepQuantity_one": "{{base}} + {{price}} per item",
     "summaryStepQuantity_other": "{{base}} + {{price}} per {{count}} items",
-    "summaryPercent": "{{percent}}% of subtotal"
+    "summaryPercent": "{{percent}}% of subtotal",
+    "descriptionLabel": "Description (optional)",
+    "descriptionHelp": "Shown under the rate name at checkout, e.g. Tracked and insured.",
+    "errorDescriptionTooLong": "Use 100 characters or fewer for the description."
   }
 }

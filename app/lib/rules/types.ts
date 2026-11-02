@@ -154,6 +154,7 @@ export type RuleInput = {
   status: RuleStatus;
   preset: RatePreset | null; // null = use customName
   customName: string;
+  description: string; // shown under the name at checkout; "" = none
   minDeliveryDays: number | null;
   maxDeliveryDays: number | null;
   prices: ZonePricing[]; // zones without a pricing don't get this rate
@@ -174,6 +175,7 @@ export type RuleDraft = {
   status: RuleStatus;
   preset: RatePreset | "custom";
   customName: string;
+  description: string;
   minDeliveryDays: string;
   maxDeliveryDays: string;
   prices: Record<string, ZonePricingDraft>; // zoneId → that zone's pricing

@@ -7,6 +7,7 @@ const ERROR_TEXT = {
   nameTooLong: "rates.errorNameTooLong",
   customNameRequired: "rates.errorCustomNameRequired",
   customNameTooLong: "rates.errorCustomNameTooLong",
+  descriptionTooLong: "rates.errorDescriptionTooLong",
   daysInvalid: "rates.errorDaysInvalid",
   daysOrder: "rates.errorDaysOrder",
   pricesRequired: "rates.errorPricesRequired",

@@ -104,6 +104,16 @@ describe("toShippingRates", () => {
     });
   });
 
+  it("shows the description under the name", () => {
+    const [rate] = toShippingRates(
+      [quoted({ description: "Tracked and insured" })],
+      "INR",
+      "en",
+      now,
+    );
+    expect(rate.description).toBe("Tracked and insured");
+  });
+
   it("adds delivery dates when the rate has an estimate", () => {
     const [rate] = toShippingRates(
       [quoted({ minDeliveryDays: 3, maxDeliveryDays: 5 })],

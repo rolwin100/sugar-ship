@@ -198,9 +198,11 @@ export default function RateEditPage() {
       <CheckoutDisplaySection
         preset={draft.preset}
         customName={draft.customName}
+        description={draft.description}
         minDeliveryDays={draft.minDeliveryDays}
         maxDeliveryDays={draft.maxDeliveryDays}
         customNameError={errors.find((e) => e.field === "customName")}
+        descriptionError={errors.find((e) => e.field === "description")}
         daysError={errors.find((e) => e.field === "days")}
         onChange={change}
       />

@@ -199,6 +199,9 @@
     "summaryStepSubtotal": "{{base}} + {{price}} pro {{step}}",
     "summaryStepQuantity_one": "{{base}} + {{price}} pro Artikel",
     "summaryStepQuantity_other": "{{base}} + {{price}} pro {{count}} Artikel",
-    "summaryPercent": "{{percent}} % der Zwischensumme"
+    "summaryPercent": "{{percent}} % der Zwischensumme",
+    "descriptionLabel": "Beschreibung (optional)",
+    "descriptionHelp": "Wird beim Checkout unter dem Tarifnamen angezeigt, z. B. Mit Sendungsverfolgung und versichert.",
+    "errorDescriptionTooLong": "Verwende höchstens 100 Zeichen für die Beschreibung."
   }
 }

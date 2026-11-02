@@ -3,6 +3,7 @@
 
 export const RULE_NAME_MAX = 100;
 export const CHECKOUT_NAME_MAX = 60;
+export const DESCRIPTION_MAX = 100; // the line under the rate name at checkout
 export const DELIVERY_DAYS_MAX = 365;
 export const PRICE_MAX = 1_000_000_000; // subunits; well above any real shipping price
 export const CONDITIONS_MAX = 10;

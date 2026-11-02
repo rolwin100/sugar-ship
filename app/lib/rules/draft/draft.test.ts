@@ -14,6 +14,7 @@ const rule: Rule = {
   status: "ACTIVE",
   preset: "standard",
   customName: "",
+  description: "Tracked and insured",
   minDeliveryDays: 3,
   maxDeliveryDays: 5,
   prices: [
@@ -46,6 +47,7 @@ describe("rule drafts", () => {
       status: rule.status,
       preset: rule.preset,
       customName: "",
+      description: "Tracked and insured",
       minDeliveryDays: 3,
       maxDeliveryDays: 5,
       prices: rule.prices,

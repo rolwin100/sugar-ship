@@ -9,6 +9,7 @@ import {
   CONDITION_VALUE_MAX,
   CONDITIONS_MAX,
   DELIVERY_DAYS_MAX,
+  DESCRIPTION_MAX,
   RULE_NAME_MAX,
 } from "./limits";
 import { validatePricing } from "./validate-pricing";
@@ -19,6 +20,7 @@ export type RuleErrorKey =
   | "nameTooLong"
   | "customNameRequired"
   | "customNameTooLong"
+  | "descriptionTooLong"
   | "daysInvalid"
   | "daysOrder"
   | "pricesRequired"
@@ -43,7 +45,13 @@ export type RuleErrorKey =
   | "percentInvalid";
 
 export type RuleError = {
-  field: "name" | "customName" | "days" | "prices" | "conditions";
+  field:
+    | "name"
+    | "customName"
+    | "description"
+    | "days"
+    | "prices"
+    | "conditions";
   key: RuleErrorKey;
   zoneId?: string; // for price errors
   bandIndex?: number; // for band errors: row in the zone's price table, from 0
@@ -61,6 +69,7 @@ export {
   CONDITION_VALUE_MAX,
   CONDITIONS_MAX,
   DELIVERY_DAYS_MAX,
+  DESCRIPTION_MAX,
   PERCENT_BPS_MAX,
   PRICE_MAX,
   RULE_NAME_MAX,
@@ -88,6 +97,12 @@ export function validateRule(
     else if (customName.length > CHECKOUT_NAME_MAX) {
       errors.push({ field: "customName", key: "customNameTooLong" });
     }
+  }
+
+  // Optional; an empty description shows nothing under the name.
+  const description = input.description.trim();
+  if (description.length > DESCRIPTION_MAX) {
+    errors.push({ field: "description", key: "descriptionTooLong" });
   }
 
   const { minDeliveryDays: min, maxDeliveryDays: max } = input;
@@ -143,5 +158,5 @@ export function validateRule(
 
   return errors.length
     ? { ok: false, errors }
-    : { ok: true, rule: { ...input, name, customName } };
+    : { ok: true, rule: { ...input, name, customName, description } };
 }

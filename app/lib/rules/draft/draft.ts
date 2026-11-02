@@ -25,6 +25,7 @@ export const emptyRuleDraft = (): RuleDraft => ({
   status: RULE_STATUS.ACTIVE,
   preset: RATE_PRESET.STANDARD,
   customName: "",
+  description: "",
   minDeliveryDays: "",
   maxDeliveryDays: "",
   prices: {},
@@ -39,6 +40,7 @@ export function ruleToDraft(rule: Rule, currency: string): RuleDraft {
     status: rule.status,
     preset: rule.preset ?? "custom",
     customName: rule.customName,
+    description: rule.description,
     minDeliveryDays: rule.minDeliveryDays?.toString() ?? "",
     maxDeliveryDays: rule.maxDeliveryDays?.toString() ?? "",
     prices: Object.fromEntries(
@@ -64,6 +66,7 @@ export function draftToInput(draft: RuleDraft, currency: string): RuleInput {
     status: draft.status,
     preset: draft.preset === "custom" ? null : draft.preset,
     customName: draft.preset === "custom" ? draft.customName : "",
+    description: draft.description,
     minDeliveryDays: toDays(draft.minDeliveryDays),
     maxDeliveryDays: toDays(draft.maxDeliveryDays),
     prices,
@@ -94,6 +97,7 @@ export function parseRuleDraft(raw: unknown): RuleDraft | null {
   const strings = [
     "name",
     "customName",
+    "description",
     "minDeliveryDays",
     "maxDeliveryDays",
   ] as const;

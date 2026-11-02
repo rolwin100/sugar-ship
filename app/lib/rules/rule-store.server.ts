@@ -73,6 +73,7 @@ export async function saveRule(
       bands: { create: bands },
       preset: rule.preset,
       name: rule.preset ? null : rule.customName,
+      description: rule.description || null,
       minDeliveryDays: rule.minDeliveryDays,
       maxDeliveryDays: rule.maxDeliveryDays,
     };
@@ -212,6 +213,7 @@ function toRule(row: RuleRow): Rule {
     status: row.status,
     preset: first ? preset : RATE_PRESET.STANDARD,
     customName: preset ? "" : (first?.name ?? ""),
+    description: first?.description ?? "",
     minDeliveryDays: first?.minDeliveryDays ?? null,
     maxDeliveryDays: first?.maxDeliveryDays ?? null,
     // Rows missing a column their mode needs are skipped (the zone shows as not priced).
