@@ -112,6 +112,7 @@ describe("quote", () => {
       running: "matched",
     });
     expect(result.rates.map((r) => r.ruleId)).toEqual(["running"]);
+    expect(result.trace[0].reason).toEqual({ kind: "out_of_schedule" });
   });
 
   it("stops after a matching exclusive rule", () => {
@@ -124,6 +125,7 @@ describe("quote", () => {
     expect(result.trace[1]).toMatchObject({
       ruleId: "standard",
       outcome: "skipped_after_exclusive",
+      reason: { kind: "after_exclusive", ruleName: "vip" },
     });
   });
 
@@ -153,6 +155,7 @@ describe("quote", () => {
     expect(result.rates).toHaveLength(0);
     expect(result.trace[0]).toMatchObject({ outcome: "matched" });
     expect(result.trace[0].detail).toContain("BANDS rate has no bands");
+    expect(result.trace[0].reason).toEqual({ kind: "not_priced" });
   });
 
   it("only returns rates for the address's zone", () => {
@@ -182,11 +185,34 @@ describe("quote", () => {
     );
   });
 
+  it("gives a reason for every rule that gives no rate, and none for rules that do", () => {
+    const result = quote(
+      cart,
+      [
+        rule({ id: "off", status: "INACTIVE" }),
+        rule({
+          id: "elsewhere",
+          rates: [{ ...flatRate("x", 100), zoneId: "zone-us" }],
+        }),
+        rule({ id: "shown" }),
+      ],
+      zones,
+      settings,
+      NOW,
+    );
+    expect(result.trace.map((t) => [t.ruleId, t.reason])).toEqual([
+      ["off", { kind: "inactive" }],
+      ["elsewhere", { kind: "not_in_zone", zoneName: "Domestic" }],
+      ["shown", undefined],
+    ]);
+  });
+
   it("returns no rates when the address is in no zone", () => {
     const usCart = { ...cart, destination: { country: "US", province: "CA" } };
     const result = quote(usCart, [rule({ id: "r1" })], zones, settings, NOW);
     expect(result.rates).toHaveLength(0);
     expect(result.trace[0].detail).toContain("address is not in any zone");
+    expect(result.trace[0].reason).toEqual({ kind: "no_zone" });
   });
 
   it("applies cart conditions and explains rules that don't match", () => {
@@ -219,6 +245,21 @@ describe("quote", () => {
         ruleName: "free",
         outcome: "not_matched",
         detail: "needs all conditions; subtotal 80000 ≥ 100000 is false",
+        reason: {
+          kind: "conditions",
+          failure: {
+            match: "ALL",
+            conditions: [
+              {
+                field: "subtotal",
+                operator: "GREATER_OR_EQUAL",
+                value: 100000,
+                actual: 80000,
+                result: false,
+              },
+            ],
+          },
+        },
       },
     ]);
   });

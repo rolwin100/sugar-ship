@@ -21,13 +21,27 @@ describe("checkCartCondition", () => {
         condition("subtotal", "GREATER_OR_EQUAL", 100000),
         totals,
       ),
-    ).toEqual({ result: true, text: "subtotal 100000 ≥ 100000" });
+    ).toEqual({
+      result: true,
+      text: "subtotal 100000 ≥ 100000",
+      checked: {
+        field: "subtotal",
+        operator: "GREATER_OR_EQUAL",
+        value: 100000,
+        actual: 100000,
+        result: true,
+      },
+    });
     expect(
       checkCartCondition(condition("weight", "GREATER_THAN", 1500), totals),
-    ).toEqual({ result: true, text: "weight 2000 > 1500" });
+    ).toMatchObject({ result: true, text: "weight 2000 > 1500" });
     expect(
       checkCartCondition(condition("quantity", "GREATER_OR_EQUAL", 10), totals),
-    ).toEqual({ result: false, text: "quantity 3 ≥ 10" });
+    ).toMatchObject({
+      result: false,
+      text: "quantity 3 ≥ 10",
+      checked: { field: "quantity", value: 10, actual: 3, result: false },
+    });
   });
 
   it("can't check unknown fields, non-number operators or bad values", () => {

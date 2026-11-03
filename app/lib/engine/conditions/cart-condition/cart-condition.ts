@@ -4,7 +4,7 @@ import type {
   ConditionResult,
   EngineCondition,
 } from "../../types";
-import { compareNumbers, operatorSymbol } from "../operators";
+import { compareNumbers, isNumberOperator, operatorSymbol } from "../operators";
 import { CART_CONDITION_FIELD } from "../../constants";
 
 /** Cart fields a condition can test (units: subtotal subunits, weight grams, quantity items). */
@@ -33,17 +33,20 @@ export function checkCartCondition(
     return { unsupported: `value for ${field} is not a number` };
   }
 
-  const actual = totals[field];
-  const result = compareNumbers(condition.operator, actual, value);
-
-  if (typeof result !== "boolean") {
+  const { operator } = condition;
+  if (!isNumberOperator(operator)) {
     return {
-      unsupported: `operator ${condition.operator} isn't supported for ${field}`,
+      unsupported: `operator ${operator} isn't supported for ${field}`,
     };
   }
 
+  const actual = totals[field];
+  // Never null here: the operator was checked above.
+  const result = compareNumbers(operator, actual, value) === true;
+
   return {
     result,
-    text: `${field} ${actual} ${operatorSymbol(condition.operator)} ${value}`,
+    text: `${field} ${actual} ${operatorSymbol(operator)} ${value}`,
+    checked: { field, operator, value, actual, result },
   };
 }

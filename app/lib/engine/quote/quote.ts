@@ -10,13 +10,24 @@ import type {
   EngineZone,
   QuotedRate,
   TraceEntry,
+  TraceReason,
 } from "../types";
-import { RULE_STATUS, TRACE_OUTCOME } from "../constants";
+import { RULE_STATUS, TRACE_OUTCOME, TRACE_REASON } from "../constants";
 
 function inSchedule(rule: EngineRule, now: Date): boolean {
   if (rule.startsAt && now < rule.startsAt) return false;
   if (rule.endsAt && now >= rule.endsAt) return false;
   return true;
+}
+
+/** Why a matching rule gave no rate, most specific first. */
+function noRateReason(
+  zone: EngineZone | null,
+  notPriced: boolean,
+): TraceReason {
+  if (!zone) return { kind: TRACE_REASON.NO_ZONE };
+  if (notPriced) return { kind: TRACE_REASON.NOT_PRICED };
+  return { kind: TRACE_REASON.NOT_IN_ZONE, zoneName: zone.name };
 }
 
 /**
@@ -62,15 +73,27 @@ export function quote(
         ...base,
         outcome: TRACE_OUTCOME.SKIPPED_AFTER_EXCLUSIVE,
         detail: `exclusive rule "${stoppedBy.name}" matched first`,
+        reason: {
+          kind: TRACE_REASON.AFTER_EXCLUSIVE,
+          ruleName: stoppedBy.name,
+        },
       });
       continue;
     }
     if (rule.status !== RULE_STATUS.ACTIVE) {
-      trace.push({ ...base, outcome: TRACE_OUTCOME.SKIPPED_INACTIVE });
+      trace.push({
+        ...base,
+        outcome: TRACE_OUTCOME.SKIPPED_INACTIVE,
+        reason: { kind: TRACE_REASON.INACTIVE },
+      });
       continue;
     }
     if (!inSchedule(rule, now)) {
-      trace.push({ ...base, outcome: TRACE_OUTCOME.SKIPPED_SCHEDULE });
+      trace.push({
+        ...base,
+        outcome: TRACE_OUTCOME.SKIPPED_SCHEDULE,
+        reason: { kind: TRACE_REASON.OUT_OF_SCHEDULE },
+      });
       continue;
     }
     const conditions = checkConditions(rule, totals);
@@ -79,11 +102,17 @@ export function quote(
         ...base,
         outcome: TRACE_OUTCOME.NOT_MATCHED,
         ...(conditions.reason ? { detail: conditions.reason } : {}),
+        reason: {
+          kind: TRACE_REASON.CONDITIONS,
+          failure: conditions.failure ?? { unsupported: true },
+        },
       });
       continue;
     }
 
     const notes: string[] = [];
+    const ratesBefore = rates.length;
+    let notPriced = false;
     if (!zone) notes.push("address is not in any zone");
     for (const rate of rule.rates) {
       if (!zone) continue;
@@ -96,6 +125,7 @@ export function quote(
       const priced = priceRate(rate, totals);
       if (!priced.ok) {
         notes.push(`rate ${rate.id}: ${priced.reason}`);
+        notPriced = true;
         continue;
       }
       rates.push({
@@ -111,10 +141,14 @@ export function quote(
       });
     }
 
+    const reason =
+      rates.length > ratesBefore ? undefined : noRateReason(zone, notPriced);
+
     trace.push({
       ...base,
       outcome: TRACE_OUTCOME.MATCHED,
       ...(notes.length > 0 ? { detail: notes.join("; ") } : {}),
+      ...(reason ? { reason } : {}),
     });
 
     if (rule.exclusive) stoppedBy = rule;

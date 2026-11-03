@@ -56,6 +56,18 @@ describe("checkConditions", () => {
     expect(checkConditions(between, totals)).toEqual({
       matched: false,
       reason: "needs all conditions; subtotal 100000 < 100000 is false",
+      failure: {
+        match: "ALL",
+        conditions: [
+          {
+            field: "subtotal",
+            operator: "LESS_THAN",
+            value: 100000,
+            actual: 100000,
+            result: false,
+          },
+        ],
+      },
     });
   });
 
@@ -65,18 +77,35 @@ describe("checkConditions", () => {
       condition("weight", "GREATER_THAN", 1500),
     ];
     expect(matched(rule(conditions, "ANY"))).toBe(true);
-    expect(
-      checkConditions(rule([conditions[0]], "ANY"), totals).reason,
-    ).toContain("none is true");
+    const none = checkConditions(rule([conditions[0]], "ANY"), totals);
+    expect(none.reason).toContain("none is true");
+    expect(none.failure).toEqual({
+      match: "ANY",
+      conditions: [
+        {
+          field: "quantity",
+          operator: "GREATER_OR_EQUAL",
+          value: 10,
+          actual: 3,
+          result: false,
+        },
+      ],
+    });
   });
 
   it("NONE needs every condition to be false", () => {
     expect(
       matched(rule([condition("quantity", "GREATER_THAN", 5)], "NONE")),
     ).toBe(true);
-    expect(
-      matched(rule([condition("quantity", "GREATER_THAN", 1)], "NONE")),
-    ).toBe(false);
+    const hit = checkConditions(
+      rule([condition("quantity", "GREATER_THAN", 1)], "NONE"),
+      totals,
+    );
+    expect(hit.matched).toBe(false);
+    expect(hit.failure).toMatchObject({
+      match: "NONE",
+      conditions: [{ field: "quantity", actual: 3, result: true }],
+    });
   });
 
   it("treats conditions it can't check as not matching", () => {
@@ -88,6 +117,7 @@ describe("checkConditions", () => {
       const result = checkConditions(rule([c]), totals);
       expect(result.matched).toBe(false);
       expect(result.reason).toMatch(/^unsupported condition/);
+      expect(result.failure).toEqual({ unsupported: true });
     }
     // Even under NONE, which would otherwise pass when nothing is true.
     expect(matched(rule([product], "NONE"))).toBe(false);

@@ -55,6 +55,7 @@ function AppNav() {
       <s-link href="/app">{t("nav.home")}</s-link>
       <s-link href="/app/zones">{t("nav.zones")}</s-link>
       <s-link href="/app/rates">{t("nav.rates")}</s-link>
+      <s-link href="/app/simulator">{t("nav.simulator")}</s-link>
     </s-app-nav>
   );
 }

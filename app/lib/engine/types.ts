@@ -18,6 +18,7 @@ import type {
   RULE_MATCH,
   RULE_STATUS,
   TRACE_OUTCOME,
+  TRACE_REASON,
 } from "./constants";
 
 type ValueOf<T> = T[keyof T];
@@ -92,16 +93,41 @@ export type EngineCondition = {
   postcodeEntries?: string[] | null; // resolved from the linked PostcodeList
 };
 
+/** A cart condition with the cart's actual value, e.g. subtotal 80000 ≥ 100000 → false. */
+export type CheckedCondition = {
+  field: CartConditionField;
+  operator: NumberOperator;
+  value: number; // what the condition asks for
+  actual: number; // what the cart has
+  result: boolean;
+};
+
 /**
  * One condition checked against the cart: true/false with a short description
  * (e.g. "subtotal 80000 ≥ 100000"), or why the engine can't check it yet.
  */
 export type ConditionResult =
-  | { result: boolean; text: string }
+  | { result: boolean; text: string; checked: CheckedCondition }
   | { unsupported: string };
 
-/** Whether a rule's conditions match a cart, and if not, why (for the trace). */
-export type ConditionCheck = { matched: boolean; reason?: string };
+/**
+ * Why a rule's conditions didn't match: its match and the conditions that decided it
+ * (ALL: the first false one; ANY: all of them, none true; NONE: the first true one),
+ * or a condition the engine can't check yet.
+ */
+export type ConditionFailure =
+  | { match: RuleMatch; conditions: CheckedCondition[] }
+  | { unsupported: true };
+
+/**
+ * Whether a rule's conditions match a cart, and if not, why: `reason` as developer
+ * text, `failure` as data for the admin.
+ */
+export type ConditionCheck = {
+  matched: boolean;
+  reason?: string;
+  failure?: ConditionFailure;
+};
 
 /** One zone's price for a cart (subunits), or why it can't be priced. */
 export type PriceResult =
@@ -172,11 +198,22 @@ export type QuotedRate = {
 
 export type TraceOutcome = ValueOf<typeof TRACE_OUTCOME>;
 
+/** Why a rule gave this cart no rate (see TRACE_REASON). */
+export type TraceReason =
+  | { kind: typeof TRACE_REASON.INACTIVE }
+  | { kind: typeof TRACE_REASON.OUT_OF_SCHEDULE }
+  | { kind: typeof TRACE_REASON.AFTER_EXCLUSIVE; ruleName: string }
+  | { kind: typeof TRACE_REASON.CONDITIONS; failure: ConditionFailure }
+  | { kind: typeof TRACE_REASON.NO_ZONE } // the address is in none of the shop's zones
+  | { kind: typeof TRACE_REASON.NOT_IN_ZONE; zoneName: string } // not offered in the address's zone
+  | { kind: typeof TRACE_REASON.NOT_PRICED }; // the zone's price couldn't be worked out
+
 export type TraceEntry = {
   ruleId: string;
   ruleName: string;
   outcome: TraceOutcome;
-  detail?: string;
+  detail?: string; // developer text
+  reason?: TraceReason; // set when the rule gave no rate
 };
 
 export type EngineResult = {

@@ -82,6 +82,20 @@ export const CART_CONDITION_FIELD = {
   WEIGHT: "weight",
 } as const;
 
+/**
+ * Why a rule gave no rate, as data (not text), so the admin can explain it in the
+ * merchant's language (cart simulator, History).
+ */
+export const TRACE_REASON = {
+  INACTIVE: "inactive",
+  OUT_OF_SCHEDULE: "out_of_schedule",
+  AFTER_EXCLUSIVE: "after_exclusive",
+  CONDITIONS: "conditions",
+  NO_ZONE: "no_zone",
+  NOT_IN_ZONE: "not_in_zone",
+  NOT_PRICED: "not_priced",
+} as const;
+
 /** What happened to a rule in a quote's trace. */
 export const TRACE_OUTCOME = {
   MATCHED: "matched",

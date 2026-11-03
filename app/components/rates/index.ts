@@ -15,6 +15,7 @@ export { RatesEmptyState } from "./RatesEmptyState";
 export { RatesTable } from "./RatesTable";
 export { RuleDetailsSection } from "./RuleDetailsSection";
 export { RuleErrorsBanner } from "./RuleErrorsBanner";
+export { TestRatesButton } from "./TestRatesButton";
 export { ZonePricesSection } from "./ZonePricesSection";
 export { ZonePricingCard } from "./ZonePricingCard";
 export * from "./utils";

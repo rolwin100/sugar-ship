@@ -11,6 +11,7 @@ import {
   AddRateButton,
   RatesEmptyState,
   RatesTable,
+  TestRatesButton,
 } from "../components/rates";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -37,6 +38,7 @@ export default function RatesPage() {
   return (
     <s-page heading={t("rates.title")}>
       {hasZones && <AddRateButton />}
+      {rules.length > 0 && <TestRatesButton />}
       {rules.length === 0 ? (
         <RatesEmptyState hasZones={hasZones} />
       ) : (

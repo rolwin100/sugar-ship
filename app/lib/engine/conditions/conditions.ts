@@ -46,6 +46,7 @@ export function checkConditions(
       return {
         matched: false,
         reason: `unsupported condition: ${checked.unsupported}`,
+        failure: { unsupported: true },
       };
     }
     results.push(checked);
@@ -58,6 +59,7 @@ export function checkConditions(
         ? {
             matched: false,
             reason: `needs all conditions; ${failed.text} is false`,
+            failure: { match: rule.match, conditions: [failed.checked] },
           }
         : { matched: true };
     }
@@ -67,6 +69,10 @@ export function checkConditions(
         : {
             matched: false,
             reason: `needs any condition; none is true (${results.map((r) => r.text).join(", ")})`,
+            failure: {
+              match: rule.match,
+              conditions: results.map((r) => r.checked),
+            },
           };
     case RULE_MATCH.NONE: {
       const hit = results.find((r) => r.result);
@@ -74,6 +80,7 @@ export function checkConditions(
         ? {
             matched: false,
             reason: `needs no conditions true; ${hit.text} is true`,
+            failure: { match: rule.match, conditions: [hit.checked] },
           }
         : { matched: true };
     }
