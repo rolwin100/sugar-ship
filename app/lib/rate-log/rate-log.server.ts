@@ -1,6 +1,13 @@
 import type { Prisma } from "@prisma/client";
-import db from "../db.server";
-import type { RateAddress, RateItem, RateOutcome, ShippingRate } from "./types";
+import db from "../../db.server";
+import type {
+  RateAddress,
+  RateItem,
+  RateOutcome,
+  ShippingRate,
+} from "../types";
+import { toHistoryItem } from "./to-history-item";
+import type { HistoryFilters, HistoryPage } from "./types";
 
 type RateLogInput = {
   shopId: string;
@@ -53,4 +60,32 @@ export async function logRateRequest(input: RateLogInput) {
       error: input.error,
     },
   });
+}
+
+/** History rows per page. */
+export const HISTORY_PAGE_SIZE = 25;
+
+/** One page of a shop's checkouts, newest first. `page` starts at 1. */
+export async function listRateLogs(
+  shopId: string,
+  filters: HistoryFilters,
+  page: number,
+): Promise<HistoryPage> {
+  const current = Math.max(1, Math.floor(page));
+  const rows = await db.rateLog.findMany({
+    where: {
+      shopId,
+      ...(filters.outcome ? { outcome: filters.outcome } : {}),
+      ...(filters.testMode === undefined ? {} : { testMode: filters.testMode }),
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    skip: (current - 1) * HISTORY_PAGE_SIZE,
+    take: HISTORY_PAGE_SIZE + 1, // one extra tells us there's a next page
+  });
+
+  return {
+    items: rows.slice(0, HISTORY_PAGE_SIZE).map(toHistoryItem),
+    page: current,
+    hasNext: rows.length > HISTORY_PAGE_SIZE,
+  };
 }

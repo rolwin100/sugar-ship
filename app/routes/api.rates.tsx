@@ -7,7 +7,7 @@ import {
 } from "../lib/rates/rates.server";
 import { quoteCheckout } from "../lib/rates/quote-checkout.server";
 import { getShopForRates } from "../lib/shop.server";
-import { logRateRequest } from "../lib/rate-log.server";
+import { logRateRequest } from "../lib/rate-log/rate-log.server";
 import { RATE_OUTCOME } from "../lib/constants";
 
 /**
