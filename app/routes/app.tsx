@@ -7,10 +7,16 @@ import { AppProvider } from "@shopify/shopify-app-react-router/react";
 
 import { authenticate } from "../shopify.server";
 import { ensureCarrierService } from "../lib/carrier-service.server";
+import { startProductSync } from "../lib/products/product-sync.server";
+import { requireShop } from "../lib/shop.server";
 import { createI18n, getLocale } from "../lib/i18n";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request);
+
+  // Shops installed before product conditions existed have never synced their products.
+  const shop = await requireShop(session.shop);
+  if (!shop.productsSyncedAt) startProductSync(admin, shop.id);
 
   // Dev only: the tunnel URL changes on every `shopify app dev` run, so re-point the
   // carrier service on each admin load. In production afterAuth handles it.

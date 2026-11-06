@@ -9,6 +9,7 @@ import prisma from "./db.server";
 import { ensureCarrierService } from "./lib/carrier-service.server";
 import { fetchShopCurrency, upsertShopOnInstall } from "./lib/shop.server";
 import { importZonesFromShopify } from "./lib/zones/zones.server";
+import { startProductSync } from "./lib/products/product-sync.server";
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -29,6 +30,8 @@ const shopify = shopifyApp({
           currency,
         });
         await importZonesFromShopify(admin, shop.id);
+        // Product conditions need tags, types and collections; copy them in the background.
+        startProductSync(admin, shop.id);
       } catch (error) {
         console.error("[sugar-ship] afterAuth setup failed", error);
       }

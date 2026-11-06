@@ -98,3 +98,14 @@ export async function loadProducts(
     ]),
   );
 }
+
+/** Removes products not saved since `before` (e.g. deleted in Shopify before a full sync). */
+export async function deleteStaleProducts(
+  shopId: string,
+  before: Date,
+): Promise<number> {
+  const { count } = await db.productSnapshot.deleteMany({
+    where: { shopId, updatedAt: { lt: before } },
+  });
+  return count;
+}

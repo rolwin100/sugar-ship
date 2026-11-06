@@ -5,7 +5,6 @@ import { Trans, useTranslation } from "react-i18next";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
-  console.log("hoooo");
   return null;
 };
 

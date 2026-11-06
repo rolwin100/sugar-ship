@@ -76,3 +76,11 @@ export async function requireShop(domain: string) {
   const shop = await db.shop.findUnique({ where: { domain } });
   return shop ?? upsertShopOnInstall(domain);
 }
+
+/** Records that the shop's products were fully copied into ProductSnapshot. */
+export async function markProductsSynced(shopId: string, at: Date) {
+  await db.shop.update({
+    where: { id: shopId },
+    data: { productsSyncedAt: at },
+  });
+}
