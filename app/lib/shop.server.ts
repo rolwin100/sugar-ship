@@ -84,3 +84,14 @@ export async function markProductsSynced(shopId: string, at: Date) {
     data: { productsSyncedAt: at },
   });
 }
+
+/** Our id for an installed shop, or null if we don't know it or it's uninstalled. */
+export async function findInstalledShopId(
+  domain: string,
+): Promise<string | null> {
+  const shop = await db.shop.findUnique({
+    where: { domain },
+    select: { id: true, uninstalledAt: true },
+  });
+  return shop && !shop.uninstalledAt ? shop.id : null;
+}

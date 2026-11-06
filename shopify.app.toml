@@ -20,6 +20,15 @@ topics = ["app/uninstalled"]
 uri = "/webhooks/app/scopes_update"
 topics = ["app/scopes_update"]
 
+# Keep ProductSnapshot (tags, types, collections for product conditions) current.
+[[webhooks.subscriptions]]
+uri = "/webhooks/products"
+topics = ["products/create", "products/update", "products/delete"]
+
+[[webhooks.subscriptions]]
+uri = "/webhooks/collections"
+topics = ["collections/create", "collections/update", "collections/delete"]
+
 [auth]
 redirect_urls = ["https://example.com/api/auth"]
 

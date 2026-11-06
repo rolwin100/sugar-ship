@@ -33,7 +33,7 @@ export async function syncAllProducts(
 }
 
 /** Every collection a product is in, fetched page by page after the first ones we have. */
-async function allCollections(
+export async function allCollections(
   client: ProductsClient,
   product: ProductSnapshotInput,
 ): Promise<number[]> {

@@ -1,1 +1,1 @@
-export { syncAllProducts } from "./sync-all-products";
+export { allCollections, syncAllProducts } from "./sync-all-products";

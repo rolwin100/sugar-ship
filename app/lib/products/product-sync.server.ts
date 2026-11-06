@@ -1,5 +1,6 @@
 import type { AdminApiContext } from "@shopify/shopify-app-react-router/server";
 import { markProductsSynced } from "../shop.server";
+import { adminQuery } from "./admin-query.server";
 import { deleteStaleProducts, upsertProducts } from "./product-store.server";
 import { readCollectionsPage, readProductsPage } from "./read-products-page";
 import { syncAllProducts } from "./sync-all-products";
@@ -23,7 +24,7 @@ const PRODUCTS_QUERY = `#graphql
     }
   }`;
 
-const COLLECTIONS_QUERY = `#graphql
+export const COLLECTIONS_QUERY = `#graphql
   query SugarShipProductCollections($id: ID!, $cursor: String) {
     product(id: $id) {
       collections(first: 250, after: $cursor) {
@@ -33,40 +34,14 @@ const COLLECTIONS_QUERY = `#graphql
     }
   }`;
 
-const RETRIES = 3;
-
-const isThrottled = (error: unknown) =>
-  /throttl/i.test(
-    error instanceof Error ? `${error.message} ${JSON.stringify(error)}` : "",
-  );
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-/** Runs an Admin API query, waiting and retrying when Shopify says to slow down. */
-async function query(
-  admin: AdminApiContext,
-  text: string,
-  variables: Record<string, unknown>,
-): Promise<unknown> {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      const response = await admin.graphql(text, { variables });
-      return await response.json();
-    } catch (error) {
-      if (!isThrottled(error) || attempt >= RETRIES) throw error;
-      await wait(1000 * attempt);
-    }
-  }
-}
-
 /** The sync's view of Shopify, backed by the Admin API. */
-function adminProductsClient(admin: AdminApiContext): ProductsClient {
+export function adminProductsClient(admin: AdminApiContext): ProductsClient {
   return {
     productsPage: async (cursor) =>
-      readProductsPage(await query(admin, PRODUCTS_QUERY, { cursor })),
+      readProductsPage(await adminQuery(admin, PRODUCTS_QUERY, { cursor })),
     collectionsPage: async (productId, cursor) =>
       readCollectionsPage(
-        await query(admin, COLLECTIONS_QUERY, {
+        await adminQuery(admin, COLLECTIONS_QUERY, {
           id: `gid://shopify/Product/${productId}`,
           cursor,
         }),
