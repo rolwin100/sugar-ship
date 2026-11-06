@@ -42,11 +42,13 @@ model Shop {
   uninstalledAt    DateTime? // null = currently installed
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  productsSyncedAt DateTime? // last full product sync (null = never synced)
   settings         ShopSettings?
   rateLogs         RateLog[]
   rules            Rule[]
   postcodeLists    PostcodeList[]
   zones            Zone[]
+  productSnapshots ProductSnapshot[]
 }
 
 model ShopSettings {
@@ -276,4 +278,21 @@ model Zone {
   updatedAt     DateTime @updatedAt
 
   @@index([shopId])
+}
+
+/// A copy of the product fields checkout needs but Shopify doesn't send in the rate
+/// request (tags, type, collections). Shopify is the source of truth; rows can be
+/// re-synced at any time. Product and collection ids fit in a JS number (< 2^53).
+model ProductSnapshot {
+  id            String   @id @default(cuid())
+  shopId        String
+  shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  productId     BigInt // Shopify product id, as sent in the rate request
+  tags          String[] // lowercased and trimmed, for matching
+  productType   String   @default("")
+  vendor        String   @default("")
+  collectionIds BigInt[] // Shopify collection ids
+  updatedAt     DateTime @updatedAt
+
+  @@unique([shopId, productId])
 }
