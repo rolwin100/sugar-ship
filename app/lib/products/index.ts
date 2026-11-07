@@ -1,3 +1,4 @@
+export { attachProductData } from "./attach-product-data";
 export {
   gidToId,
   normaliseTags,

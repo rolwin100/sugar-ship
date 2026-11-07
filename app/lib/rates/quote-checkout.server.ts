@@ -1,5 +1,7 @@
 import type { CombineStrategy } from "@prisma/client";
-import { COMBINE_STRATEGY, quote } from "../engine";
+import { COMBINE_STRATEGY, CONDITION_SUBJECT, quote } from "../engine";
+import { attachProductData } from "../products";
+import { loadProducts } from "../products/product-store.server";
 import { loadEngineRules } from "../rules/rule-store.server";
 import type { RateRequest, ShippingRate } from "../types";
 import { listZones } from "../zones/zone-store.server";
@@ -31,7 +33,25 @@ export async function quoteCheckout(
     listZones(shop.id),
     loadEngineRules(shop.id),
   ]);
-  const result = quote(cart, rules, zones, {
+
+  // Product conditions need tags, types and collections, which Shopify doesn't send.
+  // Look them up only when some rule uses them, so other shops skip the query.
+  const usesProducts = rules.some((rule) =>
+    rule.conditions.some((c) => c.subject === CONDITION_SUBJECT.PRODUCT),
+  );
+  const items = usesProducts
+    ? attachProductData(
+        cart.items,
+        await loadProducts(
+          shop.id,
+          cart.items.flatMap((item) =>
+            item.productId != null ? [item.productId] : [],
+          ),
+        ),
+      )
+    : cart.items;
+
+  const result = quote({ ...cart, items }, rules, zones, {
     combineStrategy: shop.settings?.combineStrategy ?? COMBINE_STRATEGY.SUM,
   });
 

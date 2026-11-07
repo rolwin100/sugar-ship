@@ -25,6 +25,7 @@ export type RateItem = {
   price?: number | null; // subunits
   product_id?: number | null;
   variant_id?: number | null;
+  vendor?: string | null;
 };
 
 export type RateRequest = {

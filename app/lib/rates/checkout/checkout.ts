@@ -23,6 +23,7 @@ export function toEngineCart(payload: RateRequest): EngineCart {
       productId: item.product_id,
       variantId: item.variant_id,
       sku: item.sku,
+      vendor: item.vendor,
       name: item.name,
       quantity: item.quantity ?? 0,
       grams: item.grams ?? 0,
