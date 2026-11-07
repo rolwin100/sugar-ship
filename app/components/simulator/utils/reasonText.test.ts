@@ -8,6 +8,7 @@ const format = { t, currency: "INR", locale: "en" };
 const text = (reason: TraceReason) => reasonText(reason, format);
 
 const subtotal: CheckedCondition = {
+  subject: "CART",
   field: "subtotal",
   operator: "GREATER_OR_EQUAL",
   value: 250000,
@@ -15,6 +16,7 @@ const subtotal: CheckedCondition = {
   result: false,
 };
 const weight: CheckedCondition = {
+  subject: "CART",
   field: "weight",
   operator: "GREATER_THAN",
   value: 2000,
@@ -65,6 +67,26 @@ describe("reasonText", () => {
     expect(failure("NONE", [weight])).toBe(
       "Must not have: Cart weight is more than 2 kg (this cart: 3 kg)",
     );
+    expect(
+      text({
+        kind: "conditions",
+        failure: {
+          match: "ALL",
+          conditions: [
+            {
+              subject: "PRODUCT",
+              field: "tag",
+              operator: "EQUALS",
+              quantifier: "ANY",
+              values: ["fragile"],
+              matching: 0,
+              total: 3,
+              result: false,
+            },
+          ],
+        },
+      }),
+    ).toBe("Needs: Any item: Product tag is fragile (0 of 3 items match)");
     expect(text({ kind: "conditions", failure: { unsupported: true } })).toBe(
       "Has a condition Sugar Ship can't check yet",
     );

@@ -12,6 +12,7 @@ import type {
   COMBINE_STRATEGY,
   CONDITION_OPERATOR,
   CONDITION_SUBJECT,
+  PRODUCT_CONDITION_FIELD,
   QUANTIFIER,
   RATE_BASIS,
   RATE_MODE,
@@ -39,6 +40,17 @@ export type NumberOperator = Extract<
   | typeof CONDITION_OPERATOR.LESS_THAN
   | typeof CONDITION_OPERATOR.LESS_OR_EQUAL
 >;
+/** Operators that compare text (or collection ids) for product conditions. */
+export type TextOperator = Extract<
+  ConditionOperator,
+  | typeof CONDITION_OPERATOR.EQUALS
+  | typeof CONDITION_OPERATOR.NOT_EQUALS
+  | typeof CONDITION_OPERATOR.CONTAINS
+  | typeof CONDITION_OPERATOR.NOT_CONTAINS
+  | typeof CONDITION_OPERATOR.IN
+  | typeof CONDITION_OPERATOR.NOT_IN
+>;
+export type ProductConditionField = ValueOf<typeof PRODUCT_CONDITION_FIELD>;
 export type RateMode = ValueOf<typeof RATE_MODE>;
 export type RateBasis = ValueOf<typeof RATE_BASIS>;
 export type AdjustmentKind = ValueOf<typeof ADJUSTMENT_KIND>;
@@ -55,6 +67,12 @@ export type EngineItem = {
   quantity: number;
   grams: number; // per unit
   price: number; // per unit, subunits
+  // For product conditions. vendor and sku come with Shopify's rate request; tags,
+  // type and collections from our ProductSnapshot. Missing means none.
+  vendor?: string | null;
+  tags?: string[];
+  productType?: string | null;
+  collectionIds?: number[];
 };
 
 export type EngineAddress = {
@@ -94,13 +112,31 @@ export type EngineCondition = {
 };
 
 /** A cart condition with the cart's actual value, e.g. subtotal 80000 ≥ 100000 → false. */
-export type CheckedCondition = {
+export type CheckedCartCondition = {
+  subject: typeof CONDITION_SUBJECT.CART;
   field: CartConditionField;
   operator: NumberOperator;
   value: number; // what the condition asks for
   actual: number; // what the cart has
   result: boolean;
 };
+
+/**
+ * A product condition with how many of the cart's items matched it, e.g. "any item
+ * has tag fragile" → 0 of 3 items → false. Text values are lowercased.
+ */
+export type CheckedProductCondition = {
+  subject: typeof CONDITION_SUBJECT.PRODUCT;
+  field: ProductConditionField;
+  operator: TextOperator;
+  quantifier: Quantifier;
+  values: string[] | number[]; // one value, or the list for IN / NOT_IN
+  matching: number; // items that matched
+  total: number; // items in the cart
+  result: boolean;
+};
+
+export type CheckedCondition = CheckedCartCondition | CheckedProductCondition;
 
 /**
  * One condition checked against the cart: true/false with a short description

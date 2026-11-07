@@ -3,20 +3,25 @@ import type {
   ConditionCheck,
   ConditionResult,
   EngineCondition,
+  EngineItem,
   EngineRule,
 } from "../types";
 import { checkCartCondition } from "./cart-condition";
+import { checkProductCondition } from "./product-condition";
 import { CONDITION_SUBJECT, RULE_MATCH } from "../constants";
 
 /** Hands each condition to the checker for its subject. */
 function checkCondition(
   condition: EngineCondition,
   totals: CartTotals,
+  items: EngineItem[],
 ): ConditionResult {
   switch (condition.subject) {
     case CONDITION_SUBJECT.CART:
       return checkCartCondition(condition, totals);
-    // PRODUCT (slice G) and ADDRESS postcode lists (slice H) come later.
+    case CONDITION_SUBJECT.PRODUCT:
+      return checkProductCondition(condition, items);
+    // ADDRESS postcode lists come in slice H.
     default:
       return {
         unsupported: `${condition.subject} conditions aren't supported yet`,
@@ -36,12 +41,13 @@ function checkCondition(
 export function checkConditions(
   rule: EngineRule,
   totals: CartTotals,
+  items: EngineItem[] = [],
 ): ConditionCheck {
   if (rule.conditions.length === 0) return { matched: true };
 
   const results = [];
   for (const condition of rule.conditions) {
-    const checked = checkCondition(condition, totals);
+    const checked = checkCondition(condition, totals, items);
     if ("unsupported" in checked) {
       return {
         matched: false,

@@ -5,7 +5,7 @@ import type {
   EngineCondition,
 } from "../../types";
 import { compareNumbers, isNumberOperator, operatorSymbol } from "../operators";
-import { CART_CONDITION_FIELD } from "../../constants";
+import { CART_CONDITION_FIELD, CONDITION_SUBJECT } from "../../constants";
 
 /** Cart fields a condition can test (units: subtotal subunits, weight grams, quantity items). */
 export const CART_CONDITION_FIELDS: readonly CartConditionField[] = [
@@ -47,6 +47,13 @@ export function checkCartCondition(
   return {
     result,
     text: `${field} ${actual} ${operatorSymbol(operator)} ${value}`,
-    checked: { field, operator, value, actual, result },
+    checked: {
+      subject: CONDITION_SUBJECT.CART,
+      field,
+      operator,
+      value,
+      actual,
+      result,
+    },
   };
 }

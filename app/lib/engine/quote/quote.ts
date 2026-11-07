@@ -96,7 +96,7 @@ export function quote(
       });
       continue;
     }
-    const conditions = checkConditions(rule, totals);
+    const conditions = checkConditions(rule, totals, cart.items);
     if (!conditions.matched) {
       trace.push({
         ...base,

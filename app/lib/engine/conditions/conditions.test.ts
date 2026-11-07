@@ -60,6 +60,7 @@ describe("checkConditions", () => {
         match: "ALL",
         conditions: [
           {
+            subject: "CART",
             field: "subtotal",
             operator: "LESS_THAN",
             value: 100000,
@@ -83,6 +84,7 @@ describe("checkConditions", () => {
       match: "ANY",
       conditions: [
         {
+          subject: "CART",
           field: "quantity",
           operator: "GREATER_OR_EQUAL",
           value: 10,
@@ -109,17 +111,33 @@ describe("checkConditions", () => {
   });
 
   it("treats conditions it can't check as not matching", () => {
-    const product = condition("tag", "CONTAINS", "fragile", {
-      subject: "PRODUCT",
+    // Postcode conditions come in slice H.
+    const address = condition("postcode", "IN_POSTCODE_LIST", "list1", {
+      subject: "ADDRESS",
     });
     const badField = condition("colour", "EQUALS", 1);
-    for (const c of [product, badField]) {
+    for (const c of [address, badField]) {
       const result = checkConditions(rule([c]), totals);
       expect(result.matched).toBe(false);
       expect(result.reason).toMatch(/^unsupported condition/);
       expect(result.failure).toEqual({ unsupported: true });
     }
     // Even under NONE, which would otherwise pass when nothing is true.
-    expect(matched(rule([product], "NONE"))).toBe(false);
+    expect(matched(rule([address], "NONE"))).toBe(false);
+  });
+
+  it("checks product conditions against the items", () => {
+    const fragile = condition("tag", "EQUALS", "fragile", {
+      subject: "PRODUCT",
+      quantifier: "ANY",
+    });
+    const item = { quantity: 1, grams: 0, price: 0 };
+    expect(
+      checkConditions(rule([fragile]), totals, [{ ...item, tags: ["fragile"] }])
+        .matched,
+    ).toBe(true);
+    expect(checkConditions(rule([fragile]), totals, [item]).matched).toBe(
+      false,
+    );
   });
 });

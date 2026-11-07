@@ -8,12 +8,16 @@ import { formatMoney } from "../../../lib/money";
 import { gramsToKg } from "../../../lib/weight";
 import {
   CART_CONDITION_FIELD,
+  CONDITION_SUBJECT,
   RULE_MATCH,
   TRACE_REASON,
 } from "../../../lib/engine";
 import {
   CONDITION_FIELD_KEYS,
   CONDITION_OPERATOR_KEYS,
+  PRODUCT_FIELD_KEYS,
+  QUANTIFIER_KEYS,
+  TEXT_OPERATOR_KEYS,
 } from "../../rates/utils";
 
 type Format = { t: TFunction; currency: string; locale: string };
@@ -34,9 +38,22 @@ export function amountText(
   }
 }
 
-/** "Cart subtotal is at least ₹2,500.00 (this cart: ₹1,000.00)". */
+/**
+ * "Cart subtotal is at least ₹2,500.00 (this cart: ₹1,000.00)", or for products
+ * "Any item: Product tag is fragile (0 of 3 items match)".
+ */
 function conditionText(checked: CheckedCondition, format: Format): string {
   const { t } = format;
+  if (checked.subject === CONDITION_SUBJECT.PRODUCT) {
+    return t("simulator.productCondition", {
+      quantifier: t(QUANTIFIER_KEYS[checked.quantifier]),
+      field: t(PRODUCT_FIELD_KEYS[checked.field]),
+      operator: t(TEXT_OPERATOR_KEYS[checked.operator]),
+      values: checked.values.join(", "),
+      matching: checked.matching,
+      count: checked.total,
+    });
+  }
   return t("simulator.conditionWithActual", {
     field: t(CONDITION_FIELD_KEYS[checked.field]),
     operator: t(CONDITION_OPERATOR_KEYS[checked.operator]),

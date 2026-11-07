@@ -251,6 +251,7 @@ describe("quote", () => {
             match: "ALL",
             conditions: [
               {
+                subject: "CART",
                 field: "subtotal",
                 operator: "GREATER_OR_EQUAL",
                 value: 100000,
@@ -262,5 +263,38 @@ describe("quote", () => {
         },
       },
     ]);
+  });
+
+  it("applies product conditions to the cart's items", () => {
+    const fragileFee = rule({
+      id: "fragile",
+      conditions: [
+        {
+          id: "c1",
+          subject: "PRODUCT",
+          field: "tag",
+          operator: "EQUALS",
+          value: "fragile",
+          quantifier: "ANY",
+        },
+      ],
+    });
+    const withVase: EngineCart = {
+      ...cart,
+      items: [{ quantity: 1, grams: 500, price: 50000, tags: ["Fragile"] }],
+    };
+
+    expect(
+      quote(withVase, [fragileFee], zones, settings, NOW).rates,
+    ).toHaveLength(1);
+    const plain = quote(cart, [fragileFee], zones, settings, NOW);
+    expect(plain.rates).toEqual([]);
+    expect(plain.trace[0].reason).toMatchObject({
+      kind: "conditions",
+      failure: {
+        match: "ALL",
+        conditions: [{ subject: "PRODUCT", matching: 0, total: 1 }],
+      },
+    });
   });
 });

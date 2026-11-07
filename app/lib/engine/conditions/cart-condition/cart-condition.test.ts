@@ -25,6 +25,7 @@ describe("checkCartCondition", () => {
       result: true,
       text: "subtotal 100000 ≥ 100000",
       checked: {
+        subject: "CART",
         field: "subtotal",
         operator: "GREATER_OR_EQUAL",
         value: 100000,

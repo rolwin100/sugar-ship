@@ -204,7 +204,21 @@
     "summaryPercent": "{{percent}} % der Zwischensumme",
     "descriptionLabel": "Beschreibung (optional)",
     "descriptionHelp": "Wird beim Checkout unter dem Tarifnamen angezeigt, z. B. Mit Sendungsverfolgung und versichert.",
-    "errorDescriptionTooLong": "Verwende höchstens 100 Zeichen für die Beschreibung."
+    "errorDescriptionTooLong": "Verwende höchstens 100 Zeichen für die Beschreibung.",
+    "fieldTag": "Produkt-Tag",
+    "fieldType": "Produkttyp",
+    "fieldVendor": "Anbieter",
+    "fieldSku": "SKU",
+    "fieldCollection": "Kollektion",
+    "opIs": "ist",
+    "opIsNot": "ist nicht",
+    "opContains": "enthält",
+    "opNotContains": "enthält nicht",
+    "opIsOneOf": "ist eines von",
+    "opIsNoneOf": "ist keines von",
+    "quantifierAny": "Mindestens ein Artikel",
+    "quantifierAll": "Alle Artikel",
+    "quantifierNone": "Kein Artikel"
   },
   "simulator": {
     "title": "Warenkorb-Simulator",
@@ -248,7 +262,9 @@
     "errorCountryRequired": "Wähle ein Land.",
     "errorSubtotalInvalid": "Gib die Zwischensumme ein.",
     "errorWeightInvalid": "Gib ein Gewicht in kg mit höchstens 3 Dezimalstellen ein.",
-    "errorQuantityInvalid": "Gib eine ganze Anzahl Artikel ein, mindestens 1."
+    "errorQuantityInvalid": "Gib eine ganze Anzahl Artikel ein, mindestens 1.",
+    "productCondition_one": "{{quantifier}}: {{field}} {{operator}} {{values}} ({{matching}} von {{count}} Artikel passt)",
+    "productCondition_other": "{{quantifier}}: {{field}} {{operator}} {{values}} ({{matching}} von {{count}} Artikeln passen)"
   },
   "history": {
     "title": "Verlauf",

@@ -204,7 +204,21 @@
     "summaryPercent": "{{percent}} % du sous-total",
     "descriptionLabel": "Description (facultatif)",
     "descriptionHelp": "Affichée sous le nom du tarif lors du paiement, par ex. Suivi et assuré.",
-    "errorDescriptionTooLong": "Utilisez 100 caractères maximum pour la description."
+    "errorDescriptionTooLong": "Utilisez 100 caractères maximum pour la description.",
+    "fieldTag": "Balise produit",
+    "fieldType": "Type de produit",
+    "fieldVendor": "Fournisseur",
+    "fieldSku": "SKU",
+    "fieldCollection": "Collection",
+    "opIs": "est",
+    "opIsNot": "n'est pas",
+    "opContains": "contient",
+    "opNotContains": "ne contient pas",
+    "opIsOneOf": "est l'un de",
+    "opIsNoneOf": "n'est aucun de",
+    "quantifierAny": "Au moins un article",
+    "quantifierAll": "Tous les articles",
+    "quantifierNone": "Aucun article"
   },
   "simulator": {
     "title": "Simulateur de panier",
@@ -248,7 +262,9 @@
     "errorCountryRequired": "Choisissez un pays.",
     "errorSubtotalInvalid": "Saisissez le sous-total du panier.",
     "errorWeightInvalid": "Saisissez un poids en kg, avec 3 décimales au maximum.",
-    "errorQuantityInvalid": "Saisissez un nombre entier d'articles, 1 ou plus."
+    "errorQuantityInvalid": "Saisissez un nombre entier d'articles, 1 ou plus.",
+    "productCondition_one": "{{quantifier}} : {{field}} {{operator}} {{values}} ({{matching}} article sur {{count}} correspond)",
+    "productCondition_other": "{{quantifier}} : {{field}} {{operator}} {{values}} ({{matching}} articles sur {{count}} correspondent)"
   },
   "history": {
     "title": "Historique",

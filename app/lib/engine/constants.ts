@@ -26,6 +26,16 @@ export const CONDITION_OPERATOR = {
   NOT_IN_POSTCODE_LIST: "NOT_IN_POSTCODE_LIST",
 } as const;
 
+/** Product fields a condition can test, for each item in the cart. */
+export const PRODUCT_CONDITION_FIELD = {
+  TAG: "tag",
+  TYPE: "type",
+  VENDOR: "vendor",
+  SKU: "sku",
+  COLLECTION: "collection",
+} as const;
+
+/** How a product condition combines the cart's items: any, all, or none of them match. */
 export const QUANTIFIER = {
   ANY: "ANY",
   ALL: "ALL",

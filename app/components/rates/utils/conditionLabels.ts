@@ -1,7 +1,10 @@
 import type {
   CartConditionField,
   NumberOperator,
+  ProductConditionField,
+  Quantifier,
   RuleMatch,
+  TextOperator,
 } from "../../../lib/engine";
 import { CART_CONDITION_FIELD, CONDITION_OPERATOR } from "../../../lib/engine";
 
@@ -43,3 +46,29 @@ export const CONDITION_MATCH_KEYS = {
   ANY: "rates.matchAny",
   NONE: "rates.matchNone",
 } as const satisfies Record<RuleMatch, string>;
+
+/** Translation key for each product field. */
+export const PRODUCT_FIELD_KEYS = {
+  tag: "rates.fieldTag",
+  type: "rates.fieldType",
+  vendor: "rates.fieldVendor",
+  sku: "rates.fieldSku",
+  collection: "rates.fieldCollection",
+} as const satisfies Record<ProductConditionField, string>;
+
+/** Translation key for each product comparison, worded to read after the field. */
+export const TEXT_OPERATOR_KEYS = {
+  EQUALS: "rates.opIs",
+  NOT_EQUALS: "rates.opIsNot",
+  CONTAINS: "rates.opContains",
+  NOT_CONTAINS: "rates.opNotContains",
+  IN: "rates.opIsOneOf",
+  NOT_IN: "rates.opIsNoneOf",
+} as const satisfies Record<TextOperator, string>;
+
+/** Translation key for how a product condition combines the cart's items. */
+export const QUANTIFIER_KEYS = {
+  ANY: "rates.quantifierAny",
+  ALL: "rates.quantifierAll",
+  NONE: "rates.quantifierNone",
+} as const satisfies Record<Quantifier, string>;
