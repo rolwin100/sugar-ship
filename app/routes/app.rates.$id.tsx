@@ -14,11 +14,14 @@ import { authenticate } from "../shopify.server";
 import { requireShop } from "../lib/shop.server";
 import { deleteRule, getRule, saveRule } from "../lib/rules/rule-store.server";
 import {
+  collectionIdsIn,
   draftToInput,
   emptyRuleDraft,
+  fillCollectionTitles,
   parseRuleDraft,
   ruleToDraft,
 } from "../lib/rules/draft";
+import { fetchCollectionTitles } from "../lib/products/collection-titles.server";
 import type { RuleActionResult, RuleDraft } from "../lib/rules/types";
 import { listZones } from "../lib/zones/zone-store.server";
 import { FormSaveBar } from "../components/FormSaveBar";
@@ -32,10 +35,11 @@ import {
   ZonePricesSection,
 } from "../components/rates";
 import { RULE_STATUS } from "../lib/engine";
+import { withLogContext } from "../lib/log-context.server";
 
 /** `/app/rates/new` creates a rate; `/app/rates/<id>` edits one. */
-export const loader = async ({ request, params }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+const handleLoader = async ({ request, params }: LoaderFunctionArgs) => {
+  const { admin, session } = await authenticate.admin(request);
   const shop = await requireShop(session.shop);
   const currency = shop.currency ?? "USD";
 
@@ -46,9 +50,19 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   ]);
   if (!isNew && !rule) throw new Response("Rate not found", { status: 404 });
 
+  // Collection conditions store ids; fetch their names so the form shows "Shoes".
+  const draft = rule ? ruleToDraft(rule, currency) : emptyRuleDraft();
+  const titles = await fetchCollectionTitles(
+    admin,
+    collectionIdsIn(draft.conditions),
+  );
+
   return {
     rule,
-    draft: rule ? ruleToDraft(rule, currency) : emptyRuleDraft(),
+    draft: {
+      ...draft,
+      conditions: fillCollectionTitles(draft.conditions, titles),
+    },
     zones: zones.map(({ id, name, restOfWorld, regions }) => ({
       id,
       name,
@@ -59,7 +73,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   };
 };
 
-export const action = async ({
+export const loader = (args: LoaderFunctionArgs) =>
+  withLogContext(args.request, () => handleLoader(args));
+
+const handleAction = async ({
   request,
   params,
 }: ActionFunctionArgs): Promise<RuleActionResult> => {
@@ -87,6 +104,9 @@ export const action = async ({
     throw new Response("Rate not found", { status: 404 });
   return { ok: false, errors: result.errors };
 };
+
+export const action = (args: ActionFunctionArgs) =>
+  withLogContext(args.request, () => handleAction(args));
 
 // After a delete, don't re-run the loader: the rate is gone, so it would show
 // "Rate not found" before the page can show the toast and go back to the list.

@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type { CartConditionField } from "../../engine";
-import type { ProductRuleCondition, RuleCondition } from "../types";
-import { conditionToDraft, draftToCondition } from "./condition-draft";
+import type {
+  ProductRuleCondition,
+  RuleCondition,
+  RuleConditionDraft,
+} from "../types";
+import {
+  collectionIdsIn,
+  conditionToDraft,
+  draftToCondition,
+  fillCollectionTitles,
+} from "./condition-draft";
 
 describe("condition drafts", () => {
   it("shows each field in the merchant's units", () => {
@@ -134,5 +143,31 @@ describe("condition drafts", () => {
       value: ["fragile", "glass"],
     });
     expect(typed("EQUALS", "  fragile ")).toMatchObject({ value: "fragile" });
+  });
+
+  it("finds collection ids and fills in their titles", () => {
+    const drafts: RuleConditionDraft[] = [
+      { subject: "CART", field: "weight", operator: "LESS_THAN", value: "2" },
+      {
+        subject: "PRODUCT",
+        field: "collection",
+        operator: "IN",
+        quantifier: "ANY",
+        value: "",
+        collections: [
+          { id: 7, title: "" },
+          { id: 9, title: "" },
+        ],
+      },
+    ];
+    expect(collectionIdsIn(drafts)).toEqual([7, 9]);
+    const filled = fillCollectionTitles(drafts, { 7: "Shoes" });
+    expect(filled[0]).toBe(drafts[0]);
+    expect(filled[1]).toMatchObject({
+      collections: [
+        { id: 7, title: "Shoes" },
+        { id: 9, title: "" }, // deleted or unknown: shown as "Collection 9"
+      ],
+    });
   });
 });

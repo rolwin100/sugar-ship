@@ -1,11 +1,17 @@
 import type {
   CartConditionField,
   NumberOperator,
+  ProductConditionField,
+  Quantifier,
   RateBasis,
   RuleMatch,
+  TextOperator,
 } from "../../lib/engine";
 import type {
+  CartConditionDraft,
+  CollectionChoice,
   PriceBandDraft,
+  ProductConditionDraft,
   RuleConditionDraft,
   ZonePricingDraft,
   ZonePricingTextField,
@@ -16,15 +22,43 @@ import type { Zone } from "../../lib/zones/types";
 export type ConditionRowProps = {
   /** Position in the list, from 0 ("Condition 1" in labels and errors). */
   index: number;
-  condition: RuleConditionDraft;
+  condition: CartConditionDraft;
   /** The shop's currency, for subtotal values. */
   currency: string;
   /** This condition's value error from the last save, if any. */
   error?: RuleError;
-  onFieldChange: (field: CartConditionField) => void;
+  onFieldChange: (field: CartConditionField | ProductConditionField) => void;
   onOperatorChange: (operator: NumberOperator) => void;
   onValueChange: (value: string) => void;
   onRemove: () => void;
+};
+
+export type ProductConditionRowProps = {
+  /** Position in the list, from 0 ("Condition 1" in labels and errors). */
+  index: number;
+  condition: ProductConditionDraft;
+  /** This condition's error from the last save, if any. */
+  error?: RuleError;
+  onFieldChange: (field: CartConditionField | ProductConditionField) => void;
+  onQuantifierChange: (quantifier: Quantifier) => void;
+  onOperatorChange: (operator: TextOperator) => void;
+  onValueChange: (value: string) => void;
+  onCollectionsChange: (collections: CollectionChoice[]) => void;
+  onRemove: () => void;
+};
+
+export type ConditionItemProps = {
+  /** Position in the list, from 0. */
+  index: number;
+  condition: RuleConditionDraft;
+  /** The shop's currency, for subtotal values. */
+  currency: string;
+  /** This condition's error from the last save, if any. */
+  error?: RuleError;
+  /** Gets a function that turns the current list into the new one (see edit-conditions). */
+  onConditionsChange: (
+    update: (conditions: RuleConditionDraft[]) => RuleConditionDraft[],
+  ) => void;
 };
 
 export type ConditionsSectionProps = {

@@ -9,21 +9,23 @@ import { quoteCheckout } from "../lib/rates/quote-checkout.server";
 import { getShopForRates } from "../lib/shop.server";
 import { logRateRequest } from "../lib/rate-log/rate-log.server";
 import { RATE_OUTCOME } from "../lib/constants";
+import { logger } from "../lib/logger.server";
+import { withLogContext } from "../lib/log-context.server";
+
+const log = logger.child({ module: "rates" });
 
 /**
  * Carrier Service callback. Shopify POSTs { rate: { origin, destination, items, currency, locale } }
  * at checkout and shows whatever rates we return.
  */
-export const action = async ({ request }: ActionFunctionArgs) => {
+const handleAction = async ({ request }: ActionFunctionArgs) => {
   const startedAt = Date.now();
   const rawBody = await request.text();
   const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
   const shop = request.headers.get("x-shopify-shop-domain");
 
   if (!hmacHeader || !isValidHmac(rawBody, hmacHeader)) {
-    console.warn(
-      `[sugar-ship] rates: missing or bad HMAC from ${shop ?? "unknown shop"}`,
-    );
+    log.warn({ shop }, "rates request with missing or bad HMAC");
     return Response.json({ rates: [] }, { status: 401 });
   }
 
@@ -44,10 +46,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     try {
       shopRecord = await getShopForRates(shop);
     } catch (error) {
-      console.error(
-        `[sugar-ship] rates: shop lookup failed for ${shop}`,
-        error,
-      );
+      log.error({ err: error, shop }, "shop lookup failed");
     }
   }
 
@@ -63,7 +62,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   } catch (error) {
     outcome = RATE_OUTCOME.ERROR;
     errorMessage = error instanceof Error ? error.message : String(error);
-    console.error(`[sugar-ship] rates: quoting failed for ${shop}`, error);
+    log.error({ err: error, shop }, "quoting failed");
   }
 
   // Fallback when quoting failed or returned nothing. Test mode still applies.
@@ -78,8 +77,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   const durationMs = Date.now() - startedAt;
-  console.log(
-    `[sugar-ship] rates: shop=${shop} outcome=${outcome} rates=${rates.length} ${durationMs}ms`,
+  log.info(
+    { shop, outcome, testMode, rates: rates.length, ms: durationMs },
+    "rates request",
   );
 
   // Don't make checkout wait for the log write.
@@ -96,9 +96,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       durationMs,
       error: errorMessage,
     }).catch((error) => {
-      console.error(`[sugar-ship] rates: log write failed for ${shop}`, error);
+      log.error({ err: error, shop }, "rate log write failed");
     });
   }
 
   return Response.json({ rates });
 };
+
+export const action = (args: ActionFunctionArgs) =>
+  withLogContext(args.request, () => handleAction(args));

@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { emptyZonePricingDraft } from "../../lib/rules/draft";
-import type { ZonePricingDraft } from "../../lib/rules/types";
-import type { RuleError } from "../../lib/rules/validate-rule";
-import type { Zone } from "../../lib/zones/types";
-import type { ZonePricingCardProps } from "./types";
+import { emptyZonePricingDraft } from "../../../lib/rules/draft";
+import type { ZonePricingDraft } from "../../../lib/rules/types";
+import type { RuleError } from "../../../lib/rules/validate-rule";
+import type { Zone } from "../../../lib/zones/types";
+import type { ZonePricingCardProps } from "../types";
 import { ZonePricingCard } from "./ZonePricingCard";
 
 type Props = {

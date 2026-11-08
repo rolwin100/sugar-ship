@@ -7,6 +7,7 @@ import {
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
 import { ensureCarrierService } from "./lib/carrier-service.server";
+import { logger } from "./lib/logger.server";
 import { fetchShopCurrency, upsertShopOnInstall } from "./lib/shop.server";
 import { importZonesFromShopify } from "./lib/zones/zones.server";
 import { startProductSync } from "./lib/products/product-sync.server";
@@ -33,7 +34,10 @@ const shopify = shopifyApp({
         // Product conditions need tags, types and collections; copy them in the background.
         startProductSync(admin, shop.id);
       } catch (error) {
-        console.error("[sugar-ship] afterAuth setup failed", error);
+        logger.error(
+          { err: error, shop: session.shop, module: "auth" },
+          "afterAuth setup failed",
+        );
       }
     },
   },

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { ZoneListItem } from "../../lib/zones/types";
+import type { ZoneListItem } from "../../../lib/zones/types";
 import { ZoneRow } from "./ZoneRow";
 
 export function ZonesTable({ zones }: { zones: ZoneListItem[] }) {

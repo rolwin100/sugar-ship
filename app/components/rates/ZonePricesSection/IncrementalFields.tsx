@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { fieldValue } from "../field-events";
+import { fieldValue } from "../../field-events";
 import { BasisAmountField } from "./BasisAmountField";
-import type { PricingFieldsProps } from "./types";
+import type { PricingFieldsProps } from "../types";
 
 /** A base price covering the first step, then a price for each further step. */
 export function IncrementalFields({

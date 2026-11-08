@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
-import type { Rule } from "../../lib/rules/types";
+import type { Rule } from "../../../lib/rules/types";
 import { CheckoutName } from "./CheckoutName";
 import { RatePrices } from "./RatePrices";
-import { RULE_STATUS } from "../../lib/engine";
+import { RULE_STATUS } from "../../../lib/engine";
 
 type Props = {
   rule: Rule;

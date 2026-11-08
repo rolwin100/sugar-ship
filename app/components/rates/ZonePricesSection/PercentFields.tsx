@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { fieldValue } from "../field-events";
-import type { PricingFieldsProps } from "./types";
+import { fieldValue } from "../../field-events";
+import type { PricingFieldsProps } from "../types";
 
 /** A percentage of the cart subtotal, e.g. 2.5. */
 export function PercentFields({

@@ -221,7 +221,17 @@
     "quantifierNone": "No item",
     "errorProductValueRequired": "Condition {{number}}: enter a value.",
     "errorTooManyProductValues": "Condition {{number}}: use 20 values or fewer.",
-    "errorProductValueTooLong": "Condition {{number}}: each value can be up to 255 characters."
+    "errorProductValueTooLong": "Condition {{number}}: each value can be up to 255 characters.",
+    "groupCart": "Cart",
+    "groupProducts": "Products",
+    "conditionQuantifierLabel": "Condition {{number}}: which items",
+    "opInAnyOf": "is in any of",
+    "opInNoneOf": "is in none of",
+    "valuesHelp": "Separate values with commas.",
+    "chooseCollections": "Choose collections",
+    "chooseCollectionsLabel": "Condition {{number}}: choose collections",
+    "collectionsNone": "No collections chosen",
+    "collectionUnknown": "Collection {{id}}"
   },
   "simulator": {
     "title": "Cart simulator",

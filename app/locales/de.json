@@ -221,7 +221,17 @@
     "quantifierNone": "Kein Artikel",
     "errorProductValueRequired": "Bedingung {{number}}: Gib einen Wert ein.",
     "errorTooManyProductValues": "Bedingung {{number}}: Verwende höchstens 20 Werte.",
-    "errorProductValueTooLong": "Bedingung {{number}}: Jeder Wert darf höchstens 255 Zeichen lang sein."
+    "errorProductValueTooLong": "Bedingung {{number}}: Jeder Wert darf höchstens 255 Zeichen lang sein.",
+    "groupCart": "Warenkorb",
+    "groupProducts": "Produkte",
+    "conditionQuantifierLabel": "Bedingung {{number}}: welche Artikel",
+    "opInAnyOf": "ist in einer von",
+    "opInNoneOf": "ist in keiner von",
+    "valuesHelp": "Trenne Werte mit Kommas.",
+    "chooseCollections": "Kollektionen auswählen",
+    "chooseCollectionsLabel": "Bedingung {{number}}: Kollektionen auswählen",
+    "collectionsNone": "Keine Kollektionen ausgewählt",
+    "collectionUnknown": "Kollektion {{id}}"
   },
   "simulator": {
     "title": "Warenkorb-Simulator",

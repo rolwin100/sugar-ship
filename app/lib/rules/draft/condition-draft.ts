@@ -141,3 +141,31 @@ function draftToProduct(draft: ProductConditionDraft): ProductRuleCondition {
       : draft.value.trim(),
   };
 }
+
+/** Every collection id used in the drafts' collection conditions (no repeats). */
+export function collectionIdsIn(conditions: RuleConditionDraft[]): number[] {
+  const ids = conditions.flatMap((c) =>
+    c.subject === CONDITION_SUBJECT.PRODUCT
+      ? c.collections.map((choice) => choice.id)
+      : [],
+  );
+  return [...new Set(ids)];
+}
+
+/** Gives chosen collections their titles (from Shopify), so the form shows names. */
+export function fillCollectionTitles(
+  conditions: RuleConditionDraft[],
+  titles: Record<number, string>,
+): RuleConditionDraft[] {
+  return conditions.map((c) =>
+    c.subject === CONDITION_SUBJECT.PRODUCT && c.collections.length > 0
+      ? {
+          ...c,
+          collections: c.collections.map((choice) => ({
+            ...choice,
+            title: titles[choice.id] ?? choice.title,
+          })),
+        }
+      : c,
+  );
+}

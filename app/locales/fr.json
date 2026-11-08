@@ -221,7 +221,17 @@
     "quantifierNone": "Aucun article",
     "errorProductValueRequired": "Condition {{number}} : saisissez une valeur.",
     "errorTooManyProductValues": "Condition {{number}} : utilisez 20 valeurs au maximum.",
-    "errorProductValueTooLong": "Condition {{number}} : chaque valeur peut contenir jusqu'à 255 caractères."
+    "errorProductValueTooLong": "Condition {{number}} : chaque valeur peut contenir jusqu'à 255 caractères.",
+    "groupCart": "Panier",
+    "groupProducts": "Produits",
+    "conditionQuantifierLabel": "Condition {{number}} : quels articles",
+    "opInAnyOf": "est dans l'une de",
+    "opInNoneOf": "n'est dans aucune de",
+    "valuesHelp": "Séparez les valeurs par des virgules.",
+    "chooseCollections": "Choisir des collections",
+    "chooseCollectionsLabel": "Condition {{number}} : choisir des collections",
+    "collectionsNone": "Aucune collection choisie",
+    "collectionUnknown": "Collection {{id}}"
   },
   "simulator": {
     "title": "Simulateur de panier",

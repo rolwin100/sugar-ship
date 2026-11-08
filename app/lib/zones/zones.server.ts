@@ -1,6 +1,7 @@
 import type { AdminApiContext } from "@shopify/shopify-app-react-router/server";
 import type { Prisma } from "@prisma/client";
 import db from "../../db.server";
+import { logger } from "../logger.server";
 import {
   mapShopifyZones,
   type ShopifyDeliveryProfile,
@@ -65,6 +66,9 @@ export async function importZonesFromShopify(
     })),
   });
 
-  console.log(`[sugar-ship] imported ${zones.length} zones from Shopify`);
+  logger.info(
+    { module: "zones", shopId, count: zones.length },
+    "imported zones from Shopify",
+  );
   return { status: "imported" as const, count: zones.length };
 }

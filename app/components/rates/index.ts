@@ -1,22 +1,28 @@
 export { AddRateButton } from "./AddRateButton";
-export { BandRow, BandsFields } from "./BandsFields";
-export { BasisAmountField } from "./BasisAmountField";
 export { CheckoutDisplaySection } from "./CheckoutDisplaySection";
-export { CheckoutName } from "./CheckoutName";
-export { ConditionRow } from "./ConditionRow";
-export { ConditionsSection } from "./ConditionsSection";
+export {
+  CollectionPicker,
+  ConditionFieldSelect,
+  ConditionItem,
+  ConditionRow,
+  ConditionsSection,
+  ProductConditionRow,
+} from "./ConditionsSection";
 export { DeleteRuleModal, DELETE_RULE_MODAL_ID } from "./DeleteRuleModal";
-export { FlatPriceFields } from "./FlatPriceFields";
-export { IncrementalFields } from "./IncrementalFields";
-export { PercentFields } from "./PercentFields";
-export { RatePrices } from "./RatePrices";
-export { RateRow } from "./RateRow";
 export { RatesEmptyState } from "./RatesEmptyState";
-export { RatesTable } from "./RatesTable";
+export { CheckoutName, RatePrices, RateRow, RatesTable } from "./RatesTable";
 export { RuleDetailsSection } from "./RuleDetailsSection";
 export { RuleErrorsBanner } from "./RuleErrorsBanner";
 export { TestRatesButton } from "./TestRatesButton";
-export { ZonePricesSection } from "./ZonePricesSection";
-export { ZonePricingCard } from "./ZonePricingCard";
+export {
+  BandRow,
+  BandsFields,
+  BasisAmountField,
+  FlatPriceFields,
+  IncrementalFields,
+  PercentFields,
+  ZonePricesSection,
+  ZonePricingCard,
+} from "./ZonePricesSection";
 export * from "./utils";
 export type * from "./types";

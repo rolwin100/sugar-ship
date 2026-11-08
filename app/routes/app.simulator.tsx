@@ -26,9 +26,10 @@ import {
   SimulationResultSection,
   SimulatorForm,
 } from "../components/simulator";
+import { withLogContext } from "../lib/log-context.server";
 
 /** `/app/simulator`: try an address and cart against the shop's current rates. */
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+const handleLoader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   const shop = await requireShop(session.shop);
   const locale = getLocale(request);
@@ -65,7 +66,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   };
 };
 
-export const action = async ({
+export const loader = (args: LoaderFunctionArgs) =>
+  withLogContext(args.request, () => handleLoader(args));
+
+const handleAction = async ({
   request,
 }: ActionFunctionArgs): Promise<SimulatorActionResult> => {
   const { session } = await authenticate.admin(request);
@@ -79,6 +83,9 @@ export const action = async ({
   if (!parsed.ok) return parsed;
   return { ok: true, result: await simulateQuote(shop, parsed.cart) };
 };
+
+export const action = (args: ActionFunctionArgs) =>
+  withLogContext(args.request, () => handleAction(args));
 
 export default function SimulatorPage() {
   const { countries, currency, fallback, initial } =

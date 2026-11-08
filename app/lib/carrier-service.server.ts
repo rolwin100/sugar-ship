@@ -1,5 +1,8 @@
 import type { AdminApiContext } from "@shopify/shopify-app-react-router/server";
+import { logger } from "./logger.server";
 import type { CarrierServiceNode } from "./types";
+
+const log = logger.child({ module: "carrier-service" });
 
 export const CARRIER_SERVICE_NAME = "Sugar Ship";
 
@@ -64,12 +67,12 @@ export async function ensureCarrierService(admin: AdminApiContext) {
     const createJson = await createResponse.json();
     const errors = createJson.data?.carrierServiceCreate?.userErrors ?? [];
     if (errors.length > 0) {
-      console.error("[sugar-ship] carrierServiceCreate failed", errors);
+      log.error({ errors }, "carrierServiceCreate failed");
       return { status: "error" as const, errors };
     }
     const createdId: string | undefined =
       createJson.data?.carrierServiceCreate?.carrierService?.id;
-    console.log(`[sugar-ship] carrier service created -> ${callbackUrl}`);
+    log.info({ callbackUrl }, "carrier service created");
     return { status: "created" as const, id: createdId };
   }
 
@@ -101,9 +104,9 @@ export async function ensureCarrierService(admin: AdminApiContext) {
   const updateJson = await updateResponse.json();
   const errors = updateJson.data?.carrierServiceUpdate?.userErrors ?? [];
   if (errors.length > 0) {
-    console.error("[sugar-ship] carrierServiceUpdate failed", errors);
+    log.error({ errors }, "carrierServiceUpdate failed");
     return { status: "error" as const, errors };
   }
-  console.log(`[sugar-ship] carrier service updated -> ${callbackUrl}`);
+  log.info({ callbackUrl }, "carrier service updated");
   return { status: "updated" as const, id: existing.id };
 }

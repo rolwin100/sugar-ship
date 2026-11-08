@@ -1,15 +1,14 @@
 import { useTranslation } from "react-i18next";
-import type { CartConditionField, NumberOperator } from "../../lib/engine";
-import { fieldValue } from "../field-events";
+import type { NumberOperator } from "../../../lib/engine";
+import { fieldValue } from "../../field-events";
+import { ConditionFieldSelect } from "./ConditionFieldSelect";
 import {
-  CONDITION_FIELD_KEYS,
-  CONDITION_FIELDS_IN_ORDER,
   CONDITION_OPERATOR_KEYS,
   CONDITION_OPERATORS_IN_ORDER,
   ruleErrorMessage,
-} from "./utils";
-import type { ConditionRowProps } from "./types";
-import { CART_CONDITION_FIELD } from "../../lib/engine";
+} from "../utils";
+import type { ConditionRowProps } from "../types";
+import { CART_CONDITION_FIELD } from "../../../lib/engine";
 
 /** One condition: [field] [comparison] [value in the right unit] [remove]. */
 export function ConditionRow({
@@ -33,18 +32,11 @@ export function ConditionRow({
       gap="small-200"
       alignItems="start"
     >
-      <s-select
-        label={t("rates.conditionFieldLabel", { number })}
-        labelAccessibilityVisibility="exclusive"
+      <ConditionFieldSelect
+        number={number}
         value={condition.field}
-        onChange={(e) => onFieldChange(fieldValue(e) as CartConditionField)}
-      >
-        {CONDITION_FIELDS_IN_ORDER.map((field) => (
-          <s-option key={field} value={field}>
-            {t(CONDITION_FIELD_KEYS[field])}
-          </s-option>
-        ))}
-      </s-select>
+        onChange={onFieldChange}
+      />
 
       <s-select
         label={t("rates.conditionOperatorLabel", { number })}

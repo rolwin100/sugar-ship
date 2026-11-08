@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { fieldValue } from "../../field-events";
+import { fieldValue } from "../../../field-events";
 import { BasisAmountField } from "../BasisAmountField";
-import type { BandRowProps } from "../types";
+import type { BandRowProps } from "../../types";
 import { BAND_COLUMNS } from "./constants";
 
 /** One price-table row: [from] [to] [price] [remove]. */

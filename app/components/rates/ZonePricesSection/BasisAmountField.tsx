@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { fieldValue } from "../field-events";
-import type { BasisAmountFieldProps } from "./types";
-import { RATE_BASIS } from "../../lib/engine";
+import { fieldValue } from "../../field-events";
+import type { BasisAmountFieldProps } from "../types";
+import { RATE_BASIS } from "../../../lib/engine";
 
 /** An amount in the basis's unit: money for subtotal, kg for weight, items for quantity. */
 export function BasisAmountField({

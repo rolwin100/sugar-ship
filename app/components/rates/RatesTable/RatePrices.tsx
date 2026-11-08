@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import type { ZonePricing } from "../../lib/rules/types";
-import { pricingSummary } from "./utils";
+import type { ZonePricing } from "../../../lib/rules/types";
+import { pricingSummary } from "../utils";
 
 /** Up to this many zones are listed by name; more are summed up as a count. */
 const NAMED_ZONES_MAX = 2;

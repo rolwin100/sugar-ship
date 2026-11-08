@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { Rule } from "../../lib/rules/types";
+import type { Rule } from "../../../lib/rules/types";
 import { RateRow } from "./RateRow";
 
 type Props = {

@@ -1,4 +1,5 @@
 import type { AdminApiContext } from "@shopify/shopify-app-react-router/server";
+import { logger } from "../logger.server";
 import { markProductsSynced } from "../shop.server";
 import { adminQuery } from "./admin-query.server";
 import { deleteStaleProducts, upsertProducts } from "./product-store.server";
@@ -67,6 +68,8 @@ export async function syncProducts(
   return count;
 }
 
+const log = logger.child({ module: "products" });
+
 /** Shops with a sync running in this process, so a second trigger doesn't start another. */
 const running = new Set<string>();
 
@@ -78,11 +81,7 @@ export function startProductSync(admin: AdminApiContext, shopId: string): void {
   if (running.has(shopId)) return;
   running.add(shopId);
   syncProducts(admin, shopId)
-    .then((count) =>
-      console.log(`[sugar-ship] products synced: ${count} for shop ${shopId}`),
-    )
-    .catch((error) =>
-      console.error(`[sugar-ship] product sync failed for ${shopId}`, error),
-    )
+    .then((count) => log.info({ shopId, count }, "products synced"))
+    .catch((error) => log.error({ err: error, shopId }, "product sync failed"))
     .finally(() => running.delete(shopId));
 }

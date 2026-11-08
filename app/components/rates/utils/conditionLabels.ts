@@ -6,7 +6,12 @@ import type {
   RuleMatch,
   TextOperator,
 } from "../../../lib/engine";
-import { CART_CONDITION_FIELD, CONDITION_OPERATOR } from "../../../lib/engine";
+import {
+  CART_CONDITION_FIELD,
+  CONDITION_OPERATOR,
+  PRODUCT_CONDITION_FIELD,
+  QUANTIFIER,
+} from "../../../lib/engine";
 
 /** Translation key for each condition field. */
 export const CONDITION_FIELD_KEYS = {
@@ -72,3 +77,34 @@ export const QUANTIFIER_KEYS = {
   ALL: "rates.quantifierAll",
   NONE: "rates.quantifierNone",
 } as const satisfies Record<Quantifier, string>;
+
+/** Dropdown order for product fields. */
+export const PRODUCT_FIELDS_IN_ORDER: ProductConditionField[] = [
+  PRODUCT_CONDITION_FIELD.TAG,
+  PRODUCT_CONDITION_FIELD.TYPE,
+  PRODUCT_CONDITION_FIELD.VENDOR,
+  PRODUCT_CONDITION_FIELD.SKU,
+  PRODUCT_CONDITION_FIELD.COLLECTION,
+];
+
+/** Dropdown order for text comparisons (tag, type, vendor, SKU). */
+export const TEXT_OPERATORS_IN_ORDER: TextOperator[] = [
+  CONDITION_OPERATOR.EQUALS,
+  CONDITION_OPERATOR.NOT_EQUALS,
+  CONDITION_OPERATOR.CONTAINS,
+  CONDITION_OPERATOR.NOT_CONTAINS,
+  CONDITION_OPERATOR.IN,
+  CONDITION_OPERATOR.NOT_IN,
+];
+
+/** Collections only compare against a chosen list. */
+export const COLLECTION_OPERATOR_KEYS = {
+  IN: "rates.opInAnyOf",
+  NOT_IN: "rates.opInNoneOf",
+} as const satisfies Partial<Record<TextOperator, string>>;
+
+export const QUANTIFIERS_IN_ORDER: Quantifier[] = [
+  QUANTIFIER.ANY,
+  QUANTIFIER.ALL,
+  QUANTIFIER.NONE,
+];

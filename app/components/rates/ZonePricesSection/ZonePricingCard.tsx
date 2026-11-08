@@ -1,28 +1,28 @@
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
-import type { RateBasis, RateMode } from "../../lib/engine";
+import type { RateBasis, RateMode } from "../../../lib/engine";
 import {
   replaceZoneBasis,
   replaceZoneField,
   replaceZoneMode,
   replaceZoneOffered,
   updateZonePricing,
-} from "../../lib/rules/edit-pricing";
-import { PRICING_BASES, PRICING_MODES } from "../../lib/rules/types";
-import type { RuleErrorKey } from "../../lib/rules/validate-rule";
-import { fieldChecked, fieldValue } from "../field-events";
-import { ZoneCoverage } from "../zones/ZoneCoverage";
+} from "../../../lib/rules/edit-pricing";
+import { PRICING_BASES, PRICING_MODES } from "../../../lib/rules/types";
+import type { RuleErrorKey } from "../../../lib/rules/validate-rule";
+import { fieldChecked, fieldValue } from "../../field-events";
+import { ZoneCoverage } from "../../zones/ZoneCoverage";
 import { BandsFields } from "./BandsFields";
 import { FlatPriceFields } from "./FlatPriceFields";
 import { IncrementalFields } from "./IncrementalFields";
 import { PercentFields } from "./PercentFields";
-import type { PricingFieldsProps, ZonePricingCardProps } from "./types";
+import type { PricingFieldsProps, ZonePricingCardProps } from "../types";
 import {
   PRICING_BASIS_KEYS,
   PRICING_MODE_KEYS,
   ruleErrorMessage,
-} from "./utils";
-import { RATE_MODE } from "../../lib/engine";
+} from "../utils";
+import { RATE_MODE } from "../../../lib/engine";
 
 /** Each mode's fields. */
 const MODE_FIELDS = {

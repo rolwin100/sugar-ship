@@ -1,5 +1,5 @@
-import type { ZoneListItem } from "../../lib/zones/types";
-import { ZoneCoverage } from "./ZoneCoverage";
+import type { ZoneListItem } from "../../../lib/zones/types";
+import { ZoneCoverage } from "../ZoneCoverage";
 
 export function ZoneRow({ zone }: { zone: ZoneListItem }) {
   return (

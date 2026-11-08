@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { normCountry } from "../../lib/zones/codes";
-import type { TakenIndex } from "../../lib/zones/taken";
-import type { Region } from "../../lib/zones/types";
+import { normCountry } from "../../../lib/zones/codes";
+import type { TakenIndex } from "../../../lib/zones/taken";
+import type { Region } from "../../../lib/zones/types";
 import { COUNTRIES_MODAL_ID } from "./CountriesModal";
 import { RegionRow } from "./RegionRow";
 

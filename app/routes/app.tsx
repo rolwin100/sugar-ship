@@ -7,11 +7,13 @@ import { AppProvider } from "@shopify/shopify-app-react-router/react";
 
 import { authenticate } from "../shopify.server";
 import { ensureCarrierService } from "../lib/carrier-service.server";
+import { logger } from "../lib/logger.server";
 import { startProductSync } from "../lib/products/product-sync.server";
 import { requireShop } from "../lib/shop.server";
 import { createI18n, getLocale } from "../lib/i18n";
+import { withLogContext } from "../lib/log-context.server";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+const handleLoader = async ({ request }: LoaderFunctionArgs) => {
   const { admin, session } = await authenticate.admin(request);
 
   // Shops installed before product conditions existed have never synced their products.
@@ -24,7 +26,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     try {
       await ensureCarrierService(admin);
     } catch (error) {
-      console.error("[sugar-ship] ensureCarrierService failed", error);
+      logger.error(
+        { err: error, shop: session.shop, module: "carrier-service" },
+        "ensureCarrierService failed",
+      );
     }
   }
 
@@ -34,6 +39,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     locale: getLocale(request),
   };
 };
+
+export const loader = (args: LoaderFunctionArgs) =>
+  withLogContext(args.request, () => handleLoader(args));
 
 // Shopify only sends ?locale= on the first load. In-app links and form saves drop it,
 // so don't re-run this loader on navigation — keep the language from the first load.

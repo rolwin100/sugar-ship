@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { countryName, hasStates, listStates } from "../../lib/geo/geo";
-import type { Region } from "../../lib/zones/types";
-import { fieldValues } from "../field-events";
+import { countryName, hasStates, listStates } from "../../../lib/geo/geo";
+import type { Region } from "../../../lib/zones/types";
+import { fieldValues } from "../../field-events";
 import { STATES_MODAL_ID } from "./StatesModal";
 
 type Props = {

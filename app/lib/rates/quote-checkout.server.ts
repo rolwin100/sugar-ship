@@ -5,7 +5,10 @@ import { loadProducts } from "../products/product-store.server";
 import { loadEngineRules } from "../rules/rule-store.server";
 import type { RateRequest, ShippingRate } from "../types";
 import { listZones } from "../zones/zone-store.server";
+import { logger } from "../logger.server";
 import { toEngineCart, toShippingRates } from "./checkout";
+
+const log = logger.child({ module: "quote" });
 
 type ShopForQuote = {
   id: string;
@@ -23,8 +26,9 @@ export async function quoteCheckout(
   // Prices are saved in the shop's currency and we don't convert yet,
   // so checkouts in another currency get no Sugar Ship rates.
   if (!shop.currency || shop.currency !== cart.currency) {
-    console.log(
-      `[sugar-ship] quote: skipped, checkout currency ${cart.currency} isn't the shop's (${shop.currency ?? "unknown"})`,
+    log.info(
+      { checkoutCurrency: cart.currency, shopCurrency: shop.currency },
+      "quote skipped: checkout currency isn't the shop's",
     );
     return [];
   }
@@ -55,16 +59,20 @@ export async function quoteCheckout(
     combineStrategy: shop.settings?.combineStrategy ?? COMBINE_STRATEGY.SUM,
   });
 
-  // Why each rule did or didn't produce a rate, until the History page shows it.
-  const { country, province } = cart.destination;
-  console.log(
-    `[sugar-ship] quote: to ${country ?? "?"}-${province ?? "?"}, ${result.rates.length} rate(s)`,
+  // Why each rate did or didn't show (debug level: the History page and simulator
+  // show this to merchants).
+  log.debug(
+    {
+      destination: cart.destination,
+      rates: result.rates.length,
+      trace: result.trace.map(({ ruleName, outcome, detail }) => ({
+        ruleName,
+        outcome,
+        detail,
+      })),
+    },
+    "quote",
   );
-  for (const entry of result.trace) {
-    console.log(
-      `[sugar-ship]   "${entry.ruleName}": ${entry.outcome}${entry.detail ? ` — ${entry.detail}` : ""}`,
-    );
-  }
 
   return toShippingRates(result.rates, cart.currency, cart.locale);
 }

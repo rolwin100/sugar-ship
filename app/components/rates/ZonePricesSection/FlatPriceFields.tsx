@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { fieldValue } from "../field-events";
-import type { PricingFieldsProps } from "./types";
+import { fieldValue } from "../../field-events";
+import type { PricingFieldsProps } from "../types";
 
 /** One price for every cart. */
 export function FlatPriceFields({

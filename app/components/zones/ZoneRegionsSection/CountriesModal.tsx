@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { hasStates, listCountries } from "../../lib/geo/geo";
-import { takenBy, type TakenIndex } from "../../lib/zones/taken";
-import { fieldChecked, fieldValue } from "../field-events";
+import { hasStates, listCountries } from "../../../lib/geo/geo";
+import { takenBy, type TakenIndex } from "../../../lib/zones/taken";
+import { fieldChecked, fieldValue } from "../../field-events";
 
 export const COUNTRIES_MODAL_ID = "countries-modal";
 

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { countryName, listStates } from "../../lib/geo/geo";
-import { normState } from "../../lib/zones/codes";
-import type { TakenIndex } from "../../lib/zones/taken";
-import { fieldChecked, fieldValue } from "../field-events";
+import { countryName, listStates } from "../../../lib/geo/geo";
+import { normState } from "../../../lib/zones/codes";
+import type { TakenIndex } from "../../../lib/zones/taken";
+import { fieldChecked, fieldValue } from "../../field-events";
 
 export const STATES_MODAL_ID = "states-modal";
 

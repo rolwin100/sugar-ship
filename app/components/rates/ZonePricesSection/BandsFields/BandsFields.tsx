@@ -4,12 +4,12 @@ import {
   removeBand,
   replaceBandPrice,
   replaceBandTo,
-} from "../../../lib/rules/edit-pricing";
-import { BANDS_MAX } from "../../../lib/rules/validate-rule";
-import type { PricingFieldsProps } from "../types";
+} from "../../../../lib/rules/edit-pricing";
+import { BANDS_MAX } from "../../../../lib/rules/validate-rule";
+import type { PricingFieldsProps } from "../../types";
 import { BandRow } from "./BandRow";
 import { BAND_COLUMNS, BAND_LIMIT_ERRORS } from "./constants";
-import { RATE_BASIS } from "../../../lib/engine";
+import { RATE_BASIS } from "../../../../lib/engine";
 
 /**
  * A price table, one BandRow per row. "From" follows the row above, so only "to"
