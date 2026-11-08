@@ -218,7 +218,10 @@
     "opIsNoneOf": "ist keines von",
     "quantifierAny": "Mindestens ein Artikel",
     "quantifierAll": "Alle Artikel",
-    "quantifierNone": "Kein Artikel"
+    "quantifierNone": "Kein Artikel",
+    "errorProductValueRequired": "Bedingung {{number}}: Gib einen Wert ein.",
+    "errorTooManyProductValues": "Bedingung {{number}}: Verwende höchstens 20 Werte.",
+    "errorProductValueTooLong": "Bedingung {{number}}: Jeder Wert darf höchstens 255 Zeichen lang sein."
   },
   "simulator": {
     "title": "Warenkorb-Simulator",

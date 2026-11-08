@@ -1,17 +1,13 @@
-import {
-  CART_CONDITION_FIELDS,
-  NUMBER_OPERATORS,
-  type CartConditionField,
-} from "../../engine";
+import type { CartConditionField } from "../../engine";
 import { RULE_MATCHES, type RuleInput } from "../types";
 import {
   CHECKOUT_NAME_MAX,
-  CONDITION_VALUE_MAX,
   CONDITIONS_MAX,
   DELIVERY_DAYS_MAX,
   DESCRIPTION_MAX,
   RULE_NAME_MAX,
 } from "./limits";
+import { validateCondition } from "./validate-condition";
 import { validatePricing } from "./validate-pricing";
 
 /** Each key maps to a `rates.error<Key>` translation. */
@@ -31,6 +27,9 @@ export type RuleErrorKey =
   | "tooManyConditions"
   | "conditionUnsupported"
   | "conditionValueInvalid"
+  | "productValueRequired"
+  | "tooManyProductValues"
+  | "productValueTooLong"
   | "pricingBasisInvalid"
   | "bandsRequired"
   | "tooManyBands"
@@ -72,6 +71,8 @@ export {
   DESCRIPTION_MAX,
   PERCENT_BPS_MAX,
   PRICE_MAX,
+  PRODUCT_VALUE_LENGTH_MAX,
+  PRODUCT_VALUES_MAX,
   RULE_NAME_MAX,
 } from "./limits";
 
@@ -136,24 +137,7 @@ export function validateRule(
     errors.push({ field: "conditions", key: "tooManyConditions" });
   }
   input.conditions.forEach((condition, index) => {
-    const { field, operator, value } = condition;
-    if (
-      !CART_CONDITION_FIELDS.includes(field) ||
-      !NUMBER_OPERATORS.includes(operator)
-    ) {
-      errors.push({ field: "conditions", key: "conditionUnsupported", index });
-    } else if (
-      !Number.isInteger(value) ||
-      value < 0 ||
-      value > CONDITION_VALUE_MAX
-    ) {
-      errors.push({
-        field: "conditions",
-        key: "conditionValueInvalid",
-        index,
-        conditionField: field,
-      });
-    }
+    errors.push(...validateCondition(condition, index));
   });
 
   return errors.length

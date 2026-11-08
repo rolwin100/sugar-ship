@@ -18,6 +18,9 @@ const ERROR_TEXT = {
   tooManyConditions: "rates.errorTooManyConditions",
   conditionUnsupported: "rates.errorConditionUnsupported",
   conditionValueInvalid: "rates.errorConditionSubtotalInvalid", // see VALUE_TEXT
+  productValueRequired: "rates.errorProductValueRequired",
+  tooManyProductValues: "rates.errorTooManyProductValues",
+  productValueTooLong: "rates.errorProductValueTooLong",
   pricingBasisInvalid: "rates.errorPricingBasisInvalid",
   bandsRequired: "rates.errorBandsRequired",
   tooManyBands: "rates.errorTooManyBands",

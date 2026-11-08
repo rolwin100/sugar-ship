@@ -148,9 +148,19 @@ describe("validateRule", () => {
       input({
         match: "ANY",
         conditions: [
-          { field: "subtotal", operator: "GREATER_OR_EQUAL", value: 100000 },
-          { field: "weight", operator: "LESS_THAN", value: 1500 },
-          { field: "quantity", operator: "EQUALS", value: 0 },
+          {
+            subject: "CART",
+            field: "subtotal",
+            operator: "GREATER_OR_EQUAL",
+            value: 100000,
+          },
+          {
+            subject: "CART",
+            field: "weight",
+            operator: "LESS_THAN",
+            value: 1500,
+          },
+          { subject: "CART", field: "quantity", operator: "EQUALS", value: 0 },
         ],
       }),
       zones,
@@ -162,11 +172,31 @@ describe("validateRule", () => {
     const result = validateRule(
       input({
         conditions: [
-          { field: "subtotal", operator: "GREATER_THAN", value: 100 },
-          { field: "weight", operator: "LESS_THAN", value: Number.NaN },
-          { field: "quantity", operator: "EQUALS", value: -1 },
-          { field: "quantity", operator: "EQUALS", value: 2.5 },
-          { field: "subtotal", operator: "EQUALS", value: 2_000_000_000 },
+          {
+            subject: "CART",
+            field: "subtotal",
+            operator: "GREATER_THAN",
+            value: 100,
+          },
+          {
+            subject: "CART",
+            field: "weight",
+            operator: "LESS_THAN",
+            value: Number.NaN,
+          },
+          { subject: "CART", field: "quantity", operator: "EQUALS", value: -1 },
+          {
+            subject: "CART",
+            field: "quantity",
+            operator: "EQUALS",
+            value: 2.5,
+          },
+          {
+            subject: "CART",
+            field: "subtotal",
+            operator: "EQUALS",
+            value: 2_000_000_000,
+          },
         ],
       }),
       zones,
@@ -204,8 +234,18 @@ describe("validateRule", () => {
       input({
         conditions: [
           // Wrong shapes can only arrive from outside the form, hence the casts.
-          { field: "colour" as never, operator: "EQUALS", value: 1 },
-          { field: "subtotal", operator: "CONTAINS" as never, value: 1 },
+          {
+            subject: "CART",
+            field: "colour" as never,
+            operator: "EQUALS",
+            value: 1,
+          },
+          {
+            subject: "CART",
+            field: "subtotal",
+            operator: "CONTAINS" as never,
+            value: 1,
+          },
         ],
       }),
       zones,
@@ -218,6 +258,7 @@ describe("validateRule", () => {
 
   it("allows at most 10 conditions and a known match mode", () => {
     const condition = {
+      subject: "CART",
       field: "quantity",
       operator: "GREATER_THAN",
       value: 1,
@@ -262,5 +303,40 @@ describe("validateRule", () => {
       ],
     });
     expect(keys(validateRule(badStep, zones))).toEqual(["stepSizeInvalid"]);
+  });
+
+  it("checks product conditions", () => {
+    const tag = {
+      subject: "PRODUCT" as const,
+      field: "tag" as const,
+      operator: "EQUALS" as const,
+      quantifier: "ANY" as const,
+      value: "fragile",
+    };
+    const errors = (condition: unknown) =>
+      keys(
+        validateRule(input({ conditions: [condition as typeof tag] }), zones),
+      );
+
+    expect(errors(tag)).toEqual([]);
+    expect(errors({ ...tag, value: "" })).toEqual(["productValueRequired"]);
+    expect(errors({ ...tag, operator: "IN", value: [] })).toEqual([
+      "productValueRequired",
+    ]);
+    expect(
+      errors({ ...tag, operator: "IN", value: Array(21).fill("x") }),
+    ).toEqual(["tooManyProductValues"]);
+    expect(errors({ ...tag, value: "x".repeat(256) })).toEqual([
+      "productValueTooLong",
+    ]);
+    expect(errors({ ...tag, quantifier: "SOME" })).toEqual([
+      "conditionUnsupported",
+    ]);
+    expect(
+      errors({ ...tag, field: "collection", operator: "EQUALS", value: [7] }),
+    ).toEqual(["conditionUnsupported"]);
+    expect(
+      errors({ ...tag, field: "collection", operator: "IN", value: [7, 12] }),
+    ).toEqual([]);
   });
 });

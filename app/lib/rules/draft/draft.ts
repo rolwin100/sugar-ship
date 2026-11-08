@@ -1,8 +1,12 @@
 import {
   CART_CONDITION_FIELDS,
+  CONDITION_SUBJECT,
   NUMBER_OPERATORS,
+  PRODUCT_CONDITION_FIELDS,
+  QUANTIFIER,
   RULE_MATCH,
   RULE_STATUS,
+  TEXT_OPERATORS,
 } from "../../engine";
 import {
   RATE_PRESETS,
@@ -119,13 +123,37 @@ export function parseRuleDraft(raw: unknown): RuleDraft | null {
   return value as RuleDraft;
 }
 
-/** One posted condition: a known field and number operator, and the value as text. */
+/**
+ * One posted condition: a cart condition (known field, number operator, value as text)
+ * or a product condition (known field, text operator and quantifier, value as text,
+ * collections as { id, title }).
+ */
 function isConditionDraft(value: unknown): boolean {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const c = value as Record<string, unknown>;
-  return (
-    (CART_CONDITION_FIELDS as readonly unknown[]).includes(c.field) &&
-    (NUMBER_OPERATORS as readonly unknown[]).includes(c.operator) &&
-    typeof c.value === "string"
-  );
+  if (typeof c.value !== "string") return false;
+  const known = (list: readonly unknown[], v: unknown) => list.includes(v);
+
+  if (c.subject === CONDITION_SUBJECT.CART) {
+    return (
+      known(CART_CONDITION_FIELDS, c.field) &&
+      known(NUMBER_OPERATORS, c.operator)
+    );
+  }
+  if (c.subject === CONDITION_SUBJECT.PRODUCT) {
+    return (
+      known(PRODUCT_CONDITION_FIELDS, c.field) &&
+      known(TEXT_OPERATORS, c.operator) &&
+      known(Object.values(QUANTIFIER), c.quantifier) &&
+      Array.isArray(c.collections) &&
+      c.collections.every(
+        (choice: unknown) =>
+          !!choice &&
+          typeof choice === "object" &&
+          Number.isSafeInteger((choice as { id?: unknown }).id) &&
+          typeof (choice as { title?: unknown }).title === "string",
+      )
+    );
+  }
+  return false;
 }

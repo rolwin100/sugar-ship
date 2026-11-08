@@ -218,7 +218,10 @@
     "opIsNoneOf": "n'est aucun de",
     "quantifierAny": "Au moins un article",
     "quantifierAll": "Tous les articles",
-    "quantifierNone": "Aucun article"
+    "quantifierNone": "Aucun article",
+    "errorProductValueRequired": "Condition {{number}} : saisissez une valeur.",
+    "errorTooManyProductValues": "Condition {{number}} : utilisez 20 valeurs au maximum.",
+    "errorProductValueTooLong": "Condition {{number}} : chaque valeur peut contenir jusqu'à 255 caractères."
   },
   "simulator": {
     "title": "Simulateur de panier",

@@ -5,17 +5,22 @@ import {
   addCondition,
   NEW_CONDITION,
   removeCondition,
+  newProductCondition,
+  replaceConditionCollections,
   replaceConditionField,
   replaceConditionOperator,
+  replaceConditionQuantifier,
   replaceConditionValue,
 } from "./edit-conditions";
 
 const subtotal: RuleConditionDraft = {
+  subject: "CART",
   field: "subtotal",
   operator: "GREATER_OR_EQUAL",
   value: "1000",
 };
 const weight: RuleConditionDraft = {
+  subject: "CART",
   field: "weight",
   operator: "LESS_THAN",
   value: "5",
@@ -42,7 +47,12 @@ describe("editing conditions", () => {
 
   it("clears the value when the field changes", () => {
     expect(replaceConditionField([subtotal, weight], 0, "weight")).toEqual([
-      { field: "weight", operator: "GREATER_OR_EQUAL", value: "" },
+      {
+        subject: "CART",
+        field: "weight",
+        operator: "GREATER_OR_EQUAL",
+        value: "",
+      },
       weight,
     ]);
     // Same field: nothing changes.
@@ -70,5 +80,64 @@ describe("editing conditions", () => {
     replaceConditionOperator(original, 0, "EQUALS");
     replaceConditionValue(original, 0, "1");
     expect(original).toEqual(copy);
+  });
+
+  it("starts a product condition when switching from a cart field, and back", () => {
+    const [tag] = replaceConditionField([subtotal], 0, "tag");
+    expect(tag).toEqual({
+      subject: "PRODUCT",
+      field: "tag",
+      operator: "EQUALS",
+      quantifier: "ANY",
+      value: "",
+      collections: [],
+    });
+    expect(replaceConditionField([tag], 0, "weight")[0]).toEqual({
+      ...NEW_CONDITION,
+      field: "weight",
+    });
+  });
+
+  it("keeps the quantifier between product fields, and resets operators for collections", () => {
+    const tag = {
+      ...newProductCondition("tag"),
+      quantifier: "ALL" as const,
+      operator: "CONTAINS" as const,
+      value: "fra",
+    };
+    expect(replaceConditionField([tag], 0, "sku")[0]).toMatchObject({
+      field: "sku",
+      quantifier: "ALL",
+      operator: "CONTAINS",
+      value: "",
+    });
+    expect(replaceConditionField([tag], 0, "collection")[0]).toMatchObject({
+      field: "collection",
+      quantifier: "ALL",
+      operator: "IN",
+    });
+  });
+
+  it("only accepts operators that fit the condition", () => {
+    expect(replaceConditionOperator([subtotal], 0, "CONTAINS")[0]).toBe(
+      subtotal,
+    );
+    const tag = newProductCondition("tag");
+    expect(replaceConditionOperator([tag], 0, "GREATER_THAN")[0]).toBe(tag);
+    expect(replaceConditionOperator([tag], 0, "IN")[0]).toMatchObject({
+      operator: "IN",
+    });
+  });
+
+  it("sets the quantifier and collections of product conditions only", () => {
+    const shoes = [{ id: 7, title: "Shoes" }];
+    const collection = newProductCondition("collection");
+    expect(
+      replaceConditionQuantifier([collection], 0, "NONE")[0],
+    ).toMatchObject({ quantifier: "NONE" });
+    expect(
+      replaceConditionCollections([collection], 0, shoes)[0],
+    ).toMatchObject({ collections: shoes });
+    expect(replaceConditionQuantifier([subtotal], 0, "NONE")[0]).toBe(subtotal);
   });
 });

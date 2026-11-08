@@ -10,4 +10,6 @@ export const CONDITIONS_MAX = 10;
 // Subunits, grams or items; well above any real cart.
 export const CONDITION_VALUE_MAX = 1_000_000_000;
 export const BANDS_MAX = 20; // price-table rows per zone
+export const PRODUCT_VALUES_MAX = 20; // tags, SKUs or collections in one product condition
+export const PRODUCT_VALUE_LENGTH_MAX = 255; // one tag, type, vendor or SKU
 export const PERCENT_BPS_MAX = 10_000; // 100%

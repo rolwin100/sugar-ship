@@ -218,7 +218,10 @@
     "opIsNoneOf": "is none of",
     "quantifierAny": "Any item",
     "quantifierAll": "All items",
-    "quantifierNone": "No item"
+    "quantifierNone": "No item",
+    "errorProductValueRequired": "Condition {{number}}: enter a value.",
+    "errorTooManyProductValues": "Condition {{number}}: use 20 values or fewer.",
+    "errorProductValueTooLong": "Condition {{number}}: each value can be up to 255 characters."
   },
   "simulator": {
     "title": "Cart simulator",

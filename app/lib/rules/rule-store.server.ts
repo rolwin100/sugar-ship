@@ -79,15 +79,18 @@ export async function saveRule(
     };
   });
   // One Condition row per condition, in the order the merchant listed them.
-  const conditions = rule.conditions.map(
-    ({ field, operator, value }, sortOrder) => ({
-      subject: CONDITION_SUBJECT.CART,
-      field,
-      operator,
-      value,
-      sortOrder,
-    }),
-  );
+  // Product conditions also save their quantifier (any / all / no item).
+  const conditions = rule.conditions.map((condition, sortOrder) => ({
+    subject: condition.subject,
+    field: condition.field,
+    operator: condition.operator,
+    value: condition.value,
+    quantifier:
+      condition.subject === CONDITION_SUBJECT.PRODUCT
+        ? condition.quantifier
+        : null,
+    sortOrder,
+  }));
 
   if (id === null) {
     // New rules run after existing ones.
@@ -222,7 +225,8 @@ function toRule(row: RuleRow): Rule {
       return pricing ? [pricing] : [];
     }),
     match: row.match,
-    // Only cart conditions exist for now; rows that aren't valid ones are skipped.
+    // Cart and product conditions; rows that aren't valid ones (e.g. address
+    // conditions from a later slice) are skipped.
     conditions: row.conditions.flatMap((c) => {
       const condition = toRuleCondition(c);
       return condition ? [condition] : [];

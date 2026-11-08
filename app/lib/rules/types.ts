@@ -1,11 +1,15 @@
 import { RATE_BASIS, RATE_MODE, RULE_MATCH } from "../engine";
 import type {
   CartConditionField,
+  CONDITION_SUBJECT,
   NumberOperator,
+  ProductConditionField,
+  Quantifier,
   RateBasis,
   RateMode,
   RuleMatch,
   RuleStatus,
+  TextOperator,
 } from "../engine";
 import { RATE_PRESET } from "./constants";
 import type { RuleError } from "./validate-rule";
@@ -96,11 +100,28 @@ export type ZonePricingDraft = {
  * subtotal in subunits, weight in grams, quantity in items.
  * Saved as a Condition row with subject CART.
  */
-export type RuleCondition = {
+export type CartRuleCondition = {
+  subject: typeof CONDITION_SUBJECT.CART;
   field: CartConditionField;
   operator: NumberOperator;
   value: number;
 };
+
+/**
+ * One product condition, checked on each item and combined with the quantifier
+ * (any / all / no item). Text values are kept as typed (matching ignores case); a list
+ * for is one of / is none of. Collections are always a list of collection ids.
+ * Saved as a Condition row with subject PRODUCT.
+ */
+export type ProductRuleCondition = {
+  subject: typeof CONDITION_SUBJECT.PRODUCT;
+  field: ProductConditionField;
+  operator: TextOperator;
+  quantifier: Quantifier;
+  value: string | string[] | number[];
+};
+
+export type RuleCondition = CartRuleCondition | ProductRuleCondition;
 
 /** The single-value text fields of a zone pricing draft (bands are edited as rows). */
 export type ZonePricingTextField = keyof Pick<
@@ -131,6 +152,7 @@ export type StoredCondition = {
   field: string;
   operator: string;
   value: unknown; // JSON column
+  quantifier: string | null; // product conditions only
 };
 
 /**
@@ -138,11 +160,30 @@ export type StoredCondition = {
  * merchant sees: subtotal in the shop's currency ("1000"), weight in kg ("1.5"),
  * quantity in items ("10").
  */
-export type RuleConditionDraft = {
+export type CartConditionDraft = {
+  subject: typeof CONDITION_SUBJECT.CART;
   field: CartConditionField;
   operator: NumberOperator;
   value: string;
 };
+
+/** A collection chosen in the form: its id, and its title to show (may be "" until loaded). */
+export type CollectionChoice = { id: number; title: string };
+
+/**
+ * A product condition as the form holds it: text values as typed (comma-separated
+ * for is one of / is none of), collections as chosen in Shopify's picker.
+ */
+export type ProductConditionDraft = {
+  subject: typeof CONDITION_SUBJECT.PRODUCT;
+  field: ProductConditionField;
+  operator: TextOperator;
+  quantifier: Quantifier;
+  value: string; // text fields
+  collections: CollectionChoice[]; // collection field
+};
+
+export type RuleConditionDraft = CartConditionDraft | ProductConditionDraft;
 
 /**
  * A shipping rate as the merchant sees it ("Rates" in the admin; a Rule in the database).
