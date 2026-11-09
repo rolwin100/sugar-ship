@@ -1,4 +1,5 @@
 import type {
+  AdjustmentType,
   CartConditionField,
   NumberOperator,
   ProductConditionField,
@@ -10,6 +11,8 @@ import type {
 import type {
   CartConditionDraft,
   CollectionChoice,
+  AdjustmentsDraft,
+  AdjustmentTextField,
   PriceBandDraft,
   ProductConditionDraft,
   RuleConditionDraft,
@@ -90,6 +93,13 @@ export type ZonePricingCardProps = {
 };
 
 /** What every mode's fields get: the zone's draft, its errors and ways to change it. */
+export type AdjustmentsFieldsProps = {
+  adjustments: AdjustmentsDraft;
+  currency: string;
+  onAdjustmentChange: (field: AdjustmentTextField, text: string) => void;
+  onHandlingTypeChange: (type: AdjustmentType) => void;
+};
+
 export type PricingFieldsProps = {
   pricing: ZonePricingDraft;
   currency: string;

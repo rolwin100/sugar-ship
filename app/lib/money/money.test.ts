@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   currencyDecimals,
+  currencySymbol,
   formatMoney,
   fromSubunits,
   toSubunits,
@@ -40,5 +41,13 @@ describe("money", () => {
     expect(formatMoney(150000, "INR", "en")).toBe("₹1,500.00");
     // German puts a non-breaking space before the symbol.
     expect(formatMoney(8000, "EUR", "de").replace(/\s/g, " ")).toBe("80,00 €");
+  });
+});
+
+describe("currencySymbol", () => {
+  it("gives the symbol, or the code when there isn't one", () => {
+    expect(currencySymbol("INR")).toBe("₹");
+    expect(currencySymbol("EUR", "de")).toBe("€");
+    expect(currencySymbol("XYZ")).toBe("XYZ");
   });
 });

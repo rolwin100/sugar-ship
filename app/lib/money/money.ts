@@ -55,3 +55,18 @@ export function formatMoney(
     return `${fromSubunits(subunits, currency)} ${currency}`;
   }
 }
+
+/** The currency's symbol as shown in this language: "INR" → "₹", "EUR" → "€". */
+export function currencySymbol(currency: string, locale = "en"): string {
+  try {
+    const part = new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+    })
+      .formatToParts(0)
+      .find((p) => p.type === "currency");
+    return part?.value ?? currency;
+  } catch {
+    return currency;
+  }
+}

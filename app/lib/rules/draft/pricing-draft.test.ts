@@ -22,6 +22,17 @@ describe("zone pricing drafts", () => {
     });
   });
 
+  it("starts with no adjustments and a fixed handling fee", () => {
+    expect(emptyZonePricingDraft().adjustments).toEqual({
+      freeOver: "",
+      handlingFee: "",
+      handlingType: "FIXED",
+      roundTo: "",
+      minPrice: "",
+      maxPrice: "",
+    });
+  });
+
   it("round-trips every mode through the form", () => {
     const pricings: ZonePricing[] = [
       { zoneId: "z", mode: "FLAT", price: 8000 },

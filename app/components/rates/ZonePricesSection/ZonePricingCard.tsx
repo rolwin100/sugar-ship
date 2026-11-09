@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 import type { RateBasis, RateMode } from "../../../lib/engine";
 import {
   replaceZoneBasis,
+  replaceZoneAdjustment,
   replaceZoneField,
+  replaceZoneHandlingType,
   replaceZoneMode,
   replaceZoneOffered,
   updateZonePricing,
@@ -13,6 +15,7 @@ import type { RuleErrorKey } from "../../../lib/rules/validate-rule";
 import { fieldChecked, fieldValue } from "../../field-events";
 import { ZoneCoverage } from "../../zones/ZoneCoverage";
 import { BandsFields } from "./BandsFields";
+import { AdjustmentsFields } from "./AdjustmentsFields";
 import { FlatPriceFields } from "./FlatPriceFields";
 import { IncrementalFields } from "./IncrementalFields";
 import { PercentFields } from "./PercentFields";
@@ -37,7 +40,7 @@ const USES_BASIS: RateMode[] = [RATE_MODE.BANDS, RATE_MODE.INCREMENTAL];
 
 /**
  * One zone's pricing: a switch to offer the rate there and, when on, how it's priced
- * (mode, basis) with that mode's fields.
+ * (mode, basis) with that mode's fields, then the optional adjustments.
  */
 export function ZonePricingCard({
   zone,
@@ -124,6 +127,19 @@ export function ZonePricingCard({
                     bands: update(z.bands),
                   })),
                 )
+              }
+            />
+
+            <AdjustmentsFields
+              adjustments={pricing.adjustments}
+              currency={currency}
+              onAdjustmentChange={(field, text) =>
+                onPricesChange((p) =>
+                  replaceZoneAdjustment(p, zone.id, field, text),
+                )
+              }
+              onHandlingTypeChange={(type) =>
+                onPricesChange((p) => replaceZoneHandlingType(p, zone.id, type))
               }
             />
           </>

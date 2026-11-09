@@ -1,5 +1,6 @@
 import { RATE_BASIS, RATE_MODE, RULE_MATCH } from "../engine";
 import type {
+  AdjustmentType,
   CartConditionField,
   CONDITION_SUBJECT,
   NumberOperator,
@@ -75,6 +76,26 @@ export type ZonePricing =
     }
   | { zoneId: string; mode: typeof RATE_MODE.PERCENT; percentBps: number };
 
+/**
+ * A zone's optional adjustments as typed, applied after the base price: free over a cart
+ * subtotal, a handling fee (fixed amount or % of shipping), rounding up, and a
+ * minimum and maximum price. Amounts in the shop's currency; "" means not used.
+ */
+export type AdjustmentsDraft = {
+  freeOver: string;
+  handlingFee: string;
+  handlingType: AdjustmentType; // FIXED = amount, PERCENT = % of shipping
+  roundTo: string;
+  minPrice: string;
+  maxPrice: string;
+};
+
+/** The adjustments typed as text (all but the handling fee's type). */
+export type AdjustmentTextField = Exclude<
+  keyof AdjustmentsDraft,
+  "handlingType"
+>;
+
 /** A price-table row as typed in the form. */
 export type PriceBandDraft = { from: string; to: string; price: string };
 
@@ -85,6 +106,7 @@ export type PriceBandDraft = { from: string; to: string; price: string };
  */
 export type ZonePricingDraft = {
   offered: boolean; // false = this zone doesn't get the rate
+  adjustments: AdjustmentsDraft;
   mode: RateMode;
   basis: RateBasis; // BANDS and INCREMENTAL
   price: string; // FLAT

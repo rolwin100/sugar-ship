@@ -5,11 +5,12 @@ import {
   PRICING_BASES,
   PRICING_MODES,
   type PriceBand,
+  type AdjustmentsDraft,
   type PriceBandDraft,
   type ZonePricing,
   type ZonePricingDraft,
 } from "../types";
-import { RATE_BASIS, RATE_MODE } from "../../engine";
+import { ADJUSTMENT_TYPE, RATE_BASIS, RATE_MODE } from "../../engine";
 
 // Converts one zone's pricing between the form (typed text, merchant units) and
 // stored values (subunits, grams, items, basis points). Text that can't be read
@@ -17,9 +18,20 @@ import { RATE_BASIS, RATE_MODE } from "../../engine";
 
 const BPS_PER_PERCENT = 100; // 5% = 500 basis points
 
+/** No adjustments: every field empty, handling fee as a fixed amount. */
+export const emptyAdjustmentsDraft = (): AdjustmentsDraft => ({
+  freeOver: "",
+  handlingFee: "",
+  handlingType: ADJUSTMENT_TYPE.FIXED,
+  roundTo: "",
+  minPrice: "",
+  maxPrice: "",
+});
+
 /** A zone that isn't offered yet; flat is the default mode when it's switched on. */
 export const emptyZonePricingDraft = (): ZonePricingDraft => ({
   offered: false,
+  adjustments: emptyAdjustmentsDraft(),
   mode: RATE_MODE.FLAT,
   basis: RATE_BASIS.WEIGHT,
   price: "",

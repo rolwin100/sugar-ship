@@ -1,6 +1,10 @@
-import type { RateBasis, RateMode } from "../../engine";
+import type { AdjustmentType, RateBasis, RateMode } from "../../engine";
 import { emptyZonePricingDraft } from "../draft/pricing-draft";
-import type { ZonePricingDraft, ZonePricingTextField } from "../types";
+import type {
+  AdjustmentTextField,
+  ZonePricingDraft,
+  ZonePricingTextField,
+} from "../types";
 import { resetBandLimits } from "./edit-bands";
 
 // Pure helpers for editing zone pricings in the form. Each takes the zoneId → pricing
@@ -63,4 +67,32 @@ export function replaceZoneField(
   text: string,
 ): Prices {
   return updateZonePricing(prices, zoneId, (p) => ({ ...p, [field]: text }));
+}
+
+/** Types into one of a zone's adjustments (free over, handling fee, round up to, min, max). */
+export function replaceZoneAdjustment(
+  prices: Prices,
+  zoneId: string,
+  field: AdjustmentTextField,
+  text: string,
+): Prices {
+  return updateZonePricing(prices, zoneId, (p) => ({
+    ...p,
+    adjustments: { ...p.adjustments, [field]: text },
+  }));
+}
+
+/**
+ * Switches the handling fee between a fixed amount and a % of shipping. The typed
+ * number is kept, since it's still what the merchant meant.
+ */
+export function replaceZoneHandlingType(
+  prices: Prices,
+  zoneId: string,
+  handlingType: AdjustmentType,
+): Prices {
+  return updateZonePricing(prices, zoneId, (p) => ({
+    ...p,
+    adjustments: { ...p.adjustments, handlingType },
+  }));
 }

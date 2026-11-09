@@ -4,7 +4,9 @@ import type { ZonePricingDraft } from "../types";
 import { RATE_BASIS, RATE_MODE } from "../../engine";
 import {
   replaceZoneBasis,
+  replaceZoneAdjustment,
   replaceZoneField,
+  replaceZoneHandlingType,
   replaceZoneMode,
   replaceZoneOffered,
 } from "./edit-pricing";
@@ -82,5 +84,29 @@ describe("replaceZoneField", () => {
     expect(next.dom.stepPrice).toBe("20");
     expect(next.intl).toBe(prices.intl);
     expect(prices).not.toHaveProperty("dom");
+  });
+});
+
+describe("replaceZoneAdjustment", () => {
+  it("types into one adjustment and keeps the others", () => {
+    const prices = { dom: priced() };
+    const next = replaceZoneAdjustment(prices, "dom", "freeOver", "1000");
+    expect(next.dom.adjustments).toEqual({
+      ...prices.dom.adjustments,
+      freeOver: "1000",
+    });
+    expect(prices.dom.adjustments.freeOver).toBe("");
+  });
+});
+
+describe("replaceZoneHandlingType", () => {
+  it("switches the fee type and keeps the typed fee", () => {
+    const prices = { dom: priced() };
+    const typed = replaceZoneAdjustment(prices, "dom", "handlingFee", "5");
+    const next = replaceZoneHandlingType(typed, "dom", "PERCENT");
+    expect(next.dom.adjustments).toMatchObject({
+      handlingType: "PERCENT",
+      handlingFee: "5",
+    });
   });
 });
