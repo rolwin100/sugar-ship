@@ -14,12 +14,23 @@ import { adjustmentsSummary } from "../utils";
 export function AdjustmentsFields({
   adjustments,
   currency,
+  errorFor,
   onAdjustmentChange,
   onHandlingTypeChange,
 }: AdjustmentsFieldsProps) {
   const { t, i18n } = useTranslation();
   const summary = adjustmentsSummary(adjustments, t, currency, i18n.language);
-  const [open, setOpen] = useState(summary !== null);
+  const errors = {
+    handlingFee: errorFor(["handlingFeeInvalid"]),
+    freeOver: errorFor(["freeOverInvalid"]),
+    roundTo: errorFor(["roundToInvalid"]),
+    minPrice: errorFor(["minPriceInvalid"]),
+    maxPrice: errorFor(["maxPriceInvalid", "minAboveMax"]),
+  };
+  const hasErrors = Object.values(errors).some(Boolean);
+  const [opened, setOpen] = useState(summary !== null);
+  // Kept open while a field has an error, so the error isn't hidden.
+  const open = opened || hasErrors;
   const money = { currencyCode: currency as never, min: 0 };
   const isPercent = adjustments.handlingType === ADJUSTMENT_TYPE.PERCENT;
 
@@ -71,6 +82,7 @@ export function AdjustmentsFields({
                 min={0}
                 step={0.01}
                 value={adjustments.handlingFee}
+                error={errors.handlingFee}
                 details={t("rates.handlingFeePercentHelp")}
                 onInput={(e) =>
                   onAdjustmentChange("handlingFee", fieldValue(e))
@@ -81,6 +93,7 @@ export function AdjustmentsFields({
                 {...money}
                 label={t("rates.handlingFeeLabel")}
                 value={adjustments.handlingFee}
+                error={errors.handlingFee}
                 details={t("rates.handlingFeeHelp")}
                 onInput={(e) =>
                   onAdjustmentChange("handlingFee", fieldValue(e))
@@ -104,6 +117,7 @@ export function AdjustmentsFields({
             {...money}
             label={t("rates.freeOverLabel")}
             value={adjustments.freeOver}
+            error={errors.freeOver}
             details={t("rates.freeOverHelp")}
             onInput={(e) => onAdjustmentChange("freeOver", fieldValue(e))}
           />
@@ -111,6 +125,7 @@ export function AdjustmentsFields({
             {...money}
             label={t("rates.roundToLabel")}
             value={adjustments.roundTo}
+            error={errors.roundTo}
             details={t("rates.roundToHelp")}
             onInput={(e) => onAdjustmentChange("roundTo", fieldValue(e))}
           />
@@ -118,6 +133,7 @@ export function AdjustmentsFields({
             {...money}
             label={t("rates.minPriceLabel")}
             value={adjustments.minPrice}
+            error={errors.minPrice}
             details={t("rates.minPriceHelp")}
             onInput={(e) => onAdjustmentChange("minPrice", fieldValue(e))}
           />
@@ -125,6 +141,7 @@ export function AdjustmentsFields({
             {...money}
             label={t("rates.maxPriceLabel")}
             value={adjustments.maxPrice}
+            error={errors.maxPrice}
             details={t("rates.maxPriceHelp")}
             onInput={(e) => onAdjustmentChange("maxPrice", fieldValue(e))}
           />

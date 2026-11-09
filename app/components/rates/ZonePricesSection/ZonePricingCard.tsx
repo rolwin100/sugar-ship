@@ -133,6 +133,7 @@ export function ZonePricingCard({
             <AdjustmentsFields
               adjustments={pricing.adjustments}
               currency={currency}
+              errorFor={errorFor}
               onAdjustmentChange={(field, text) =>
                 onPricesChange((p) =>
                   replaceZoneAdjustment(p, zone.id, field, text),

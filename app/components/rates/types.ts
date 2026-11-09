@@ -96,6 +96,8 @@ export type ZonePricingCardProps = {
 export type AdjustmentsFieldsProps = {
   adjustments: AdjustmentsDraft;
   currency: string;
+  /** The error text for a field, found by error key. */
+  errorFor: (keys: RuleErrorKey[]) => string | undefined;
   onAdjustmentChange: (field: AdjustmentTextField, text: string) => void;
   onHandlingTypeChange: (type: AdjustmentType) => void;
 };

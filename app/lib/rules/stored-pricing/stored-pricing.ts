@@ -1,11 +1,30 @@
-import type { PricingColumns, StoredPricing, ZonePricing } from "../types";
+import type {
+  BasePricing,
+  PricingColumns,
+  StoredPricing,
+  ZonePricing,
+} from "../types";
 import { RATE_MODE } from "../../engine";
 
 /**
- * A Rate row's pricing columns → the zone's pricing, or null when the columns its
- * mode needs are missing (then the zone is treated as not priced).
+ * A Rate row's pricing columns and adjustments → the zone's pricing, or null when the
+ * columns its mode needs are missing (then the zone is treated as not priced).
  */
 export function toZonePricing(row: StoredPricing): ZonePricing | null {
+  const base = toBasePricing(row);
+  return base
+    ? {
+        ...base,
+        adjustments: row.adjustments.map(({ kind, type, value }) => ({
+          kind,
+          type,
+          value,
+        })),
+      }
+    : null;
+}
+
+function toBasePricing(row: StoredPricing): BasePricing | null {
   const { zoneId, basis, price, stepSize, stepPrice, percentBps } = row;
   switch (row.mode) {
     case RATE_MODE.FLAT:
@@ -51,10 +70,29 @@ const NO_COLUMNS = {
   stepPrice: null,
   percentBps: null,
   bands: [],
-} satisfies Omit<PricingColumns, "mode">;
+} satisfies Omit<PricingColumns, "mode" | "adjustments">;
 
-/** A zone's pricing → the Rate columns and RateBand rows that store it. Unused columns are null. */
+/**
+ * A zone's pricing → the Rate columns, RateBand rows and RateAdjustment rows that
+ * store it. Unused columns are null.
+ */
 export function toPricingColumns(pricing: ZonePricing): PricingColumns {
+  return {
+    ...baseColumns(pricing),
+    adjustments: pricing.adjustments.map(
+      ({ kind, type, value }, sortOrder) => ({
+        kind,
+        type,
+        value,
+        sortOrder,
+      }),
+    ),
+  };
+}
+
+function baseColumns(
+  pricing: BasePricing,
+): Omit<PricingColumns, "adjustments"> {
   switch (pricing.mode) {
     case RATE_MODE.FLAT:
       return { ...NO_COLUMNS, mode: RATE_MODE.FLAT, price: pricing.price };

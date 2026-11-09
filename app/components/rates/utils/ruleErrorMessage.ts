@@ -33,6 +33,12 @@ const ERROR_TEXT = {
   stepSizeInvalid: "rates.errorStepSizeInvalid",
   stepPriceInvalid: "rates.errorStepPriceInvalid",
   percentInvalid: "rates.errorPercentInvalid",
+  freeOverInvalid: "rates.errorFreeOverInvalid",
+  handlingFeeInvalid: "rates.errorHandlingFeeInvalid",
+  roundToInvalid: "rates.errorRoundToInvalid",
+  minPriceInvalid: "rates.errorMinPriceInvalid",
+  maxPriceInvalid: "rates.errorMaxPriceInvalid",
+  minAboveMax: "rates.errorMinAboveMax",
 } as const satisfies Record<RuleErrorKey, string>;
 
 // A bad condition value asks for the right unit: an amount, a weight in kg, or items.

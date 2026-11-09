@@ -5,28 +5,23 @@ import {
   PRICING_BASES,
   PRICING_MODES,
   type PriceBand,
-  type AdjustmentsDraft,
+  type BasePricing,
   type PriceBandDraft,
   type ZonePricing,
   type ZonePricingDraft,
 } from "../types";
-import { ADJUSTMENT_TYPE, RATE_BASIS, RATE_MODE } from "../../engine";
+import { RATE_BASIS, RATE_MODE } from "../../engine";
+import {
+  adjustmentsToDraft,
+  draftToAdjustments,
+  emptyAdjustmentsDraft,
+  isAdjustmentsDraft,
+} from "./adjustments-draft";
+import { bpsToPercent, percentToBps } from "./percent";
 
 // Converts one zone's pricing between the form (typed text, merchant units) and
 // stored values (subunits, grams, items, basis points). Text that can't be read
 // becomes NaN, so validation can point at the exact field.
-
-const BPS_PER_PERCENT = 100; // 5% = 500 basis points
-
-/** No adjustments: every field empty, handling fee as a fixed amount. */
-export const emptyAdjustmentsDraft = (): AdjustmentsDraft => ({
-  freeOver: "",
-  handlingFee: "",
-  handlingType: ADJUSTMENT_TYPE.FIXED,
-  roundTo: "",
-  minPrice: "",
-  maxPrice: "",
-});
 
 /** A zone that isn't offered yet; flat is the default mode when it's switched on. */
 export const emptyZonePricingDraft = (): ZonePricingDraft => ({
@@ -47,6 +42,13 @@ export function pricingToDraft(
   pricing: ZonePricing,
   currency: string,
 ): ZonePricingDraft {
+  return {
+    ...baseToDraft(pricing, currency),
+    adjustments: adjustmentsToDraft(pricing.adjustments, currency),
+  };
+}
+
+function baseToDraft(pricing: BasePricing, currency: string): ZonePricingDraft {
   const draft = {
     ...emptyZonePricingDraft(),
     offered: true,
@@ -78,7 +80,7 @@ export function pricingToDraft(
 
 /**
  * The form's text → a pricing to validate and save, or null when the zone isn't
- * offered. Only the chosen mode's fields are read.
+ * offered. Only the chosen mode's fields are read, plus the filled adjustments.
  */
 export function draftToPricing(
   zoneId: string,
@@ -86,6 +88,17 @@ export function draftToPricing(
   currency: string,
 ): ZonePricing | null {
   if (!draft.offered) return null;
+  return {
+    ...draftToBase(zoneId, draft, currency),
+    adjustments: draftToAdjustments(draft.adjustments, currency),
+  };
+}
+
+function draftToBase(
+  zoneId: string,
+  draft: ZonePricingDraft,
+  currency: string,
+): BasePricing {
   const money = (text: string) => toSubunits(text, currency) ?? Number.NaN;
 
   switch (draft.mode) {
@@ -180,20 +193,6 @@ export function textToBasis(
   }
 }
 
-/** "5" → 500, "2.5" → 250; null when empty, NaN for anything else (max 2 decimals). */
-export function percentToBps(text: string): number | null {
-  const trimmed = text.trim();
-  if (trimmed === "") return null;
-  if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return Number.NaN;
-  const [whole, fraction = ""] = trimmed.split(".");
-  return Number(whole) * BPS_PER_PERCENT + Number(fraction.padEnd(2, "0"));
-}
-
-/** 500 → "5", 250 → "2.5". */
-export function bpsToPercent(bps: number): string {
-  return String(bps / BPS_PER_PERCENT);
-}
-
 /** Does a posted value look like a ZonePricingDraft? (Shape only; validation checks values.) */
 export function isZonePricingDraft(value: unknown): value is ZonePricingDraft {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -205,7 +204,8 @@ export function isZonePricingDraft(value: unknown): value is ZonePricingDraft {
     (PRICING_BASES as readonly unknown[]).includes(d.basis) &&
     strings.every((key) => typeof d[key] === "string") &&
     Array.isArray(d.bands) &&
-    d.bands.every(isBandDraft)
+    d.bands.every(isBandDraft) &&
+    isAdjustmentsDraft(d.adjustments)
   );
 }
 

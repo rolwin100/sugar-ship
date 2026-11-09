@@ -1,5 +1,6 @@
 import { RATE_BASIS, RATE_MODE, RULE_MATCH } from "../engine";
 import type {
+  AdjustmentKind,
   AdjustmentType,
   CartConditionField,
   CONDITION_SUBJECT,
@@ -58,7 +59,21 @@ export type PriceBand = { from: number; to: number | null; price: number };
  * How one zone is priced, in stored units (money in subunits, weight in grams,
  * percentages in basis points). Zones without a pricing don't get this rate.
  */
-export type ZonePricing =
+/**
+ * One price adjustment in stored units: amounts in subunits, a percent handling fee in
+ * basis points. Saved as a RateAdjustment row; the same shape the engine applies.
+ */
+export type PriceAdjustment = {
+  kind: AdjustmentKind;
+  type: AdjustmentType;
+  value: number;
+};
+
+/** One zone's pricing: how the base price is worked out, then its adjustments. */
+export type ZonePricing = BasePricing & { adjustments: PriceAdjustment[] };
+
+/** How one zone's base price is worked out, by mode. */
+export type BasePricing =
   | { zoneId: string; mode: typeof RATE_MODE.FLAT; price: number }
   | {
       zoneId: string;
@@ -161,11 +176,16 @@ export type StoredPricing = {
   stepPrice: number | null;
   percentBps: number | null;
   bands: PriceBand[];
+  adjustments: PriceAdjustment[];
 };
 
-/** A zone pricing as Rate columns plus RateBand rows, ready to save (see toPricingColumns). */
-export type PricingColumns = Omit<StoredPricing, "zoneId" | "bands"> & {
+/** A zone pricing as Rate columns plus RateBand and RateAdjustment rows, ready to save (see toPricingColumns). */
+export type PricingColumns = Omit<
+  StoredPricing,
+  "zoneId" | "bands" | "adjustments"
+> & {
   bands: (PriceBand & { sortOrder: number })[];
+  adjustments: (PriceAdjustment & { sortOrder: number })[];
 };
 
 /** A Condition row as read from the database, before it's checked (see toRuleCondition). */

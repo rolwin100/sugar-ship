@@ -18,8 +18,8 @@ const rule: Rule = {
   minDeliveryDays: 3,
   maxDeliveryDays: 5,
   prices: [
-    { zoneId: "domestic", mode: "FLAT", price: 8000 },
-    { zoneId: "intl", mode: "FLAT", price: 150000 },
+    { zoneId: "domestic", adjustments: [], mode: "FLAT", price: 8000 },
+    { zoneId: "intl", adjustments: [], mode: "FLAT", price: 150000 },
   ],
   match: "ANY",
   conditions: [
@@ -95,8 +95,8 @@ describe("rule drafts", () => {
     };
     const input = draftToInput(draft, "INR");
     expect(input.prices).toEqual([
-      { zoneId: "b", mode: "FLAT", price: 5000 },
-      { zoneId: "c", mode: "FLAT", price: Number.NaN },
+      { zoneId: "b", adjustments: [], mode: "FLAT", price: 5000 },
+      { zoneId: "c", adjustments: [], mode: "FLAT", price: Number.NaN },
     ]);
     expect(input.minDeliveryDays).toBeNaN();
     expect(input.maxDeliveryDays).toBeNull();

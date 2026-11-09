@@ -1,4 +1,4 @@
-import type { ZonePricing } from "../types";
+import type { BasePricing, PriceAdjustment, ZonePricing } from "../types";
 import { PRICING_BASES } from "../types";
 import {
   BANDS_MAX,
@@ -7,7 +7,7 @@ import {
   PRICE_MAX,
 } from "./limits";
 import type { RuleError, RuleErrorKey } from "./validate-rule";
-import { RATE_MODE } from "../../engine";
+import { ADJUSTMENT_KIND, ADJUSTMENT_TYPE, RATE_MODE } from "../../engine";
 
 // Checks one zone's pricing, by mode. Values are in stored units (subunits, grams,
 // items, basis points); text the form couldn't read arrives as NaN and fails here.
@@ -17,6 +17,56 @@ const isAmount = (value: number, max: number) =>
 
 /** All problems with one zone's pricing (empty when it's fine). */
 export function validatePricing(pricing: ZonePricing): RuleError[] {
+  return [
+    ...validateBase(pricing),
+    ...validateAdjustments(pricing.zoneId, pricing.adjustments),
+  ];
+}
+
+/** Each adjustment's error, by kind. */
+const ADJUSTMENT_ERROR = {
+  FREE_OVER: "freeOverInvalid",
+  HANDLING_FEE: "handlingFeeInvalid",
+  ROUND_TO: "roundToInvalid",
+  MIN_PRICE: "minPriceInvalid",
+  MAX_PRICE: "maxPriceInvalid",
+} as const satisfies Record<PriceAdjustment["kind"], RuleErrorKey>;
+
+/**
+ * Problems with a zone's adjustments: each amount must be valid (a percent fee up to
+ * 100%), rounding must be above 0, there's at most one of each, and the minimum
+ * can't be above the maximum.
+ */
+function validateAdjustments(
+  zoneId: string,
+  adjustments: PriceAdjustment[],
+): RuleError[] {
+  const errors: RuleError[] = [];
+  const seen = new Set<string>();
+  for (const { kind, type, value } of adjustments) {
+    const percent =
+      kind === ADJUSTMENT_KIND.HANDLING_FEE && type === ADJUSTMENT_TYPE.PERCENT;
+    const valid =
+      !seen.has(kind) &&
+      (type === ADJUSTMENT_TYPE.FIXED || percent) &&
+      isAmount(value, percent ? PERCENT_BPS_MAX : PRICE_MAX) &&
+      (kind !== ADJUSTMENT_KIND.ROUND_TO || value > 0);
+    seen.add(kind);
+    if (!valid) {
+      errors.push({ field: "prices", key: ADJUSTMENT_ERROR[kind], zoneId });
+    }
+  }
+
+  const min = adjustments.find((a) => a.kind === ADJUSTMENT_KIND.MIN_PRICE);
+  const max = adjustments.find((a) => a.kind === ADJUSTMENT_KIND.MAX_PRICE);
+  if (min && max && errors.length === 0 && min.value > max.value) {
+    errors.push({ field: "prices", key: "minAboveMax", zoneId });
+  }
+  return errors;
+}
+
+/** Problems with how the base price is worked out, by mode. */
+function validateBase(pricing: BasePricing): RuleError[] {
   const { zoneId } = pricing;
   const error = (key: RuleErrorKey, bandIndex?: number): RuleError => ({
     field: "prices",

@@ -19,7 +19,10 @@ import { RATE_PRESET } from "./constants";
 const withRatesAndConditions = {
   rates: {
     orderBy: { sortOrder: "asc" },
-    include: { bands: { orderBy: { sortOrder: "asc" } } },
+    include: {
+      bands: { orderBy: { sortOrder: "asc" } },
+      adjustments: { orderBy: { sortOrder: "asc" } },
+    },
   },
   conditions: { orderBy: { sortOrder: "asc" } },
 } satisfies Prisma.RuleInclude;
@@ -62,15 +65,17 @@ export async function saveRule(
   const rule = result.rule;
 
   const ruleData = { name: rule.name, status: rule.status, match: rule.match };
-  // One Rate row per priced zone (plus RateBand rows for a price table);
+  // One Rate row per priced zone (plus RateBand rows for a price table and
+  // RateAdjustment rows for its price adjustments);
   // the checkout name and delivery estimate are shared.
   const rates = rule.prices.map((pricing, sortOrder) => {
-    const { bands, ...columns } = toPricingColumns(pricing);
+    const { bands, adjustments, ...columns } = toPricingColumns(pricing);
     return {
       zoneId: pricing.zoneId,
       sortOrder,
       ...columns,
       bands: { create: bands },
+      adjustments: { create: adjustments },
       preset: rule.preset,
       name: rule.preset ? null : rule.customName,
       description: rule.description || null,
@@ -118,9 +123,10 @@ export async function saveRule(
   });
   if (!existing) return { ok: false, notFound: true };
 
-  // Replace rates (their bands go by cascade) and conditions wholesale, in one
+  // Replace rates (their bands and adjustments go by cascade) and conditions wholesale, in one
   // transaction; simpler than diffing, and their ids aren't referenced anywhere yet.
-  // Rates are created one by one because createMany can't create their bands.
+  // Rates are created one by one because createMany can't create their bands
+  // and adjustments.
   await db.$transaction(async (tx) => {
     await tx.rule.update({ where: { id }, data: ruleData });
     await tx.rate.deleteMany({ where: { ruleId: id } });

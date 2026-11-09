@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { ZonePricing } from "../types";
+import { bpsToPercent, percentToBps } from "./percent";
 import {
-  bpsToPercent,
   draftToPricing,
   emptyZonePricingDraft,
   isZonePricingDraft,
-  percentToBps,
   pricingToDraft,
 } from "./pricing-draft";
 
@@ -35,9 +34,10 @@ describe("zone pricing drafts", () => {
 
   it("round-trips every mode through the form", () => {
     const pricings: ZonePricing[] = [
-      { zoneId: "z", mode: "FLAT", price: 8000 },
+      { zoneId: "z", adjustments: [], mode: "FLAT", price: 8000 },
       {
         zoneId: "z",
+        adjustments: [],
         mode: "BANDS",
         basis: "WEIGHT",
         bands: [
@@ -47,13 +47,14 @@ describe("zone pricing drafts", () => {
       },
       {
         zoneId: "z",
+        adjustments: [],
         mode: "INCREMENTAL",
         basis: "WEIGHT",
         basePrice: 5000,
         stepSize: 500,
         stepPrice: 2000,
       },
-      { zoneId: "z", mode: "PERCENT", percentBps: 250 },
+      { zoneId: "z", adjustments: [], mode: "PERCENT", percentBps: 250 },
     ];
     for (const pricing of pricings) {
       expect(roundTrip(pricing)).toEqual(pricing);
@@ -65,6 +66,7 @@ describe("zone pricing drafts", () => {
       pricingToDraft(
         {
           zoneId: "z",
+          adjustments: [],
           mode: "BANDS",
           basis,
           bands: [{ from, to: null, price: 6000 }],
@@ -83,6 +85,7 @@ describe("zone pricing drafts", () => {
     const steps = pricingToDraft(
       {
         zoneId: "z",
+        adjustments: [],
         mode: "INCREMENTAL",
         basis: "WEIGHT",
         basePrice: 5000,
@@ -114,6 +117,7 @@ describe("zone pricing drafts", () => {
     };
     expect(draftToPricing("z", draft, "INR")).toEqual({
       zoneId: "z",
+      adjustments: [],
       mode: "INCREMENTAL",
       basis: "WEIGHT",
       basePrice: 5000,
@@ -134,6 +138,7 @@ describe("zone pricing drafts", () => {
     );
     expect(bands).toEqual({
       zoneId: "z",
+      adjustments: [],
       mode: "BANDS",
       basis: "QUANTITY",
       bands: [{ from: Number.NaN, to: null, price: Number.NaN }],
@@ -162,5 +167,29 @@ describe("zone pricing drafts", () => {
       isZonePricingDraft({ ...ok, bands: [{ from: 0, to: "", price: "" }] }),
     ).toBe(false);
     expect(isZonePricingDraft("80")).toBe(false);
+  });
+
+  it("round-trips adjustments with the base price", () => {
+    const pricing: ZonePricing = {
+      zoneId: "z",
+      mode: "FLAT",
+      price: 8000,
+      adjustments: [
+        { kind: "FREE_OVER", type: "FIXED", value: 100000 },
+        { kind: "HANDLING_FEE", type: "PERCENT", value: 500 },
+      ],
+    };
+    expect(roundTrip(pricing)).toEqual(pricing);
+  });
+
+  it("rejects a posted zone pricing with bad adjustments", () => {
+    const ok = emptyZonePricingDraft();
+    expect(isZonePricingDraft({ ...ok, adjustments: undefined })).toBe(false);
+    expect(
+      isZonePricingDraft({
+        ...ok,
+        adjustments: { ...ok.adjustments, handlingType: "HALF" },
+      }),
+    ).toBe(false);
   });
 });

@@ -4,6 +4,7 @@ import { toPricingColumns, toZonePricing } from "./stored-pricing";
 
 const row = (overrides: Partial<StoredPricing> = {}): StoredPricing => ({
   zoneId: "z1",
+  adjustments: [],
   mode: "FLAT",
   basis: null,
   price: 5000,
@@ -15,9 +16,10 @@ const row = (overrides: Partial<StoredPricing> = {}): StoredPricing => ({
 });
 
 const pricings: ZonePricing[] = [
-  { zoneId: "z1", mode: "FLAT", price: 5000 },
+  { zoneId: "z1", adjustments: [], mode: "FLAT", price: 5000 },
   {
     zoneId: "z1",
+    adjustments: [],
     mode: "BANDS",
     basis: "WEIGHT",
     bands: [
@@ -27,24 +29,32 @@ const pricings: ZonePricing[] = [
   },
   {
     zoneId: "z1",
+    adjustments: [],
     mode: "INCREMENTAL",
     basis: "QUANTITY",
     basePrice: 4000,
     stepSize: 2,
     stepPrice: 1500,
   },
-  { zoneId: "z1", mode: "PERCENT", percentBps: 250 },
+  { zoneId: "z1", adjustments: [], mode: "PERCENT", percentBps: 250 },
 ];
 
 describe("toPricingColumns / toZonePricing", () => {
   it.each(pricings)("round-trips $mode", (pricing) => {
-    const { bands, ...columns } = toPricingColumns(pricing);
-    expect(toZonePricing({ zoneId: "z1", ...columns, bands })).toEqual(pricing);
+    const { bands, adjustments, ...columns } = toPricingColumns(pricing);
+    expect(
+      toZonePricing({ zoneId: "z1", ...columns, bands, adjustments }),
+    ).toEqual(pricing);
   });
 
   it("leaves columns other modes use empty", () => {
     expect(
-      toPricingColumns({ zoneId: "z1", mode: "PERCENT", percentBps: 250 }),
+      toPricingColumns({
+        zoneId: "z1",
+        adjustments: [],
+        mode: "PERCENT",
+        percentBps: 250,
+      }),
     ).toEqual({
       mode: "PERCENT",
       basis: null,
@@ -53,6 +63,7 @@ describe("toPricingColumns / toZonePricing", () => {
       stepPrice: null,
       percentBps: 250,
       bands: [],
+      adjustments: [],
     });
   });
 
@@ -83,9 +94,28 @@ describe("toZonePricing", () => {
       toZonePricing(row({ mode: "BANDS", basis: "SUBTOTAL", bands: [band] })),
     ).toEqual({
       zoneId: "z1",
+      adjustments: [],
       mode: "BANDS",
       basis: "SUBTOTAL",
       bands: [{ from: 0, to: null, price: 100 }],
     });
+  });
+
+  it("round-trips adjustments as numbered rows", () => {
+    const pricing: ZonePricing = {
+      zoneId: "z1",
+      mode: "FLAT",
+      price: 5000,
+      adjustments: [
+        { kind: "FREE_OVER", type: "FIXED", value: 100000 },
+        { kind: "MAX_PRICE", type: "FIXED", value: 30000 },
+      ],
+    };
+    const { adjustments, ...columns } = toPricingColumns(pricing);
+    expect(adjustments.map((a) => a.sortOrder)).toEqual([0, 1]);
+    const stored = adjustments.map((a) => ({ ...a, id: "a", rateId: "r" }));
+    expect(
+      toZonePricing({ zoneId: "z1", ...columns, adjustments: stored }),
+    ).toEqual(pricing);
   });
 });

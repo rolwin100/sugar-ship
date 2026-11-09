@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createI18n } from "../../../lib/i18n";
-import { emptyAdjustmentsDraft } from "../../../lib/rules/draft/pricing-draft";
+import { emptyAdjustmentsDraft } from "../../../lib/rules/draft/adjustments-draft";
 import { adjustmentsSummary } from "./adjustmentsSummary";
 
 const t = createI18n("en").t;

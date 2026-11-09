@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 import { formatMoney } from "../../../lib/money";
-import type { ZonePricing } from "../../../lib/rules/types";
+import type { BasePricing } from "../../../lib/rules/types";
 import { gramsToKg } from "../../../lib/weight";
 import { RATE_BASIS, RATE_MODE } from "../../../lib/engine";
 
@@ -16,7 +16,7 @@ const BANDS_TEXT = {
  * "₹80.00", "₹50.00–₹90.00 by weight", "₹40.00 + ₹15.00 per 2 items", "2.5% of subtotal".
  */
 export function pricingSummary(
-  pricing: ZonePricing,
+  pricing: BasePricing,
   t: TFunction,
   currency: string,
   locale: string,

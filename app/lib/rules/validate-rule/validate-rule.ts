@@ -41,7 +41,13 @@ export type RuleErrorKey =
   | "basePriceInvalid"
   | "stepSizeInvalid"
   | "stepPriceInvalid"
-  | "percentInvalid";
+  | "percentInvalid"
+  | "freeOverInvalid"
+  | "handlingFeeInvalid"
+  | "roundToInvalid"
+  | "minPriceInvalid"
+  | "maxPriceInvalid"
+  | "minAboveMax";
 
 export type RuleError = {
   field:

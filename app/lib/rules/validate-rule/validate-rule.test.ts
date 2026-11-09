@@ -12,7 +12,7 @@ const input = (overrides: Partial<RuleInput> = {}): RuleInput => ({
   description: "",
   minDeliveryDays: 3,
   maxDeliveryDays: 5,
-  prices: [{ zoneId: "domestic", mode: "FLAT", price: 8000 }],
+  prices: [{ zoneId: "domestic", adjustments: [], mode: "FLAT", price: 8000 }],
   match: "ALL",
   conditions: [],
   ...overrides,
@@ -100,15 +100,24 @@ describe("validateRule", () => {
   it("allows free (0) and flags bad prices per zone", () => {
     expect(
       validateRule(
-        input({ prices: [{ zoneId: "domestic", mode: "FLAT", price: 0 }] }),
+        input({
+          prices: [
+            { zoneId: "domestic", adjustments: [], mode: "FLAT", price: 0 },
+          ],
+        }),
         zones,
       ).ok,
     ).toBe(true);
     const result = validateRule(
       input({
         prices: [
-          { zoneId: "domestic", mode: "FLAT", price: Number.NaN },
-          { zoneId: "intl", mode: "FLAT", price: -1 },
+          {
+            zoneId: "domestic",
+            adjustments: [],
+            mode: "FLAT",
+            price: Number.NaN,
+          },
+          { zoneId: "intl", adjustments: [], mode: "FLAT", price: -1 },
         ],
       }),
       zones,
@@ -123,7 +132,11 @@ describe("validateRule", () => {
     expect(
       keys(
         validateRule(
-          input({ prices: [{ zoneId: "other-shop", mode: "FLAT", price: 1 }] }),
+          input({
+            prices: [
+              { zoneId: "other-shop", adjustments: [], mode: "FLAT", price: 1 },
+            ],
+          }),
           zones,
         ),
       ),
@@ -133,8 +146,8 @@ describe("validateRule", () => {
         validateRule(
           input({
             prices: [
-              { zoneId: "domestic", mode: "FLAT", price: 1 },
-              { zoneId: "domestic", mode: "FLAT", price: 2 },
+              { zoneId: "domestic", adjustments: [], mode: "FLAT", price: 1 },
+              { zoneId: "domestic", adjustments: [], mode: "FLAT", price: 2 },
             ],
           }),
           zones,
@@ -281,11 +294,12 @@ describe("validateRule", () => {
       prices: [
         {
           zoneId: "domestic",
+          adjustments: [],
           mode: "BANDS",
           basis: "WEIGHT",
           bands: [{ from: 0, to: null, price: 8000 }],
         },
-        { zoneId: "intl", mode: "PERCENT", percentBps: 500 },
+        { zoneId: "intl", adjustments: [], mode: "PERCENT", percentBps: 500 },
       ],
     });
     expect(validateRule(tableAndPercent, zones).ok).toBe(true);
@@ -294,6 +308,7 @@ describe("validateRule", () => {
       prices: [
         {
           zoneId: "domestic",
+          adjustments: [],
           mode: "INCREMENTAL",
           basis: "WEIGHT",
           basePrice: 5000,
