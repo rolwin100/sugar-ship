@@ -7,6 +7,7 @@ import type {
   EngineSettings,
   EngineZone,
 } from "../types";
+import { NO_ADJUSTMENTS } from "../constants";
 
 const cart: EngineCart = {
   items: [{ quantity: 1, grams: 500, price: 50000 }],
@@ -33,7 +34,7 @@ function flatRate(id: string, price: number): EngineRate {
     mode: "FLAT",
     price,
     bands: [],
-    adjustments: [],
+    adjustments: NO_ADJUSTMENTS,
   };
 }
 

@@ -7,6 +7,7 @@ import {
 } from "./draft";
 import { emptyZonePricingDraft } from "./pricing-draft";
 import type { Rule } from "../types";
+import { NO_ADJUSTMENTS } from "../../engine";
 
 const rule: Rule = {
   id: "r1",
@@ -18,8 +19,18 @@ const rule: Rule = {
   minDeliveryDays: 3,
   maxDeliveryDays: 5,
   prices: [
-    { zoneId: "domestic", adjustments: [], mode: "FLAT", price: 8000 },
-    { zoneId: "intl", adjustments: [], mode: "FLAT", price: 150000 },
+    {
+      zoneId: "domestic",
+      adjustments: NO_ADJUSTMENTS,
+      mode: "FLAT",
+      price: 8000,
+    },
+    {
+      zoneId: "intl",
+      adjustments: NO_ADJUSTMENTS,
+      mode: "FLAT",
+      price: 150000,
+    },
   ],
   match: "ANY",
   conditions: [
@@ -95,8 +106,13 @@ describe("rule drafts", () => {
     };
     const input = draftToInput(draft, "INR");
     expect(input.prices).toEqual([
-      { zoneId: "b", adjustments: [], mode: "FLAT", price: 5000 },
-      { zoneId: "c", adjustments: [], mode: "FLAT", price: Number.NaN },
+      { zoneId: "b", adjustments: NO_ADJUSTMENTS, mode: "FLAT", price: 5000 },
+      {
+        zoneId: "c",
+        adjustments: NO_ADJUSTMENTS,
+        mode: "FLAT",
+        price: Number.NaN,
+      },
     ]);
     expect(input.minDeliveryDays).toBeNaN();
     expect(input.maxDeliveryDays).toBeNull();

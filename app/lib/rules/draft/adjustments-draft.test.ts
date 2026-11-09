@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { NO_ADJUSTMENTS } from "../../engine";
 import {
   adjustmentsToDraft,
   draftToAdjustments,
@@ -12,21 +13,24 @@ const draft = (fields: Partial<ReturnType<typeof emptyAdjustmentsDraft>>) => ({
 });
 
 describe("draftToAdjustments", () => {
-  it("is empty when nothing is filled", () => {
-    expect(draftToAdjustments(draft({ roundTo: " " }), "INR")).toEqual([]);
+  it("is all null when nothing is filled", () => {
+    expect(draftToAdjustments(draft({ roundTo: " " }), "INR")).toEqual(
+      NO_ADJUSTMENTS,
+    );
   });
 
-  it("turns filled fields into adjustments, in the order they apply", () => {
+  it("turns filled fields into amounts in subunits", () => {
     expect(
       draftToAdjustments(
         draft({ maxPrice: "300", freeOver: "1000", handlingFee: "15" }),
         "INR",
       ),
-    ).toEqual([
-      { kind: "FREE_OVER", type: "FIXED", value: 100000 },
-      { kind: "HANDLING_FEE", type: "FIXED", value: 1500 },
-      { kind: "MAX_PRICE", type: "FIXED", value: 30000 },
-    ]);
+    ).toEqual({
+      ...NO_ADJUSTMENTS,
+      freeOver: 100000,
+      handlingFee: { type: "FIXED", value: 1500 },
+      maxPrice: 30000,
+    });
   });
 
   it("stores a percent handling fee in basis points", () => {
@@ -34,13 +38,17 @@ describe("draftToAdjustments", () => {
       draftToAdjustments(
         draft({ handlingFee: "2.5", handlingType: "PERCENT" }),
         "INR",
-      ),
-    ).toEqual([{ kind: "HANDLING_FEE", type: "PERCENT", value: 250 }]);
+      ).handlingFee,
+    ).toEqual({ type: "PERCENT", value: 250 });
   });
 
   it("marks text it can't read as NaN", () => {
-    const [adjustment] = draftToAdjustments(draft({ minPrice: "abc" }), "INR");
-    expect(adjustment.value).toBeNaN();
+    const adjustments = draftToAdjustments(
+      draft({ minPrice: "abc", handlingFee: "x", handlingType: "PERCENT" }),
+      "INR",
+    );
+    expect(adjustments.minPrice).toBeNaN();
+    expect(adjustments.handlingFee?.value).toBeNaN();
   });
 });
 
@@ -48,10 +56,11 @@ describe("adjustmentsToDraft", () => {
   it("fills the form's fields and the handling fee's type", () => {
     expect(
       adjustmentsToDraft(
-        [
-          { kind: "ROUND_TO", type: "FIXED", value: 1000 },
-          { kind: "HANDLING_FEE", type: "PERCENT", value: 500 },
-        ],
+        {
+          ...NO_ADJUSTMENTS,
+          roundTo: 1000,
+          handlingFee: { type: "PERCENT", value: 500 },
+        },
         "INR",
       ),
     ).toEqual(

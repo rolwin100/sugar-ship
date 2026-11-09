@@ -1,4 +1,5 @@
 import type { CartTotals, EngineRate } from "../types";
+import { NO_ADJUSTMENTS } from "../constants";
 
 // Shared builders for the pricing tests.
 
@@ -14,6 +15,6 @@ export const rate = (overrides: Partial<EngineRate>): EngineRate => ({
   zoneId: "zone",
   mode: "FLAT",
   bands: [],
-  adjustments: [],
+  adjustments: NO_ADJUSTMENTS,
   ...overrides,
 });

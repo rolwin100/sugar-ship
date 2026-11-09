@@ -1,9 +1,9 @@
 import { RATE_BASIS, RATE_MODE, RULE_MATCH } from "../engine";
 import type {
-  AdjustmentKind,
   AdjustmentType,
   CartConditionField,
   CONDITION_SUBJECT,
+  EngineAdjustments,
   NumberOperator,
   ProductConditionField,
   Quantifier,
@@ -60,17 +60,23 @@ export type PriceBand = { from: number; to: number | null; price: number };
  * percentages in basis points). Zones without a pricing don't get this rate.
  */
 /**
- * One price adjustment in stored units: amounts in subunits, a percent handling fee in
- * basis points. Saved as a RateAdjustment row; the same shape the engine applies.
+ * A zone's price adjustments in stored units (subunits; a percent handling fee in
+ * basis points), one property per kind, null when not used. The shape the engine applies.
  */
-export type PriceAdjustment = {
-  kind: AdjustmentKind;
-  type: AdjustmentType;
-  value: number;
+export type PriceAdjustments = EngineAdjustments;
+
+/** A RateAdjustment row's columns: a rate's adjustments as stored (null = not used). */
+export type AdjustmentColumns = {
+  freeOver: number | null;
+  handlingFee: number | null;
+  handlingFeeType: AdjustmentType | null;
+  roundTo: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
 };
 
 /** One zone's pricing: how the base price is worked out, then its adjustments. */
-export type ZonePricing = BasePricing & { adjustments: PriceAdjustment[] };
+export type ZonePricing = BasePricing & { adjustments: PriceAdjustments };
 
 /** How one zone's base price is worked out, by mode. */
 export type BasePricing =
@@ -176,16 +182,16 @@ export type StoredPricing = {
   stepPrice: number | null;
   percentBps: number | null;
   bands: PriceBand[];
-  adjustments: PriceAdjustment[];
+  adjustments: AdjustmentColumns | null; // null when the rate has no RateAdjustment row
 };
 
-/** A zone pricing as Rate columns plus RateBand and RateAdjustment rows, ready to save (see toPricingColumns). */
+/** A zone pricing as Rate columns plus its RateBand rows and RateAdjustment row, ready to save (see toPricingColumns). */
 export type PricingColumns = Omit<
   StoredPricing,
   "zoneId" | "bands" | "adjustments"
 > & {
   bands: (PriceBand & { sortOrder: number })[];
-  adjustments: (PriceAdjustment & { sortOrder: number })[];
+  adjustments: AdjustmentColumns | null; // null when none are used (no row is saved)
 };
 
 /** A Condition row as read from the database, before it's checked (see toRuleCondition). */

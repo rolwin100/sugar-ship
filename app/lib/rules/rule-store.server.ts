@@ -9,7 +9,11 @@ import {
   type SaveRuleResult,
 } from "./types";
 import { toRuleCondition } from "./stored-condition";
-import { toPricingColumns, toZonePricing } from "./stored-pricing";
+import {
+  toAdjustments,
+  toPricingColumns,
+  toZonePricing,
+} from "./stored-pricing";
 import { validateRule } from "./validate-rule";
 import { CONDITION_SUBJECT } from "../engine";
 import { RATE_PRESET } from "./constants";
@@ -21,7 +25,7 @@ const withRatesAndConditions = {
     orderBy: { sortOrder: "asc" },
     include: {
       bands: { orderBy: { sortOrder: "asc" } },
-      adjustments: { orderBy: { sortOrder: "asc" } },
+      adjustments: true,
     },
   },
   conditions: { orderBy: { sortOrder: "asc" } },
@@ -65,8 +69,8 @@ export async function saveRule(
   const rule = result.rule;
 
   const ruleData = { name: rule.name, status: rule.status, match: rule.match };
-  // One Rate row per priced zone (plus RateBand rows for a price table and
-  // RateAdjustment rows for its price adjustments);
+  // One Rate row per priced zone (plus RateBand rows for a price table and a
+  // RateAdjustment row when it has price adjustments);
   // the checkout name and delivery estimate are shared.
   const rates = rule.prices.map((pricing, sortOrder) => {
     const { bands, adjustments, ...columns } = toPricingColumns(pricing);
@@ -75,7 +79,7 @@ export async function saveRule(
       sortOrder,
       ...columns,
       bands: { create: bands },
-      adjustments: { create: adjustments },
+      ...(adjustments ? { adjustments: { create: adjustments } } : {}),
       preset: rule.preset,
       name: rule.preset ? null : rule.customName,
       description: rule.description || null,
@@ -161,7 +165,7 @@ export async function loadEngineRules(shopId: string): Promise<EngineRule[]> {
         orderBy: { sortOrder: "asc" },
         include: {
           bands: { orderBy: { sortOrder: "asc" } },
-          adjustments: { orderBy: { sortOrder: "asc" } },
+          adjustments: true,
         },
       },
     },
@@ -200,11 +204,7 @@ export async function loadEngineRules(shopId: string): Promise<EngineRule[]> {
       stepPrice: r.stepPrice,
       percentBps: r.percentBps,
       bands: r.bands.map(({ from, to, price }) => ({ from, to, price })),
-      adjustments: r.adjustments.map(({ kind, type, value }) => ({
-        kind,
-        type,
-        value,
-      })),
+      adjustments: toAdjustments(r.adjustments),
     })),
   }));
 }

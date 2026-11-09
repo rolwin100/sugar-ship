@@ -6,7 +6,6 @@
  */
 
 import type {
-  ADJUSTMENT_KIND,
   ADJUSTMENT_TYPE,
   CART_CONDITION_FIELD,
   COMBINE_STRATEGY,
@@ -53,7 +52,6 @@ export type TextOperator = Extract<
 export type ProductConditionField = ValueOf<typeof PRODUCT_CONDITION_FIELD>;
 export type RateMode = ValueOf<typeof RATE_MODE>;
 export type RateBasis = ValueOf<typeof RATE_BASIS>;
-export type AdjustmentKind = ValueOf<typeof ADJUSTMENT_KIND>;
 export type AdjustmentType = ValueOf<typeof ADJUSTMENT_TYPE>;
 export type CombineStrategy = ValueOf<typeof COMBINE_STRATEGY>;
 
@@ -172,10 +170,20 @@ export type PriceResult =
 
 export type EngineBand = { from: number; to: number | null; price: number };
 
-export type EngineAdjustment = {
-  kind: AdjustmentKind;
-  type: AdjustmentType;
-  value: number;
+/** A handling fee: a fixed amount (subunits) or a percent of the shipping price (basis points). */
+export type HandlingFee = { type: AdjustmentType; value: number };
+
+/**
+ * A rate's price adjustments, applied after the base price in this order: free over a
+ * cart subtotal, handling fee, round up, minimum, maximum. Amounts in subunits; null
+ * means not used.
+ */
+export type EngineAdjustments = {
+  freeOver: number | null;
+  handlingFee: HandlingFee | null;
+  roundTo: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
 };
 
 export type {
@@ -198,7 +206,7 @@ export type EngineRate = {
   stepPrice?: number | null;
   percentBps?: number | null;
   bands: EngineBand[];
-  adjustments: EngineAdjustment[];
+  adjustments: EngineAdjustments;
 };
 
 export type EngineRule = {

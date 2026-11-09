@@ -1,4 +1,4 @@
-import type { BasePricing, PriceAdjustment, ZonePricing } from "../types";
+import type { BasePricing, PriceAdjustments, ZonePricing } from "../types";
 import { PRICING_BASES } from "../types";
 import {
   BANDS_MAX,
@@ -7,7 +7,7 @@ import {
   PRICE_MAX,
 } from "./limits";
 import type { RuleError, RuleErrorKey } from "./validate-rule";
-import { ADJUSTMENT_KIND, ADJUSTMENT_TYPE, RATE_MODE } from "../../engine";
+import { ADJUSTMENT_TYPE, RATE_MODE } from "../../engine";
 
 // Checks one zone's pricing, by mode. Values are in stored units (subunits, grams,
 // items, basis points); text the form couldn't read arrives as NaN and fails here.
@@ -23,44 +23,46 @@ export function validatePricing(pricing: ZonePricing): RuleError[] {
   ];
 }
 
-/** Each adjustment's error, by kind. */
-const ADJUSTMENT_ERROR = {
-  FREE_OVER: "freeOverInvalid",
-  HANDLING_FEE: "handlingFeeInvalid",
-  ROUND_TO: "roundToInvalid",
-  MIN_PRICE: "minPriceInvalid",
-  MAX_PRICE: "maxPriceInvalid",
-} as const satisfies Record<PriceAdjustment["kind"], RuleErrorKey>;
-
 /**
- * Problems with a zone's adjustments: each amount must be valid (a percent fee up to
- * 100%), rounding must be above 0, there's at most one of each, and the minimum
- * can't be above the maximum.
+ * Problems with a zone's adjustments: each amount used must be valid, rounding must be
+ * above 0, a percent handling fee is up to 100%, and the minimum can't be above the
+ * maximum. Errors come in the order the fields apply.
  */
 function validateAdjustments(
   zoneId: string,
-  adjustments: PriceAdjustment[],
+  adjustments: PriceAdjustments,
 ): RuleError[] {
-  const errors: RuleError[] = [];
-  const seen = new Set<string>();
-  for (const { kind, type, value } of adjustments) {
-    const percent =
-      kind === ADJUSTMENT_KIND.HANDLING_FEE && type === ADJUSTMENT_TYPE.PERCENT;
-    const valid =
-      !seen.has(kind) &&
-      (type === ADJUSTMENT_TYPE.FIXED || percent) &&
-      isAmount(value, percent ? PERCENT_BPS_MAX : PRICE_MAX) &&
-      (kind !== ADJUSTMENT_KIND.ROUND_TO || value > 0);
-    seen.add(kind);
-    if (!valid) {
-      errors.push({ field: "prices", key: ADJUSTMENT_ERROR[kind], zoneId });
-    }
-  }
+  const error = (key: RuleErrorKey): RuleError => ({
+    field: "prices",
+    key,
+    zoneId,
+  });
+  const badAmount = (value: number | null) =>
+    value !== null && !isAmount(value, PRICE_MAX);
+  const { freeOver, handlingFee, roundTo, minPrice, maxPrice } = adjustments;
 
-  const min = adjustments.find((a) => a.kind === ADJUSTMENT_KIND.MIN_PRICE);
-  const max = adjustments.find((a) => a.kind === ADJUSTMENT_KIND.MAX_PRICE);
-  if (min && max && errors.length === 0 && min.value > max.value) {
-    errors.push({ field: "prices", key: "minAboveMax", zoneId });
+  const badFee =
+    handlingFee !== null &&
+    !(handlingFee.type === ADJUSTMENT_TYPE.PERCENT
+      ? isAmount(handlingFee.value, PERCENT_BPS_MAX)
+      : handlingFee.type === ADJUSTMENT_TYPE.FIXED &&
+        isAmount(handlingFee.value, PRICE_MAX));
+
+  const errors = [
+    badAmount(freeOver) && error("freeOverInvalid"),
+    badFee && error("handlingFeeInvalid"),
+    (badAmount(roundTo) || roundTo === 0) && error("roundToInvalid"),
+    badAmount(minPrice) && error("minPriceInvalid"),
+    badAmount(maxPrice) && error("maxPriceInvalid"),
+  ].filter((e): e is RuleError => e !== false);
+
+  if (
+    errors.length === 0 &&
+    minPrice !== null &&
+    maxPrice !== null &&
+    minPrice > maxPrice
+  ) {
+    errors.push(error("minAboveMax"));
   }
   return errors;
 }

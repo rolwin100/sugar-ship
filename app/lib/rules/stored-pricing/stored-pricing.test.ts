@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type { StoredPricing, ZonePricing } from "../types";
-import { toPricingColumns, toZonePricing } from "./stored-pricing";
+import {
+  toAdjustmentColumns,
+  toAdjustments,
+  toPricingColumns,
+  toZonePricing,
+} from "./stored-pricing";
+import { NO_ADJUSTMENTS } from "../../engine";
 
 const row = (overrides: Partial<StoredPricing> = {}): StoredPricing => ({
   zoneId: "z1",
-  adjustments: [],
+  adjustments: null,
   mode: "FLAT",
   basis: null,
   price: 5000,
@@ -16,10 +22,10 @@ const row = (overrides: Partial<StoredPricing> = {}): StoredPricing => ({
 });
 
 const pricings: ZonePricing[] = [
-  { zoneId: "z1", adjustments: [], mode: "FLAT", price: 5000 },
+  { zoneId: "z1", adjustments: NO_ADJUSTMENTS, mode: "FLAT", price: 5000 },
   {
     zoneId: "z1",
-    adjustments: [],
+    adjustments: NO_ADJUSTMENTS,
     mode: "BANDS",
     basis: "WEIGHT",
     bands: [
@@ -29,14 +35,19 @@ const pricings: ZonePricing[] = [
   },
   {
     zoneId: "z1",
-    adjustments: [],
+    adjustments: NO_ADJUSTMENTS,
     mode: "INCREMENTAL",
     basis: "QUANTITY",
     basePrice: 4000,
     stepSize: 2,
     stepPrice: 1500,
   },
-  { zoneId: "z1", adjustments: [], mode: "PERCENT", percentBps: 250 },
+  {
+    zoneId: "z1",
+    adjustments: NO_ADJUSTMENTS,
+    mode: "PERCENT",
+    percentBps: 250,
+  },
 ];
 
 describe("toPricingColumns / toZonePricing", () => {
@@ -51,7 +62,7 @@ describe("toPricingColumns / toZonePricing", () => {
     expect(
       toPricingColumns({
         zoneId: "z1",
-        adjustments: [],
+        adjustments: NO_ADJUSTMENTS,
         mode: "PERCENT",
         percentBps: 250,
       }),
@@ -63,7 +74,7 @@ describe("toPricingColumns / toZonePricing", () => {
       stepPrice: null,
       percentBps: 250,
       bands: [],
-      adjustments: [],
+      adjustments: null,
     });
   });
 
@@ -94,28 +105,61 @@ describe("toZonePricing", () => {
       toZonePricing(row({ mode: "BANDS", basis: "SUBTOTAL", bands: [band] })),
     ).toEqual({
       zoneId: "z1",
-      adjustments: [],
+      adjustments: NO_ADJUSTMENTS,
       mode: "BANDS",
       basis: "SUBTOTAL",
       bands: [{ from: 0, to: null, price: 100 }],
     });
   });
 
-  it("round-trips adjustments as numbered rows", () => {
+  it("stores used adjustments as one row and reads them back", () => {
     const pricing: ZonePricing = {
       zoneId: "z1",
       mode: "FLAT",
       price: 5000,
-      adjustments: [
-        { kind: "FREE_OVER", type: "FIXED", value: 100000 },
-        { kind: "MAX_PRICE", type: "FIXED", value: 30000 },
-      ],
+      adjustments: {
+        ...NO_ADJUSTMENTS,
+        freeOver: 100000,
+        handlingFee: { type: "PERCENT", value: 500 },
+        maxPrice: 30000,
+      },
     };
     const { adjustments, ...columns } = toPricingColumns(pricing);
-    expect(adjustments.map((a) => a.sortOrder)).toEqual([0, 1]);
-    const stored = adjustments.map((a) => ({ ...a, id: "a", rateId: "r" }));
+    expect(adjustments).toEqual({
+      freeOver: 100000,
+      handlingFee: 500,
+      handlingFeeType: "PERCENT",
+      roundTo: null,
+      minPrice: null,
+      maxPrice: 30000,
+    });
+    expect(toZonePricing({ zoneId: "z1", ...columns, adjustments })).toEqual(
+      pricing,
+    );
+  });
+});
+
+describe("toAdjustments", () => {
+  it("is all null when the rate has no row", () => {
+    expect(toAdjustments(null)).toEqual(NO_ADJUSTMENTS);
+  });
+
+  it("drops a handling fee without its type", () => {
     expect(
-      toZonePricing({ zoneId: "z1", ...columns, adjustments: stored }),
-    ).toEqual(pricing);
+      toAdjustments({
+        freeOver: null,
+        handlingFee: 1500,
+        handlingFeeType: null,
+        roundTo: null,
+        minPrice: null,
+        maxPrice: null,
+      }).handlingFee,
+    ).toBeNull();
+  });
+});
+
+describe("toAdjustmentColumns", () => {
+  it("is null when nothing is used, so no row is saved", () => {
+    expect(toAdjustmentColumns(NO_ADJUSTMENTS)).toBeNull();
   });
 });

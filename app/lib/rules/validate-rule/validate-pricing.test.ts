@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { PriceAdjustment, PriceBand, ZonePricing } from "../types";
+import type { PriceAdjustments, PriceBand, ZonePricing } from "../types";
 import { BANDS_MAX } from "./limits";
 import { validatePricing } from "./validate-pricing";
+import { NO_ADJUSTMENTS } from "../../engine";
 
 const keys = (pricing: ZonePricing) =>
   validatePricing(pricing).map((e) =>
@@ -10,7 +11,7 @@ const keys = (pricing: ZonePricing) =>
 
 const bands = (rows: PriceBand[]): ZonePricing => ({
   zoneId: "z",
-  adjustments: [],
+  adjustments: NO_ADJUSTMENTS,
   mode: "BANDS",
   basis: "WEIGHT",
   bands: rows,
@@ -26,13 +27,28 @@ const good: PriceBand[] = [
 describe("validatePricing", () => {
   it("checks flat prices", () => {
     expect(
-      keys({ zoneId: "z", adjustments: [], mode: "FLAT", price: 0 }),
+      keys({
+        zoneId: "z",
+        adjustments: NO_ADJUSTMENTS,
+        mode: "FLAT",
+        price: 0,
+      }),
     ).toEqual([]);
     expect(
-      keys({ zoneId: "z", adjustments: [], mode: "FLAT", price: Number.NaN }),
+      keys({
+        zoneId: "z",
+        adjustments: NO_ADJUSTMENTS,
+        mode: "FLAT",
+        price: Number.NaN,
+      }),
     ).toEqual(["priceInvalid"]);
     expect(
-      keys({ zoneId: "z", adjustments: [], mode: "FLAT", price: -1 }),
+      keys({
+        zoneId: "z",
+        adjustments: NO_ADJUSTMENTS,
+        mode: "FLAT",
+        price: -1,
+      }),
     ).toEqual(["priceInvalid"]);
   });
 
@@ -96,7 +112,7 @@ describe("validatePricing", () => {
   it("checks incremental pricing", () => {
     const steps: ZonePricing = {
       zoneId: "z",
-      adjustments: [],
+      adjustments: NO_ADJUSTMENTS,
       mode: "INCREMENTAL",
       basis: "WEIGHT",
       basePrice: 5000,
@@ -119,7 +135,7 @@ describe("validatePricing", () => {
   it("checks percentages: above 0, up to 100%", () => {
     const percent = (bps: number): ZonePricing => ({
       zoneId: "z",
-      adjustments: [],
+      adjustments: NO_ADJUSTMENTS,
       mode: "PERCENT",
       percentBps: bps,
     });
@@ -134,7 +150,7 @@ describe("validatePricing", () => {
   it("names the zone on every error", () => {
     const [error] = validatePricing({
       zoneId: "intl",
-      adjustments: [],
+      adjustments: NO_ADJUSTMENTS,
       mode: "FLAT",
       price: -1,
     });
@@ -146,41 +162,38 @@ describe("validatePricing", () => {
   });
 
   describe("adjustments", () => {
-    const withAdjustments = (adjustments: PriceAdjustment[]): ZonePricing => ({
+    const withAdjustments = (
+      adjustments: Partial<PriceAdjustments>,
+    ): ZonePricing => ({
       zoneId: "z",
       mode: "FLAT",
       price: 8000,
-      adjustments,
-    });
-    const fixed = (kind: PriceAdjustment["kind"], value: number) => ({
-      kind,
-      type: "FIXED" as const,
-      value,
+      adjustments: { ...NO_ADJUSTMENTS, ...adjustments },
     });
 
     it("accepts valid adjustments", () => {
       expect(
         keys(
-          withAdjustments([
-            fixed("FREE_OVER", 100000),
-            { kind: "HANDLING_FEE", type: "PERCENT", value: 10_000 },
-            fixed("ROUND_TO", 1000),
-            fixed("MIN_PRICE", 5000),
-            fixed("MAX_PRICE", 5000),
-          ]),
+          withAdjustments({
+            freeOver: 100000,
+            handlingFee: { type: "PERCENT", value: 10_000 },
+            roundTo: 1000,
+            minPrice: 5000,
+            maxPrice: 5000,
+          }),
         ),
       ).toEqual([]);
     });
 
-    it("points at each unreadable amount", () => {
+    it("points at each unreadable amount, in the order they apply", () => {
       expect(
         keys(
-          withAdjustments([
-            fixed("FREE_OVER", Number.NaN),
-            fixed("HANDLING_FEE", -1),
-            fixed("MIN_PRICE", Number.NaN),
-            fixed("MAX_PRICE", Number.NaN),
-          ]),
+          withAdjustments({
+            maxPrice: Number.NaN,
+            freeOver: Number.NaN,
+            handlingFee: { type: "FIXED", value: -1 },
+            minPrice: Number.NaN,
+          }),
         ),
       ).toEqual([
         "freeOverInvalid",
@@ -191,38 +204,18 @@ describe("validatePricing", () => {
     });
 
     it("needs rounding above 0 and a percent fee up to 100%", () => {
-      expect(keys(withAdjustments([fixed("ROUND_TO", 0)]))).toEqual([
-        "roundToInvalid",
-      ]);
+      expect(keys(withAdjustments({ roundTo: 0 }))).toEqual(["roundToInvalid"]);
       expect(
         keys(
-          withAdjustments([
-            { kind: "HANDLING_FEE", type: "PERCENT", value: 10_001 },
-          ]),
+          withAdjustments({ handlingFee: { type: "PERCENT", value: 10_001 } }),
         ),
       ).toEqual(["handlingFeeInvalid"]);
     });
 
-    it("allows a percent type only for the handling fee", () => {
-      expect(
-        keys(
-          withAdjustments([{ kind: "MIN_PRICE", type: "PERCENT", value: 5 }]),
-        ),
-      ).toEqual(["minPriceInvalid"]);
-    });
-
-    it("allows one of each kind", () => {
-      expect(
-        keys(withAdjustments([fixed("ROUND_TO", 100), fixed("ROUND_TO", 100)])),
-      ).toEqual(["roundToInvalid"]);
-    });
-
     it("stops a minimum above the maximum", () => {
-      expect(
-        keys(
-          withAdjustments([fixed("MIN_PRICE", 9000), fixed("MAX_PRICE", 5000)]),
-        ),
-      ).toEqual(["minAboveMax"]);
+      expect(keys(withAdjustments({ minPrice: 9000, maxPrice: 5000 }))).toEqual(
+        ["minAboveMax"],
+      );
     });
   });
 });

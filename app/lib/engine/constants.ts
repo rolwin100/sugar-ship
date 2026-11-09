@@ -1,3 +1,5 @@
+import type { EngineAdjustments } from "./types";
+
 /**
  * The closed string sets the engine and the app share. Each value is spelled once
  * here; use `RATE_MODE.FLAT` instead of `"FLAT"`, and the types in ./types derive
@@ -66,14 +68,6 @@ export const RATE_BASIS = {
   SUBTOTAL: "SUBTOTAL",
 } as const;
 
-export const ADJUSTMENT_KIND = {
-  HANDLING_FEE: "HANDLING_FEE",
-  MIN_PRICE: "MIN_PRICE",
-  MAX_PRICE: "MAX_PRICE",
-  ROUND_TO: "ROUND_TO",
-  FREE_OVER: "FREE_OVER",
-} as const;
-
 export const ADJUSTMENT_TYPE = {
   FIXED: "FIXED",
   PERCENT: "PERCENT",
@@ -114,3 +108,12 @@ export const TRACE_OUTCOME = {
   SKIPPED_SCHEDULE: "skipped_schedule",
   SKIPPED_AFTER_EXCLUSIVE: "skipped_after_exclusive",
 } as const;
+
+/** A rate with no price adjustments. */
+export const NO_ADJUSTMENTS: Readonly<EngineAdjustments> = Object.freeze({
+  freeOver: null,
+  handlingFee: null,
+  roundTo: null,
+  minPrice: null,
+  maxPrice: null,
+});

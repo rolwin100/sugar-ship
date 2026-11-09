@@ -137,14 +137,6 @@ enum RateBasis {
   SUBTOTAL // subunits
 }
 
-enum AdjustmentKind {
-  HANDLING_FEE // added on top (fixed or percent)
-  MIN_PRICE // never charge less than value
-  MAX_PRICE // never charge more than value
-  ROUND_TO // round up to the nearest value (e.g. 100 = nearest 1.00)
-  FREE_OVER // free when cart subtotal >= value
-}
-
 enum AdjustmentType {
   FIXED // value in subunits
   PERCENT // value in basis points
@@ -215,7 +207,7 @@ model Rate {
   combineTag      String? // for tag-based combining (v2)
   sortOrder       Int              @default(0)
   bands           RateBand[]
-  adjustments     RateAdjustment[]
+  adjustments     RateAdjustment?
 
   @@index([ruleId])
   @@index([zoneId])
@@ -234,17 +226,19 @@ model RateBand {
   @@index([rateId])
 }
 
-/// Extras applied after the base price, in sortOrder.
+/// A rate's price adjustments, applied after the base price in a fixed order (free over,
+/// handling fee, round up, minimum, maximum). One row per rate, only when it has any;
+/// null columns are not used.
 model RateAdjustment {
-  id        String         @id @default(cuid())
-  rateId    String
-  rate      Rate           @relation(fields: [rateId], references: [id], onDelete: Cascade)
-  kind      AdjustmentKind
-  type      AdjustmentType @default(FIXED)
-  value     Int
-  sortOrder Int            @default(0)
-
-  @@index([rateId])
+  id              String          @id @default(cuid())
+  rateId          String          @unique // one set per rate
+  rate            Rate            @relation(fields: [rateId], references: [id], onDelete: Cascade)
+  freeOver        Int? // subunits: free when cart subtotal >= this
+  handlingFee     Int? // subunits, or basis points when handlingFeeType is PERCENT
+  handlingFeeType AdjustmentType? // FIXED | PERCENT; set together with handlingFee
+  roundTo         Int? // subunits: round up to the nearest multiple
+  minPrice        Int? // subunits: never charge less
+  maxPrice        Int? // subunits: never charge more
 }
 
 /// Reusable postcodes: "560078" (exact), "5600*" (prefix), "560001-560099" (range).

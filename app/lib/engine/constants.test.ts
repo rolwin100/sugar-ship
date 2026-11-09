@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  ADJUSTMENT_KIND,
   ADJUSTMENT_TYPE,
   COMBINE_STRATEGY,
   CONDITION_OPERATOR,
@@ -35,7 +34,6 @@ describe("constants match the Prisma enums", () => {
     ["RuleMatch", RULE_MATCH],
     ["RateMode", RATE_MODE],
     ["RateBasis", RATE_BASIS],
-    ["AdjustmentKind", ADJUSTMENT_KIND],
     ["AdjustmentType", ADJUSTMENT_TYPE],
     ["CombineStrategy", COMBINE_STRATEGY],
   ] as const;

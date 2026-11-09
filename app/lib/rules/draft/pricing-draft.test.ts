@@ -7,6 +7,7 @@ import {
   isZonePricingDraft,
   pricingToDraft,
 } from "./pricing-draft";
+import { NO_ADJUSTMENTS } from "../../engine";
 
 const roundTrip = (pricing: ZonePricing, currency = "INR") =>
   draftToPricing(pricing.zoneId, pricingToDraft(pricing, currency), currency);
@@ -34,10 +35,10 @@ describe("zone pricing drafts", () => {
 
   it("round-trips every mode through the form", () => {
     const pricings: ZonePricing[] = [
-      { zoneId: "z", adjustments: [], mode: "FLAT", price: 8000 },
+      { zoneId: "z", adjustments: NO_ADJUSTMENTS, mode: "FLAT", price: 8000 },
       {
         zoneId: "z",
-        adjustments: [],
+        adjustments: NO_ADJUSTMENTS,
         mode: "BANDS",
         basis: "WEIGHT",
         bands: [
@@ -47,14 +48,19 @@ describe("zone pricing drafts", () => {
       },
       {
         zoneId: "z",
-        adjustments: [],
+        adjustments: NO_ADJUSTMENTS,
         mode: "INCREMENTAL",
         basis: "WEIGHT",
         basePrice: 5000,
         stepSize: 500,
         stepPrice: 2000,
       },
-      { zoneId: "z", adjustments: [], mode: "PERCENT", percentBps: 250 },
+      {
+        zoneId: "z",
+        adjustments: NO_ADJUSTMENTS,
+        mode: "PERCENT",
+        percentBps: 250,
+      },
     ];
     for (const pricing of pricings) {
       expect(roundTrip(pricing)).toEqual(pricing);
@@ -66,7 +72,7 @@ describe("zone pricing drafts", () => {
       pricingToDraft(
         {
           zoneId: "z",
-          adjustments: [],
+          adjustments: NO_ADJUSTMENTS,
           mode: "BANDS",
           basis,
           bands: [{ from, to: null, price: 6000 }],
@@ -85,7 +91,7 @@ describe("zone pricing drafts", () => {
     const steps = pricingToDraft(
       {
         zoneId: "z",
-        adjustments: [],
+        adjustments: NO_ADJUSTMENTS,
         mode: "INCREMENTAL",
         basis: "WEIGHT",
         basePrice: 5000,
@@ -117,7 +123,7 @@ describe("zone pricing drafts", () => {
     };
     expect(draftToPricing("z", draft, "INR")).toEqual({
       zoneId: "z",
-      adjustments: [],
+      adjustments: NO_ADJUSTMENTS,
       mode: "INCREMENTAL",
       basis: "WEIGHT",
       basePrice: 5000,
@@ -138,7 +144,7 @@ describe("zone pricing drafts", () => {
     );
     expect(bands).toEqual({
       zoneId: "z",
-      adjustments: [],
+      adjustments: NO_ADJUSTMENTS,
       mode: "BANDS",
       basis: "QUANTITY",
       bands: [{ from: Number.NaN, to: null, price: Number.NaN }],
@@ -174,10 +180,11 @@ describe("zone pricing drafts", () => {
       zoneId: "z",
       mode: "FLAT",
       price: 8000,
-      adjustments: [
-        { kind: "FREE_OVER", type: "FIXED", value: 100000 },
-        { kind: "HANDLING_FEE", type: "PERCENT", value: 500 },
-      ],
+      adjustments: {
+        ...NO_ADJUSTMENTS,
+        freeOver: 100000,
+        handlingFee: { type: "PERCENT", value: 500 },
+      },
     };
     expect(roundTrip(pricing)).toEqual(pricing);
   });
