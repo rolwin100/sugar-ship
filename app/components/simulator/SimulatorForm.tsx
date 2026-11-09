@@ -1,11 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { hasStates, listStates } from "../../lib/geo/geo";
-import type { SimulatorDraft } from "../../lib/simulator";
+import { formatMoney } from "../../lib/money";
+import { linesTotals, type SimulatorDraft } from "../../lib/simulator";
+import { gramsToKg } from "../../lib/weight";
 import { fieldValue } from "../field-events";
+import { SimulatorProducts } from "./SimulatorProducts";
 import type { SimulatorFormProps } from "./types";
 import { simulatorErrorMessage } from "./utils";
 
-/** "Test a checkout": the address and cart totals to try. */
+/** "Test a checkout": the address, and products or cart totals to try. */
 export function SimulatorForm({
   draft,
   countries,
@@ -15,12 +18,13 @@ export function SimulatorForm({
   onChange,
   onSubmit,
 }: SimulatorFormProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const errorFor = (field: keyof SimulatorDraft) => {
     const error = errors.find((e) => e.field === field);
     return error ? simulatorErrorMessage(error, t) : undefined;
   };
   const showStates = draft.country !== "" && hasStates(draft.country);
+  const totals = linesTotals(draft.lines);
 
   return (
     <s-section heading={t("simulator.formHeading")}>
@@ -69,38 +73,56 @@ export function SimulatorForm({
           />
         </s-grid>
 
-        <s-grid
-          gridTemplateColumns="1fr 1fr 1fr"
-          gap="small-200"
-          alignItems="start"
-        >
-          <s-money-field
-            label={t("simulator.subtotalLabel")}
-            currencyCode={currency as never}
-            min={0}
-            value={draft.subtotal}
-            error={errorFor("subtotal")}
-            onInput={(e) => onChange({ subtotal: fieldValue(e) })}
-          />
-          <s-number-field
-            label={t("simulator.weightLabel")}
-            suffix={t("rates.unitKg")}
-            min={0}
-            step={0.001}
-            value={draft.weight}
-            error={errorFor("weight")}
-            onInput={(e) => onChange({ weight: fieldValue(e) })}
-          />
-          <s-number-field
-            label={t("simulator.quantityLabel")}
-            suffix={t("rates.unitItems")}
-            min={1}
-            step={1}
-            value={draft.quantity}
-            error={errorFor("quantity")}
-            onInput={(e) => onChange({ quantity: fieldValue(e) })}
-          />
-        </s-grid>
+        <s-divider />
+        <SimulatorProducts
+          lines={draft.lines}
+          currency={currency}
+          errors={errors}
+          onChange={(lines) => onChange({ lines })}
+        />
+
+        {draft.lines.length > 0 ? (
+          <s-text type="strong">
+            {t("simulator.computedTotals", {
+              subtotal: formatMoney(totals.subtotal, currency, i18n.language),
+              weight: t("simulator.kg", { value: gramsToKg(totals.grams) }),
+              items: t("simulator.items", { count: totals.quantity }),
+            })}
+          </s-text>
+        ) : (
+          <s-grid
+            gridTemplateColumns="1fr 1fr 1fr"
+            gap="small-200"
+            alignItems="start"
+          >
+            <s-money-field
+              label={t("simulator.subtotalLabel")}
+              currencyCode={currency as never}
+              min={0}
+              value={draft.subtotal}
+              error={errorFor("subtotal")}
+              onInput={(e) => onChange({ subtotal: fieldValue(e) })}
+            />
+            <s-number-field
+              label={t("simulator.weightLabel")}
+              suffix={t("rates.unitKg")}
+              min={0}
+              step={0.001}
+              value={draft.weight}
+              error={errorFor("weight")}
+              onInput={(e) => onChange({ weight: fieldValue(e) })}
+            />
+            <s-number-field
+              label={t("simulator.quantityLabel")}
+              suffix={t("rates.unitItems")}
+              min={1}
+              step={1}
+              value={draft.quantity}
+              error={errorFor("quantity")}
+              onInput={(e) => onChange({ quantity: fieldValue(e) })}
+            />
+          </s-grid>
+        )}
 
         <s-stack direction="inline">
           <s-button variant="primary" loading={busy} onClick={onSubmit}>

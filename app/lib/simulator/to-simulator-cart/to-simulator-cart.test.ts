@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { cartTotals } from "../../engine";
-import type { SimulatorDraft } from "../types";
+import type { SimulatorDraft, SimulatorLine } from "../types";
 import { toSimulatorCart } from "./to-simulator-cart";
 
 const draft = (overrides: Partial<SimulatorDraft> = {}): SimulatorDraft => ({
@@ -10,6 +10,19 @@ const draft = (overrides: Partial<SimulatorDraft> = {}): SimulatorDraft => ({
   subtotal: "1000",
   weight: "2.5",
   quantity: "3",
+  lines: [],
+  ...overrides,
+});
+
+const line = (overrides: Partial<SimulatorLine> = {}): SimulatorLine => ({
+  productId: 1,
+  variantId: 11,
+  title: "Lunch Bag",
+  sku: "BAG-1",
+  vendor: "Acme",
+  price: 31000,
+  grams: 500,
+  quantity: "2",
   ...overrides,
 });
 
@@ -62,5 +75,42 @@ describe("toSimulatorCart", () => {
     expect(errorKeys(draft({ weight: "1.2345" }))).toEqual(["weightInvalid"]);
     expect(errorKeys(draft({ quantity: "0" }))).toEqual(["quantityInvalid"]);
     expect(errorKeys(draft({ quantity: "2.5" }))).toEqual(["quantityInvalid"]);
+  });
+
+  it("builds one item per product line and ignores the typed totals", () => {
+    const result = toSimulatorCart(
+      draft({
+        subtotal: "",
+        lines: [line(), line({ variantId: 12, quantity: " 1 ", sku: null })],
+      }),
+      "INR",
+    );
+    if (!result.ok) throw new Error("expected a cart");
+    expect(result.cart.items[0]).toEqual({
+      productId: 1,
+      variantId: 11,
+      name: "Lunch Bag",
+      sku: "BAG-1",
+      vendor: "Acme",
+      quantity: 2,
+      grams: 500,
+      price: 31000,
+    });
+    expect(cartTotals(result.cart)).toEqual({
+      subtotal: 93000,
+      weight: 1500,
+      quantity: 3,
+    });
+  });
+
+  it("points at each line whose quantity needs fixing", () => {
+    const result = toSimulatorCart(
+      draft({ lines: [line(), line({ variantId: 12, quantity: "0" })] }),
+      "INR",
+    );
+    expect(result).toEqual({
+      ok: false,
+      errors: [{ field: "lines", key: "lineQuantityInvalid", line: 1 }],
+    });
   });
 });

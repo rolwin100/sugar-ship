@@ -277,7 +277,16 @@
     "errorWeightInvalid": "Gib ein Gewicht in kg mit höchstens 3 Dezimalstellen ein.",
     "errorQuantityInvalid": "Gib eine ganze Anzahl Artikel ein, mindestens 1.",
     "productCondition_one": "{{quantifier}}: {{field}} {{operator}} {{values}} ({{matching}} von {{count}} Artikel passt)",
-    "productCondition_other": "{{quantifier}}: {{field}} {{operator}} {{values}} ({{matching}} von {{count}} Artikeln passen)"
+    "productCondition_other": "{{quantifier}}: {{field}} {{operator}} {{values}} ({{matching}} von {{count}} Artikeln passen)",
+    "productsHeading": "Produkte",
+    "productsIntro": "Füge Produkte hinzu, um Produktbedingungen zu testen (Tags, Typ, Anbieter, SKU, Kollektionen). Ohne Produkte gib unten die Warenkorbsummen ein.",
+    "addProducts": "Produkte hinzufügen",
+    "removeLine": "{{title}} entfernen",
+    "lineQuantityLabel": "Menge von {{title}}",
+    "lineDetails": "{{price}} · {{weight}} pro Stück",
+    "computedTotals": "Warenkorb: {{subtotal}} · {{weight}} · {{items}}",
+    "unsyncedNote": "Sugar Ship hat diese Produkte noch nicht synchronisiert, daher sind Tags, Typ und Kollektionen unbekannt: {{products}}.",
+    "errorLineQuantityInvalid": "Gib eine ganze Zahl ein, 1 oder mehr."
   },
   "history": {
     "title": "Verlauf",

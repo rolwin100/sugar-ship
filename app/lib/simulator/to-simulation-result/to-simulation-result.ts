@@ -8,11 +8,13 @@ import type { SimulationResult } from "../types";
 export function toSimulationResult(
   result: EngineResult,
   zone: EngineZone | null,
+  unsyncedProducts: string[] = [],
 ): SimulationResult {
   const names = new Map(result.trace.map((t) => [t.ruleId, t.ruleName]));
 
   return {
     zoneName: zone?.name ?? null,
+    unsyncedProducts,
     shown: result.rates.map((rate) => ({
       ruleId: rate.ruleId,
       ruleName: names.get(rate.ruleId) ?? "",

@@ -62,6 +62,7 @@ const handleLoader = async ({ request }: LoaderFunctionArgs) => {
       subtotal: "",
       weight: "",
       quantity: "1",
+      lines: [],
     } satisfies SimulatorDraft,
   };
 };
@@ -110,7 +111,12 @@ export default function SimulatorPage() {
         errors={errors}
         busy={fetcher.state !== "idle"}
         onChange={(fields) => setDraft((d) => ({ ...d, ...fields }))}
-        onSubmit={() => fetcher.submit(draft, { method: "post" })}
+        onSubmit={() =>
+          fetcher.submit(
+            { ...draft, lines: JSON.stringify(draft.lines) },
+            { method: "post" },
+          )
+        }
       />
 
       {data?.ok && (

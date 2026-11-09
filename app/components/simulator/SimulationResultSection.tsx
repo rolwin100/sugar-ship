@@ -21,6 +21,14 @@ export function SimulationResultSection({
             : t("simulator.noZone")}
         </s-paragraph>
 
+        {result.unsyncedProducts.length > 0 && (
+          <s-banner tone="warning">
+            {t("simulator.unsyncedNote", {
+              products: result.unsyncedProducts.join(", "),
+            })}
+          </s-banner>
+        )}
+
         <s-stack gap="small-200">
           <s-heading>{t("simulator.shownHeading")}</s-heading>
           {result.shown.length > 0 ? (

@@ -9,6 +9,7 @@ describe("simulatorErrorMessage", () => {
       "subtotalInvalid",
       "weightInvalid",
       "quantityInvalid",
+      "lineQuantityInvalid",
     ] as const;
     for (const locale of ["en", "fr", "de"] as const) {
       const t = createI18n(locale).t;

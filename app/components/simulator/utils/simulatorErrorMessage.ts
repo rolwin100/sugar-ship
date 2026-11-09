@@ -6,6 +6,7 @@ const ERROR_TEXT = {
   subtotalInvalid: "simulator.errorSubtotalInvalid",
   weightInvalid: "simulator.errorWeightInvalid",
   quantityInvalid: "simulator.errorQuantityInvalid",
+  lineQuantityInvalid: "simulator.errorLineQuantityInvalid",
 } as const satisfies Record<SimulatorErrorKey, string>;
 
 export function simulatorErrorMessage(error: SimulatorError, t: TFunction) {

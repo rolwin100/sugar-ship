@@ -36,6 +36,7 @@ describe("toSimulationResult", () => {
   it("splits rates into shown and not shown, with names and reasons", () => {
     expect(toSimulationResult(result, zone)).toEqual({
       zoneName: "Domestic",
+      unsyncedProducts: [],
       shown: [
         {
           ruleId: "express",
@@ -62,8 +63,16 @@ describe("toSimulationResult", () => {
   it("has no zone name when the address is in no zone", () => {
     expect(toSimulationResult({ rates: [], trace: [] }, null)).toEqual({
       zoneName: null,
+      unsyncedProducts: [],
       shown: [],
       notShown: [],
     });
+  });
+
+  it("passes on the products Sugar Ship hasn't synced", () => {
+    expect(
+      toSimulationResult({ rates: [], trace: [] }, null, ["Lunch Bag"])
+        .unsyncedProducts,
+    ).toEqual(["Lunch Bag"]);
   });
 });

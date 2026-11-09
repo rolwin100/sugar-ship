@@ -5,6 +5,7 @@ import type {
   SimulatorDraft,
   SimulatorError,
   SimulatorFallback,
+  SimulatorLine,
   SkippedRate,
 } from "../../lib/simulator";
 
@@ -28,3 +29,18 @@ export type SimulationResultSectionProps = {
 export type ShownRateRowProps = { rate: SimulatedRate; currency: string };
 
 export type NotShownRowProps = { rate: SkippedRate; currency: string };
+
+export type SimulatorProductsProps = {
+  lines: SimulatorLine[];
+  currency: string;
+  errors: SimulatorError[];
+  onChange: (lines: SimulatorLine[]) => void;
+};
+
+export type SimulatorLineRowProps = {
+  line: SimulatorLine;
+  currency: string;
+  error?: string;
+  onQuantity: (quantity: string) => void;
+  onRemove: () => void;
+};
